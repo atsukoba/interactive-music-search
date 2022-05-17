@@ -1,6 +1,6 @@
 # Interactive Search Interface
 
-![screenshot](https://user-images.githubusercontent.com/19545249/168879727-db0b030c-b728-45cf-9bd0-67b0deef37be.png)
+![screenshot](https://user-images.githubusercontent.com/19545249/168887570-4374f45f-8701-4ed2-95e5-a2a3dd2bbc11.png)
 
 ---
 

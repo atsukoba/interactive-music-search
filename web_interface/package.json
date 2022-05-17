@@ -12,6 +12,7 @@
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.8.0",
     "@mui/material": "^5.8.0",
+    "@mui/x-data-grid": "^5.11.0",
     "@types/plotly.js": "^1.54.21",
     "d3": "^7.4.4",
     "next": "12.1.6",

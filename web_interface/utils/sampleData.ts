@@ -11,6 +11,7 @@ function getrandom(num: number, mul: number): number[] {
 
 export let sampleData: Data[] = [
   {
+    name: "Can't Stop - Red Hot Chili Peppers",
     opacity: 0.4,
     type: "scatter3d",
     x: getrandom(50, -75),
@@ -18,6 +19,7 @@ export let sampleData: Data[] = [
     z: getrandom(50, -75),
   },
   {
+    name: "Born This Way - Lady GaGa",
     opacity: 0.5,
     type: "scatter3d",
     x: getrandom(50, -75),
@@ -25,6 +27,7 @@ export let sampleData: Data[] = [
     z: getrandom(50, 75),
   },
   {
+    name: "Slide Away - Oasis",
     opacity: 0.5,
     type: "scatter3d",
     x: getrandom(50, 100),
@@ -57,4 +60,7 @@ export let sampleLayout: Partial<Layout> = {
 
 export const sampleConfig: Partial<Config> = {
   responsive: true,
+  displaylogo: false,
+  autosizable: true,
+  fillFrame: false,
 };
