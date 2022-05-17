@@ -6,3 +6,4 @@ librosa
 spotipy
 pandas
 numpy
+scikit-learn
