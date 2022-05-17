@@ -17,26 +17,33 @@ logger = create_logger(os.path.basename(__file__))
 app = Flask(__name__)
 
 
-@app.route('/parrot', methods=['POST'])
+@app.route("/", methods=["GET"])
+def test():
+    return jsonify({
+        "data": "Hello!"
+    })
+
+
+@app.route("/parrot", methods=["POST"])
 def parrot():
     return jsonify(request.get_data())
 
 
-@app.route('/get_features_sample', methods=['POST'])
+@app.route("/get_features_sample", methods=["POST"])
 def sample():
     req_json: Optional[RequestType] = request.get_json()  # Get POST JSON
     if req_json:
         return jsonify(get_sample_n_data(req_json["n_songs"]))
 
 
-@app.route('/get_features', methods=['POST'])
+@app.route("/get_features", methods=["POST"])
 def get_3d_features():
     req_json: Optional[RequestType] = request.get_json()  # Get POST JSON
     if req_json is None:
         logger.warn("request body is empty")
         return jsonify({})
     logger.debug(f"request: {req_json}")
-    names = req_json['features_name']
+    names = req_json["features_name"]
     if names is None:
         return jsonify({})
     logger.debug(f"Request features: {names}")
@@ -68,7 +75,7 @@ def get_features():
         logger.warn("request body is empty")
         return jsonify({})
     logger.debug(f"request: {req_json}")
-    NAME = req_json['name']
+    NAME = req_json["name"]
     result = {
         "data": {
             "id": 1,
