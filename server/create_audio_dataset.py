@@ -14,7 +14,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from sqlalchemy import desc
 from tqdm import tqdm
 
-from utils import create_logger, env, slack_notify_info
+from src.utils import create_logger, env, slack_notify_info
 
 SID = str
 
