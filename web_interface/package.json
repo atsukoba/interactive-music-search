@@ -8,6 +8,12 @@
     "start": "next start"
   },
   "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.8.0",
+    "@mui/material": "^5.8.0",
+    "@types/plotly.js": "^1.54.21",
+    "d3": "^7.4.4",
     "next": "12.1.6",
     "plotly.js": "^2.12.1",
     "react": "18.1.0",
@@ -15,7 +21,9 @@
     "react-plotly.js": "^2.5.1"
   },
   "devDependencies": {
+    "@types/node": "^17.0.34",
     "@types/react": "18.0.9",
+    "@types/react-plotly.js": "^2.5.0",
     "typescript": "4.6.4"
   }
 }
