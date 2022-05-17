@@ -4,7 +4,7 @@ each chunk from the song has a features obtained both MIDI and Audio sample
 
 ## ER Diagram
 
-```Mermaid
+```mermaid
 erDiagram
     Songs {
         string MD5 PK
