@@ -13,16 +13,21 @@ export default function PlotWrapper() {
     useGetElementProperty<HTMLDivElement>(targetRef);
 
   const fetchData = async () => {
-    const d = await getSampleData(30);
-    setData(d);
+    const d = await getSampleData(60);
+    console.log(d);
+    setData([...d]);
   };
 
   useEffect(() => {
     const size = [getElementProperty("width"), getElementProperty("height")];
     console.log(size);
     setSize(size);
-    fetchData();
+    fetchData().catch(console.error);
   }, []);
+
+  useEffect(() => {
+    console.log("data state changed");
+  }, [data]);
 
   return (
     <Box style={{ height: "100%" }} ref={targetRef}>

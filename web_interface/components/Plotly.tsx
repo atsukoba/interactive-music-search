@@ -1,6 +1,13 @@
 import * as d3 from "d3";
 import dynamic from "next/dynamic";
-import { Data, Datum, Layout, ScatterData, ScatterMarker } from "plotly.js";
+import {
+  Data,
+  Datum,
+  Layout,
+  PlotMouseEvent,
+  ScatterData,
+  ScatterMarker,
+} from "plotly.js";
 import React, { useEffect, useRef, useState } from "react";
 import { useGetElementProperty } from "../utils/ref";
 import { sampleData, sampleLayout, sampleConfig } from "../utils/sampleData";
@@ -21,9 +28,13 @@ interface IProps {
 
 const Plotly = ({ newData, windowSize }: IProps) => {
   const [layout, setlayout] = useState<Partial<Layout>>({});
+  const onClickDataPoint = (e: PlotMouseEvent) => {
+    console.log("Clicked Song: ", e.points[0].data);
+  };
   useEffect(() => {
     sampleLayout.width = windowSize[0];
     sampleLayout.height = windowSize[1];
+    console.log("props", newData);
     setlayout(sampleLayout);
   }, []);
   return (
@@ -32,6 +43,7 @@ const Plotly = ({ newData, windowSize }: IProps) => {
       layout={layout}
       config={sampleConfig}
       style={{ width: "100%", height: "100%" }}
+      onClick={onClickDataPoint}
     />
   );
 };

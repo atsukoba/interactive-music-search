@@ -26,7 +26,7 @@ import {
 import PlotWrapper from "../components/PlotWrapper";
 import Layout from "../components/Layout";
 
-const drawerWidth = 240;
+const drawerWidth = 210;
 
 export default function Home() {
   return (

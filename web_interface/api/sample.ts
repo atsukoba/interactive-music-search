@@ -17,12 +17,9 @@ interface ResponseDatum {
 export const getSampleData = async (n_songs: number) => {
   const params = {
     method: "POST",
-    cache: "no-cache",
     body: JSON.stringify({ n_songs: n_songs }),
     headers: headers,
   };
-
-  console.log(params)
 
   // data = {
   //   "title": "Song Title",
@@ -34,15 +31,23 @@ export const getSampleData = async (n_songs: number) => {
 
   const res = await fetch(`${apiUrl}/get_features_sample`, params);
   const resData = await res.json();
-  console.log(resData);
   const data: Data[] = resData.map((e: ResponseDatum) => {
     return {
-      name: `${e.artist} - ${e.artist}`,
-      opacity: 0.5,
+      name: e.title,
+      text: [`${e.artist} - ${e.title}`],
+      mode: "markers",
+      opacity: [0.5],
       type: "scatter3d",
-      x: e.x,
-      y: e.y,
-      z: e.z,
+      x: [e.x],
+      y: [e.y],
+      z: [e.z],
+      hovertemplate: [
+        "<b>%{text}</b><br><br>" +
+          "%{xaxis.title.text}: %{x}<br>" +
+          "%{yaxis.title.text}: %{y}<br>" +
+          "%{zaxis.title.text}: %{z}<br>" +
+          "<extra></extra>",
+      ],
     };
   });
   return data;
