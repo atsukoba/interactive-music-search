@@ -15,24 +15,20 @@ function unpack(rows: { [key: string]: number }[], key: string) {
 }
 
 interface IProps {
-  newData?: Data[];
+  newData: Data[];
   windowSize: Array<number>;
 }
 
 const Plotly = ({ newData, windowSize }: IProps) => {
-  const [data, setData] = useState<Data[]>([]);
   const [layout, setlayout] = useState<Partial<Layout>>({});
-
   useEffect(() => {
-    setData(sampleData);
     sampleLayout.width = windowSize[0];
     sampleLayout.height = windowSize[1];
     setlayout(sampleLayout);
   }, []);
-
   return (
     <Plot
-      data={data}
+      data={newData}
       layout={layout}
       config={sampleConfig}
       style={{ width: "100%", height: "100%" }}
