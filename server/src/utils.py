@@ -5,7 +5,7 @@ from datetime import datetime
 
 import requests
 
-with open("./environment.json", "r") as f:
+with open(os.path.join(os.path.dirname(__file__), "..", "environment.json"), "r") as f:
     env = json.load(f)
 
 loggers_dict = {}
@@ -27,7 +27,8 @@ def create_logger(name: str) -> logging.Logger:
         logger.addHandler(handler)
         logger.propagate = False
         d = datetime.now().strftime("%Y%m%d-%H:%M:%S")
-        fh = logging.FileHandler(f"./logs/{d}.log")
+        fh = logging.FileHandler(os.path.join(
+            os.path.dirname(__file__), "..", "logs", d + "log"))
         fh.setFormatter(formatter)
         fh.setLevel(logging.DEBUG)
         logger.addHandler(fh)
