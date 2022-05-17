@@ -2,6 +2,7 @@ import os
 from typing import Dict, List, Optional, TypedDict, Union
 
 from flask import Flask, jsonify, make_response, request
+from flask_cors import CORS
 
 from src.sample_data import get_sample_n_data
 from src.utils import create_logger, env
@@ -15,6 +16,7 @@ class RequestType(TypedDict):
 logger = create_logger(os.path.basename(__file__))
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.route("/", methods=["GET"])
@@ -29,9 +31,10 @@ def parrot():
     return jsonify(request.get_data())
 
 
-@app.route("/get_features_sample", methods=["POST"])
+@app.route("/get_features_sample", methods=['GET', 'POST'])
 def sample():
-    req_json: Optional[RequestType] = request.get_json()  # Get POST JSON
+    req_json: Optional[RequestType] = request.get_json(force=True)  # Get POST JSON
+    print(req_json)
     if req_json:
         return jsonify(get_sample_n_data(req_json["n_songs"]))
 
