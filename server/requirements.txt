@@ -1,0 +1,6 @@
+flask
+py-postgresql
+glob
+miditoolkit
+librosa
+spotipy

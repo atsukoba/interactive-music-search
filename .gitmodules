@@ -1,0 +1,3 @@
+[submodule "server/mgeval"]
+	path = server/mgeval
+	url = https://github.com/atsukoba/mgeval-python3.git
