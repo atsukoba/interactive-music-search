@@ -6,7 +6,7 @@ from typing import List
 
 import librosa
 from sklearn.preprocessing import minmax_scale
-from utils import create_logger, env
+from src.utils import create_logger, env
 
 logger = create_logger(os.path.basename(__file__))
 

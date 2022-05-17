@@ -1,11 +1,10 @@
 import os
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, TypedDict, Union
 
 from flask import Flask, jsonify, make_response, request
-from server.src.sample_data import get_sample_n_data
 
+from src.sample_data import get_sample_n_data
 from src.utils import create_logger, env
-from typing import TypedDict
 
 
 class RequestType(TypedDict):
@@ -77,9 +76,3 @@ def get_features():
         }
     }
     return jsonify(result)
-
-
-if __name__ == "__main__":
-    app.run(host="127.0.0.1",
-            port=env.get("APP_SERVER_PORT", 8000),
-            debug=env.get("DEBUG", False))

@@ -5,7 +5,7 @@ from typing import Dict, List, Union
 
 import pandas as pd
 
-from utils import env
+from src.utils import env
 
 MMD_md5_metainfo = pd.read_csv(os.path.join(
     env["DATASET_PATH"], "MMD_md5_metainfo.csv"))
