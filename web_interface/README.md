@@ -1,3 +1,9 @@
+# Interactive Search Interface
+
+![screenshot](https://user-images.githubusercontent.com/19545249/168887570-4374f45f-8701-4ed2-95e5-a2a3dd2bbc11.png)
+
+---
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
