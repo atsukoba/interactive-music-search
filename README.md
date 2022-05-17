@@ -2,7 +2,16 @@
 
 An interactive search application for audio and symbol music features.
 
-## Database backend
+## setup
+
+copy sample environment file
+
+```shell
+cp server/environment.json.sample server/environment.json
+cp web_interface/.env-sample web_interface/.env
+```
+
+### Database backend
 
 install dependencies
 
@@ -11,19 +20,17 @@ cd server/
 pip install -r requirements.txt
 ```
 
-get **Meta MIDI Dataset** from Zenodo and set the dataset path to `.env` on `server/`
+get data
 
-```shell
-# .env
-DATABASE_PATH="~/datasets/meta_midi_dataset"
-```
+1. get **Meta MIDI Dataset** from Zenodo and set the dataset path
+2. get Spotify API credencials and set values
 
-get Spotify API credencials and set values to `.env` on `server/`
-
-```shell
-# .env
-client_id="CLIENT_ID"
-client_secret="CLIENT_SECRET"
+```json
+{
+    "DATASET_PATH": "YOUR_DATASET_DIR_PATH (end with 'meta_midi_dataset/')",
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET"
+}
 ```
 
 create dataset
@@ -38,7 +45,7 @@ run server
 python run.py YOUR_PORT_NUM
 ```
 
-## Web Interface
+### Web Interface
 
 install dependencies and generate static sites with Nextjs
 
