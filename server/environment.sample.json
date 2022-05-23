@@ -1,0 +1,13 @@
+{
+    "APP_SERVER_PORT": 9823,
+    "DEBUG": true,
+    "DATABASE_USER": "user_name",
+    "DATABASE_PASSWORD": "password",
+    "DATABASE_HOST": "localhost",
+    "DATABASE_PORT": 3036,
+    "DATASET_PATH": "/dataset/path/to/meta_midi_dataset",
+    "client_id": "hoge",
+    "client_secret": "fuga",
+    "slack_notification_url": "https://hooks.slack.com/services/hoge/fuga/piyo",
+    "slack_notification_user": "piyo"
+}
