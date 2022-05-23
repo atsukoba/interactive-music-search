@@ -2,6 +2,8 @@
 
 An interactive search application for audio and symbol music features.
 
+![screenshot](https://user-images.githubusercontent.com/19545249/168916944-54c9e9bb-85fc-4c48-9c7a-ee3ed3b5c074.png)
+
 ## setup
 
 copy sample environment file

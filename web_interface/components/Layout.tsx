@@ -36,7 +36,7 @@ import {
 
 import PlotWrapper from "../components/PlotWrapper";
 
-const drawerWidth = 240;
+const drawerWidth = 210;
 
 interface IProps {
   children: ReactNode;

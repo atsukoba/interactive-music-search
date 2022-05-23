@@ -12,7 +12,7 @@ function getrandom(num: number, mul: number): number[] {
 export let sampleData: Data[] = [
   {
     name: "Can't Stop - Red Hot Chili Peppers",
-    opacity: 0.4,
+    opacity: 0.5,
     type: "scatter3d",
     x: getrandom(50, -75),
     y: getrandom(50, -75),
@@ -36,6 +36,9 @@ export let sampleData: Data[] = [
   },
 ];
 export let sampleLayout: Partial<Layout> = {
+  title: "hoge",
+  hovermode: "closest",
+  hoverlabel: { bgcolor: "#FFF" },
   scene: {
     aspectmode: "manual",
     aspectratio: {
@@ -44,16 +47,19 @@ export let sampleLayout: Partial<Layout> = {
       z: 1,
     },
     xaxis: {
+      title: "Dance",
       nticks: 9,
-      range: [-200, 100],
+      range: [0, 100],
     },
     yaxis: {
+      title: "ZCR",
       nticks: 7,
-      range: [-100, 100],
+      range: [0, 100],
     },
     zaxis: {
+      title: "Notes",
       nticks: 10,
-      range: [-150, 100],
+      range: [0, 100],
     },
   },
 };

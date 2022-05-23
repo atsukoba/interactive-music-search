@@ -26,7 +26,7 @@ import {
 import PlotWrapper from "../components/PlotWrapper";
 import Layout from "../components/Layout";
 
-const drawerWidth = 240;
+const drawerWidth = 210;
 
 export default function Home() {
   return (
@@ -35,7 +35,7 @@ export default function Home() {
         <Grid
           item
           md={6}
-          lg={3}
+          lg={2}
           xl={2}
           style={{ height: "100%", overflow: "scroll" }}
         >
@@ -84,7 +84,7 @@ export default function Home() {
         <Grid
           item
           md={6}
-          lg={9}
+          lg={10}
           xl={10}
           style={{ height: "100%", overflow: "scroll" }}
         >
