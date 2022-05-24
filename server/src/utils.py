@@ -1,9 +1,27 @@
+import hashlib
 import json
 import logging
 import os
 from datetime import datetime
-
+import pickle
+from typing import Literal
+from miditoolkit.midi.parser import MidiFile
 import requests
+
+# types
+
+AudioPath = str
+
+# Audio Features
+AudioFeatureName = Literal[
+    "zero_crossings",
+    "harmonic",
+    "percussive",
+    "spectral_centroids",
+    "spectral_rolloff",
+    "mfccs",
+    "chromagram"
+]
 
 with open(os.path.join(os.path.dirname(__file__), "..", "environment.json"), "r") as f:
     env = json.load(f)
@@ -33,6 +51,14 @@ def create_logger(name: str) -> logging.Logger:
         fh.setLevel(logging.DEBUG)
         logger.addHandler(fh)
         return logger
+
+
+def get_md5_from_path(file_path: str) -> str:
+    return hashlib.md5(open(file_path, "rb").read()).hexdigest()
+
+
+def get_md5_from_midifile(m: MidiFile) -> str:
+    return hashlib.md5(pickle.dumps(m)).hexdigest()
 
 
 SLACK_URL = env.get("slack_notification_url", None)
