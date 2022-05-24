@@ -21,7 +21,8 @@ if __name__ == "__main__":
         "database": "songs"
     }
     engine = create_engine(
-        "postgresql://{user}:{password}@{host}/{database}".format(**connection_config), echo=True)
+        "postgresql://{user}:{password}@{host}/{database}".format(
+            **connection_config), echo=True)
 
     songs = pd.merge(
         MMD_md5_metainfo[["md5", "artist", "title"]],
