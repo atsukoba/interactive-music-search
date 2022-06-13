@@ -26,11 +26,30 @@ interface IProps {
   windowSize: Array<number>;
 }
 
+interface BBox {
+  x0: float;
+    x1: float;
+    y0: float;
+    y1: float;
+}
+
+interface PlotMouseEventPoint3D {
+  bbox: BBox;
+  data: ScatterData;
+}
+
+interface PlotMouseEvent3D {
+  points: Array<PlotMouseEventPoint3D>;
+}
+
+const onClickDataPoint = (e: PlotMouseEvent3D) => {
+  let x = e.points[0].bbox.x0 + e.points[0].bbox.x1
+  let y = e.points[0].bbox.y0 + e.points[0].bbox.y1
+  console.log("Clicked Song: ", e.points[0].data);
+};
+
 const Plotly = ({ newData, windowSize }: IProps) => {
   const [layout, setlayout] = useState<Partial<Layout>>({});
-  const onClickDataPoint = (e: PlotMouseEvent) => {
-    console.log("Clicked Song: ", e.points[0].data);
-  };
   useEffect(() => {
     sampleLayout.width = windowSize[0];
     sampleLayout.height = windowSize[1];
