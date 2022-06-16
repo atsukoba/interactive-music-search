@@ -5,14 +5,11 @@ from glob import glob
 import pandas as pd
 from sqlalchemy import create_engine
 from src.datasets import MMD_audio_matches, MMD_md5_metainfo
-from src.utils import create_logger
+from src.utils import create_logger, env
 
 logger = create_logger(os.path.basename(__file__))
 
 if __name__ == "__main__":
-
-    with open("../environment.json", "r") as f:
-        env = json.load(f)
 
     connection_config = {
         "user": env["DATABASE_USER"],
