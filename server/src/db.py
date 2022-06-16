@@ -1,7 +1,7 @@
 import os
 from enum import unique
 
-from sqlalchemy import (Column, Float, ForeignKey, Integer, String,
+from sqlalchemy import (Column, Float, ForeignKey, Integer, String, ARRAY,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
@@ -39,13 +39,12 @@ class AudioFeatures(Base):
 
     spotify_track_id = Column(String, ForeignKey("song.spotify_track_id"))
     tempo = Column(Float)
-    zero_crossingrRate = Column(Float)
-    harmonic_components = Column(Float)
-    percussive_components = Column(Float)
-    spectral_centroid = Column(Float)
-    spectral_rolloff = Column(Float)
-    mfcc = Column(Float)
-    chroma_frequencies = Column(Float)
+    zero_crossing_rate = Column(ARRAY(Float))
+    harmonic_components = Column(ARRAY(Float))
+    percussive_components = Column(ARRAY(Float))
+    spectral_centroid = Column(ARRAY(Float))
+    spectral_rolloff = Column(ARRAY(Float))
+    chroma_frequencies = Column(ARRAY(Float))
 
 
 class SpotifyFeatures(Base):
