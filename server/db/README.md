@@ -13,62 +13,67 @@ psql songs < tables.sql
 ```mermaid
 erDiagram
     Songs {
-        string MD5 PK
-        string SpotifyTrackID
-        string Title
-        string Artist
-        int Year
+        TEXT MD5 PK
+        TEXT SpotifyTrackID PK
+        TEXT Title
+        TEXT Artist
+        INT Year
 
     }
     MIDI_Features ||--o{ Songs : is
     MIDI_Features {
-        string MD5 FK
-        int total_used_pitch
-        float bar_used_pitch
-        int total_used_note
-        float bar_used_note
-        float bar_pitch_class_histogram
-        int pitch_range
-        float avg_pitch_shift
-        float avg_IOI
-        float note_length_hist
+        TEXT MD5 FK
+        INT pitch_range
+        INT n_pitches_used
+        INT n_pitch_classes_used
+        FLOAT polyphony
+        FLOAT polyphony_rate
+        FLOAT scale_consistency
+        FLOAT pitch_entropy
+        FLOAT pitch_class_entropy
+        FLOAT empty_beat_rate
+        FLOAT drum_in_duple_rate
+        FLOAT drum_in_triple_rate
+        FLOAT drum_pattern_consistency
     }
     Audio_Features ||--o{ Songs : is
     Audio_Features {
-        string SpotifyTrackID FK
-        float Tempo
-        float Zero_Crossing_Rate
-        float Harmonic_and_Percussive_Components
-        float Spectral_Centroid
-        float Spectral_Rolloff
-        float Mel-Frequency_Cepstral_Coefficients
-        float Chroma_Frequencies
+        TEXT SpotifyTrackID FK
+        FLOAT tempo
+        FLOAT_ARRAY zero_crossing_rate
+        FLOAT_ARRAY harmonic_components
+        FLOAT_ARRAY percussive_components
+        FLOAT_ARRAY spectral_centroid
+        FLOAT_ARRAY spectral_rolloff
+        FLOAT_ARRAY chroma_frequencies
     }
-    Spotify_Features ||--o{ Songs : is
+    <!-- Spotify_Features ||--o{ Songs : is
     Spotify_Features {
-        string SpotifyTrackID FK
-        float acousticness
-        float danceability
-        float duration_ms
-        float energy
-        float instrumentalness
-        float key
-        float liveness
-        float loudness
-        float mode
-        float speechiness
-        float tempo
-        float time_signature
-        float valence
+        TEXT SpotifyTrackID FK
+        FLOAT acousticness
+        FLOAT danceability
+        FLOAT duration_ms
+        FLOAT energy
+        FLOAT instrumentalness
+        FLOAT key
+        FLOAT liveness
+        FLOAT loudness
+        FLOAT mode
+        FLOAT speechiness
+        FLOAT tempo
+        FLOAT time_signature
+        FLOAT valence
     }
     Original_Features ||--o{ Songs : is
     Original_Features {
-        string SpotifyTrackID FK
-        float original_feature_1
-        float original_feature_2
-        float original_feature_3
-    }
+        TEXT SpotifyTrackID FK
+        FLOAT original_feature_1
+        FLOAT original_feature_2
+        FLOAT original_feature_3
+    } -->
 ```
+
+### Tables
 
 ```
 songs=# \dt
@@ -138,6 +143,27 @@ Sound features
 - valence
 
 ## MIDI Features
+
+### Muspy metrics
+
+> These objective metrics could be used to evaluate a music generation system by comparing the statistical difference between the training data and the generated samples.
+
+<https://salu133445.github.io/muspy/metrics.html>
+
+- `pitch_range`
+- `n_pitches_used`
+- `n_pitch_classes_used`
+- `polyphony`
+- `polyphony_rate`
+- `scale_consistency`
+- `pitch_entropy`
+- `pitch_class_entropy`
+- `empty_beat_rate`
+- `drum_in_duple_rate`
+- `drum_in_triple_rate`
+- `drum_pattern_consistency`
+
+### Duplicated
 
 extracted using mgeval, which implemented several symbolic features explained in the Paper: [MGEval - An objective evaluation toolbox for symbolic domain music generation](https://richardyang40148.github.io/TheBlog/post_mgeval.html)
 
