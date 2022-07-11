@@ -55,9 +55,10 @@ if __name__ == "__main__":
     num_cores = mp.cpu_count()
     with ProcessPoolExecutor(max_workers=num_cores) as pool:
         with tqdm(total=len(midi_files[:args.num_of_files_limit or 999999999]),
-                  desc="Loading Audio files") as progress:
+                  desc="Loading MIDI files") as progress:
             futures: List[Future] = []
-            for idx, data_path in enumerate(midi_files[:args.num_of_files_limit or 999999999]):
+            for idx, data_path in enumerate(
+                    midi_files[:args.num_of_files_limit or 999999999]):
                 future = pool.submit(calc_midi_features,
                                      data_path)
                 future.add_done_callback(lambda p: progress.update())
