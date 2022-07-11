@@ -13,6 +13,19 @@ from tqdm import tqdm
 
 from src.utils import SID, AudioPath, create_logger, env
 
+""" Audio features extraction
+
+https://librosa.org/doc/main/feature.html
+
+tempo
+zero_crossing_rate
+harmonic_components
+percussive_components
+spectral_centroid
+spectral_rolloff
+chroma_frequencies
+"""
+
 AudioFeatures = List[Union[str, List[float], float]]
 
 logger = create_logger(os.path.basename(__file__))

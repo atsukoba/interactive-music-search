@@ -1,10 +1,8 @@
 import argparse
-import json
 import multiprocessing as mp
 import os
 import warnings
 from concurrent.futures import Future, ProcessPoolExecutor
-from glob import glob
 from typing import List, Union
 
 import librosa
@@ -31,7 +29,7 @@ if __name__ == "__main__":
                         metavar="NUM_OF_MP3_FILE",
                         type=int,
                         help="The limit number of mp3 files to download from Spotify API",
-                        default=1000)
+                        default=10000)
     args = parser.parse_args()
 
     # Connect to DB
