@@ -1,5 +1,4 @@
 import os
-import sys
 from glob import glob
 from pathlib import Path
 from random import choice
@@ -12,7 +11,7 @@ import spotipy
 from sklearn.preprocessing import minmax_scale
 from tqdm import tqdm
 
-from utils import SID, AudioPath, create_logger, env
+from src.utils import SID, AudioPath, create_logger, env
 
 AudioFeatures = List[Union[str, List[float], float]]
 
@@ -31,8 +30,8 @@ def sid_to_filepath(sid: SID) -> str:
                         sid[0], sid[1], sid[2], sid + ".mp3")
 
 
-def is_downloaded(sid: SID) -> bool:
-    return Path(sid_to_filepath(sid)).exists()
+def is_downloaded(path: AudioPath) -> bool:
+    return os.path.exists(path)
 
 
 def download_mp3s_from_sids(sids: List[SID], spotify: spotipy.Spotify) -> None:
@@ -40,7 +39,8 @@ def download_mp3s_from_sids(sids: List[SID], spotify: spotipy.Spotify) -> None:
         sids) <= 50, f"Spotify `tracks` API limits the num of sids to 50, got {len(sids)}"
 
     # ignore already downloaded tracks
-    sids = list(filter(lambda sid: not is_downloaded(sid), sids))
+    sids = list(filter(lambda sid: not is_downloaded(
+        sid_to_filepath(sid)), sids))
 
     try:
         results: Optional[dict] = spotify.tracks(sids)
@@ -79,31 +79,37 @@ def average_in_n_block(d: np.ndarray, n=5) -> List[float]:
     return ave
 
 
-def calc_audio_features(path: str) -> AudioFeatures:
+def calc_audio_features(path: str) -> Optional[AudioFeatures]:
     spotidy_track_id = path.split(os.path.sep)[-1].replace(".mp3", "")
-    y, sr = librosa.load(path)
-    tempo = float(librosa.beat.tempo(y=y, sr=sr)[0])
-    zcr = librosa.feature.zero_crossing_rate(y=y, pad=False)[0]
-    y_harm, y_perc = librosa.effects.hpss(y=y)
-    y_harm_rms = librosa.feature.rms(y=y_harm)[0]
-    y_perc_rms = librosa.feature.rms(y=y_perc)[0]
-    spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
-    spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0]
-    chromagram = librosa.feature.chroma_stft(
-        y=y, sr=sr, hop_length=512).mean(axis=1).astype(float).tolist()
-    return [
-        spotidy_track_id,
-        tempo,
-        average_in_n_block(zcr, n_blocks),
-        average_in_n_block(y_harm_rms, n_blocks),
-        average_in_n_block(y_perc_rms, n_blocks),
-        average_in_n_block(spectral_centroids, n_blocks),
-        average_in_n_block(spectral_rolloff, n_blocks),
-        chromagram
-    ]
+
+    if is_downloaded(path):
+        y, sr = librosa.load(path)
+        tempo = float(librosa.beat.tempo(y=y, sr=sr)[0])
+        zcr = librosa.feature.zero_crossing_rate(y=y, pad=False)[0]
+        y_harm, y_perc = librosa.effects.hpss(y=y)
+        y_harm_rms = librosa.feature.rms(y=y_harm)[0]
+        y_perc_rms = librosa.feature.rms(y=y_perc)[0]
+        spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
+        spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0]
+        chromagram = librosa.feature.chroma_stft(
+            y=y, sr=sr, hop_length=512).mean(axis=1).astype(float).tolist()
+        return [
+            spotidy_track_id,
+            tempo,
+            average_in_n_block(zcr, n_blocks),
+            average_in_n_block(y_harm_rms, n_blocks),
+            average_in_n_block(y_perc_rms, n_blocks),
+            average_in_n_block(spectral_centroids, n_blocks),
+            average_in_n_block(spectral_rolloff, n_blocks),
+            chromagram
+        ]
+    else:
+        logger.debug(f"file: {path} not exists in audio data dir")
+        return
 
 
 if __name__ == "__main__":
     feature_list = calc_audio_features(choice(all_audio_files))
-    for f in feature_list:
-        logger.info(f)
+    if feature_list:
+        for f in feature_list:
+            logger.info(f)

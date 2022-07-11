@@ -10,10 +10,10 @@ from typing import List, Union
 import librosa
 import numpy as np
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import column, create_engine, text
 from tqdm import tqdm
 
-from src.audio_feature import AudioFeatures, calc_audio_features
+from src.audio_feature import AudioFeatures, calc_audio_features, sid_to_filepath
 from src.datasets import MMD_audio_matches, MMD_md5_metainfo
 from src.db import connection_config
 from src.utils import AudioFeatureName, create_logger, env
@@ -34,6 +34,7 @@ if __name__ == "__main__":
                         default=1000)
     args = parser.parse_args()
 
+    # Connect to DB
     if connection_config["host"]:
         engine = create_engine(
             "postgresql://{user}:{password}@{host}/{database}".format(
@@ -43,10 +44,14 @@ if __name__ == "__main__":
             "postgresql://{user}:{password}@/{database}?host={socket}".format(
                 **connection_config), echo=True)
 
-    q = text("FROM song SELECT spotify_track_id;")
+    # extract track id data from song table once set before
+    q = text("SELECT spotify_track_id FROM song;")
     logger.debug(q)
+    logger.info("Loading database: songs.song")
     res_df = pd.read_sql_query(sql=q, con=engine)
-    audio_files = []
+    res_df.columns = ["sid"]
+    logger.info(f"Got {len(res_df)} records")
+    audio_files = [sid_to_filepath(sid) for sid in res_df.sid.values]
 
     results: List[AudioFeatures] = []
     num_cores = mp.cpu_count()
@@ -65,21 +70,15 @@ if __name__ == "__main__":
                     results.append(result)
 
     results_df = pd.DataFrame(results)
-    results_df.columns = ["spotidy_track_id", "tempo", "zero_crossing_rate",
-                          "harmonic_and_percussive_components",
-                          "spectral_centroid", "spectral_rolloff",
-                          "mfcc", "chroma_frequencies"]
+    results_df.columns = ["spotify_track_id",
+                          "tempo",
+                          "zero_crossing_rate",
+                          "harmonic_components",
+                          "percussive_components",
+                          "spectral_centroid",
+                          "spectral_rolloff",
+                          "chroma_frequencies"]
 
-    connection_config = {
-        "user": env["DATABASE_USER"],
-        "password": env["DATABASE_PASSWORD"],
-        "host": env["DATABASE_HOST"],
-        "database": "songs"
-    }
-    engine = create_engine(
-        "postgresql://{user}:{password}@{host}/{database}".format(
-            **connection_config), echo=True)
-
-    results_df.drop_duplicates(subset=["spotidy_track_id"], inplace=True)
+    results_df.drop_duplicates(subset=["spotify_track_id"], inplace=True)
     results_df.to_sql("audio_features", con=engine,
                       if_exists="append", index=False)

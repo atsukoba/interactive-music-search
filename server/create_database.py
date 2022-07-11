@@ -27,4 +27,5 @@ if __name__ == "__main__":
     songs.columns = ["md5", "artist", "title", "spotify_track_id"]
     songs.drop_duplicates(subset=["md5"], inplace=True)
     songs.drop_duplicates(subset=["spotify_track_id"], inplace=True)
+    # NOTE: need drop cascade to set if_exists=replace
     songs.to_sql("song", con=engine, if_exists="append", index=False)
