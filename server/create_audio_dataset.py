@@ -1,17 +1,15 @@
 import argparse
-import json
 import os
 import time
 from glob import glob
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from urllib.request import urlretrieve
 
 import numpy as np
 import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from sqlalchemy import desc
 from tqdm import tqdm
 
 from src.utils import create_logger, env, slack_notify_info
@@ -19,6 +17,16 @@ from src.utils import create_logger, env, slack_notify_info
 SID = str
 
 logger = create_logger(os.path.basename(__file__))
+
+# Spotify API  settings
+client_id = env["client_id"]
+client_secret = env["client_secret"]
+logger.info("Creating Spotify API client...")
+client_credentials_manager = SpotifyClientCredentials(
+    client_id, client_secret)
+spotify = spotipy.Spotify(
+    client_credentials_manager=client_credentials_manager)
+logger.info(f"Spotify API client set: {spotify}")
 
 
 def _sid_to_filepath(sid: SID) -> str:
@@ -39,27 +47,30 @@ def download_mp3s_from_sids(sids: List[SID]) -> None:
     sids = list(filter(lambda sid: not is_downloaded(sid), sids))
 
     try:
-        results: dict = spotify.tracks(sids)
+        results: Optional[dict] = spotify.tracks(sids)
     except Exception as e:
         logger.info("Failed to get info from Spotify API")
         logger.debug(e)
         return
-    for res in tqdm(results["tracks"], desc="Downloading mp3s...", leave=False):
-        url = res.get("preview_url", None)
-        sid = res.get("id", None)
-        if url is not None and sid is not None:
-            save_dir = os.path.join(
-                env["DATASET_PATH"], "spotify_sample", sid[0], sid[1], sid[2])
-            Path(save_dir).mkdir(exist_ok=True, parents=True)
-            try:
-                urlretrieve(url, os.path.join(save_dir, sid + ".mp3"))
-            except Exception as e:
-                logger.debug(
-                    "Failed to download mp3 file from sample URL: {url}")
-                logger.debug(e)
-        else:
-            logger.debug("`id` or `preview_url` not found on API response")
-            logger.debug(res)
+    if results:
+        for res in tqdm(results["tracks"], desc="Downloading mp3s...", leave=False):
+            url = res.get("preview_url", None)
+            sid = res.get("id", None)
+            if url is not None and sid is not None:
+                save_dir = os.path.join(
+                    env["DATASET_PATH"], "spotify_sample", sid[0], sid[1], sid[2])
+                Path(save_dir).mkdir(exist_ok=True, parents=True)
+                try:
+                    urlretrieve(url, os.path.join(save_dir, sid + ".mp3"))
+                except Exception as e:
+                    logger.debug(
+                        "Failed to download mp3 file from sample URL: {url}")
+                    logger.debug(e)
+            else:
+                logger.debug("`id` or `preview_url` not found on API response")
+                logger.debug(res)
+    else:
+        logger.warn(f"got empty API result: with sids={sids}")
 
 
 if __name__ == "__main__":
@@ -94,14 +105,6 @@ if __name__ == "__main__":
         env["DATASET_PATH"], "MMD_audio_matches.tsv"), sep="\t")
 
     sid_list: np.ndarray = MMD_audio_matches["sid"].values  # type: ignore
-
-    client_id = env["client_id"]
-    client_secret = env["client_secret"]
-    logger.info("Creating Spotify API client...")
-    client_credentials_manager = SpotifyClientCredentials(
-        client_id, client_secret)
-    spotify = spotipy.Spotify(
-        client_credentials_manager=client_credentials_manager)
 
     if args.shuffle:
         logger.info("Shuffling Spotify Track ID list...")
