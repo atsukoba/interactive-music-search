@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from utils import create_logger, env
+from src.utils import create_logger, env
 
 logger = create_logger(os.path.basename(__file__))
 
