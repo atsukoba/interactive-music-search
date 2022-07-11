@@ -5,7 +5,18 @@ from sqlalchemy import (Column, Float, ForeignKey, Integer, String, ARRAY,
                         create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
+from src.utils import env
 
+# Config
+connection_config = {
+    "user": env["DATABASE_USER"],
+    "password": env["DATABASE_PASSWORD"],
+    "host": env["DATABASE_HOST"],
+    # "socket": env["DATABASE_SOCKET"],  # if needed
+    "database": "gmap_demo_app"
+}
+
+# Models
 Base = declarative_base()
 
 

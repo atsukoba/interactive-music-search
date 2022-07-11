@@ -10,46 +10,16 @@ from typing import List, Union
 import librosa
 import numpy as np
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from tqdm import tqdm
 
+from src.audio_feature import AudioFeatures, calc_audio_features
 from src.datasets import MMD_audio_matches, MMD_md5_metainfo
+from src.db import connection_config
 from src.utils import AudioFeatureName, create_logger, env
 
 warnings.simplefilter('ignore')
 logger = create_logger(os.path.basename(__file__))
-
-AudioFeatures = List[Union[str, List[float], float]]
-
-
-def average_in_n_block(d: np.ndarray, n=5) -> List[float]:
-    l: List[np.ndarray] = np.array_split(d, 5)
-    ave = [float(ll.mean()) for ll in l]
-    return ave
-
-
-def calc_audio_features(path: str) -> AudioFeatures:
-    spotidy_track_id = path.split(os.path.sep)[-1].replace(".mp3", "")
-    y, sr = librosa.load(path)
-    tempo = float(librosa.beat.tempo(y=y, sr=sr)[0])
-    zcr = librosa.feature.zero_crossing_rate(y=y, pad=False)[0]
-    y_harm, y_perc = librosa.effects.hpss(y=y)
-    y_harm_rms = librosa.feature.rms(y=y_harm)[0]
-    y_perc_rms = librosa.feature.rms(y=y_perc)[0]
-    spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
-    spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0]
-    chromagram = librosa.feature.chroma_stft(
-        y=y, sr=sr, hop_length=512).mean(axis=1).astype(float).tolist()
-    return [
-        spotidy_track_id,
-        tempo,
-        average_in_n_block(zcr, n_blocks),
-        average_in_n_block(y_harm_rms, n_blocks),
-        average_in_n_block(y_perc_rms, n_blocks),
-        average_in_n_block(spectral_centroids, n_blocks),
-        average_in_n_block(spectral_rolloff, n_blocks),
-        chromagram
-    ]
 
 
 if __name__ == "__main__":
@@ -64,9 +34,20 @@ if __name__ == "__main__":
                         default=1000)
     args = parser.parse_args()
 
-    audio_files = glob(os.path.join(
-        env["DATASET_PATH"], "spotify_sample", "**", "*.mp3"), recursive=True)
-    n_blocks = 5
+    if connection_config["host"]:
+        engine = create_engine(
+            "postgresql://{user}:{password}@{host}/{database}".format(
+                **connection_config), echo=True)
+    else:
+        engine = create_engine(
+            "postgresql://{user}:{password}@/{database}?host={socket}".format(
+                **connection_config), echo=True)
+
+    q = text("FROM song SELECT spotify_track_id;")
+    logger.debug(q)
+    res_df = pd.read_sql_query(sql=q, con=engine)
+    audio_files = []
+
     results: List[AudioFeatures] = []
     num_cores = mp.cpu_count()
     with ProcessPoolExecutor(max_workers=num_cores) as pool:

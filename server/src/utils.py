@@ -12,6 +12,8 @@ from miditoolkit.midi.parser import MidiFile
 # types
 
 AudioPath = str
+SID = str
+MD5 = str
 
 # Audio Features
 AudioFeatureName = Literal[
@@ -56,6 +58,7 @@ with open(os.path.join(os.path.dirname(__file__), "..", "environment.json"), "r"
     env: Environment = json.load(f)
 
 loggers_dict: Dict[str, logging.Logger] = {}
+script_start_time = datetime.now().strftime("%Y%m%d-%H:%M:%S")
 
 
 def create_logger(name: str) -> logging.Logger:
@@ -73,9 +76,9 @@ def create_logger(name: str) -> logging.Logger:
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.propagate = False
-        d = datetime.now().strftime("%Y%m%d-%H:%M:%S")
         fh = logging.FileHandler(os.path.join(
-            os.path.dirname(__file__), "..", "logs", d + "log"))
+            os.path.dirname(__file__), "..", "logs",
+            script_start_time + ".log"))
         fh.setFormatter(formatter)
         fh.setLevel(logging.DEBUG)
         logger.addHandler(fh)
