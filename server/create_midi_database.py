@@ -18,56 +18,69 @@ logger = create_logger(os.path.basename(__file__))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Fetching Audio Data from Spotify API",
+        description="Fetching MIDI Data from Spotify API",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-N",
                         "--num_of_files_limit",
-                        metavar="NUM_OF_MP3_FILE",
+                        metavar="NUM_OF_MIDI FILE",
                         type=int,
-                        help="The limit number of mp3 files to download from Spotify API",
+                        help="The limit number of midi files to calculate features",
                         default=1000)
     args = parser.parse_args()
 
-    audio_files = glob(os.path.join(
-        env["DATASET_PATH"], "spotify_sample", "**", "*.mp3"), recursive=True)
+    midi_files = glob(os.path.join(
+        env["DATASET_PATH"], "MMD_MIDI", "**", "*.mid"), recursive=True)
     n_blocks = 5
     results = []
-    for path in tqdm(audio_files[:args.num_of_files_limit]):
-        spotidy_track_id = path.split(os.path.sep)[-1].replace(".mp3", "")
-        y, sr = librosa.load(path)
-        tempo = librosa.beat.tempo(y=y, sr=sr)[0]
-        zcr = librosa.feature.zero_crossing_rate(y=y, pad=False)[0]
-        y_harm, y_perc = librosa.effects.hpss(y=y)
-        y_harm_rms = librosa.feature.rms(y=y_harm)[0]
-        y_perc_rms = librosa.feature.rms(y=y_perc)[0]
-        spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
-        spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0]
-        chromagram = librosa.feature.chroma_stft(
-            y=y, sr=sr, hop_length=512).mean(axis=1)
+    for path in tqdm(midi_files[:args.num_of_files_limit]):
+
+        md5 = None
+        total_used_pitch = None
+        bar_used_pitch = None
+        total_used_note = None
+        bar_used_note = None
+        bar_pitch_class_histogram = None
+        pitch_range = None
+        avg_pitch_shift = None
+        avg_IOI = None
+        note_length_hist = None
         results.append([
-            spotidy_track_id,
-            tempo,
-            average_in_n_block(zcr, n_blocks),
-            average_in_n_block(y_harm_rms, n_blocks),
-            average_in_n_block(y_perc_rms, n_blocks),
-            average_in_n_block(spectral_centroids, n_blocks),
-            average_in_n_block(spectral_rolloff, n_blocks),
-            chromagram
+            md5,
+            total_used_pitch,
+            bar_used_pitch,
+            total_used_note,
+            bar_used_note,
+            bar_pitch_class_histogram,
+            pitch_range,
+            avg_pitch_shift,
+            avg_IOI,
+            note_length_hist,
         ])
 
     results = pd.DataFrame(results)
-    results.columns = ["sid", "tempo", "zcr", "harm",
-                       "perc", "spec_cent", "spec_roll", "chroma"]
+    results.columns = [
+        "md5",
+        "total_used_pitch",
+        "bar_used_pitch",
+        "total_used_note",
+        "bar_used_note",
+        "bar_pitch_class_histogram",
+        "pitch_range",
+        "avg_pitch_shift",
+        "avg_IOI",
+        "note_length_hist",
+    ]
 
     connection_config = {
         "user": env["DATABASE_USER"],
         "password": env["DATABASE_PASSWORD"],
         "host": env["DATABASE_HOST"],
-        "database": "audio_features"
+        "database": "songs"
     }
     engine = create_engine(
         "postgresql://{user}:{password}@{host}/{database}".format(
             **connection_config), echo=True)
 
     results.drop_duplicates(subset=["sid"], inplace=True)
-    results.to_sql("audio", con=engine, if_exists="append", index=False)
+    results.to_sql("midi_features", con=engine,
+                   if_exists="append", index=False)
