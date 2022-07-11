@@ -2,6 +2,7 @@ flask
 py-postgresql
 glob2
 miditoolkit
+muspy
 librosa
 spotipy
 pandas

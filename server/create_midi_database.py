@@ -1,86 +1,87 @@
 import argparse
-import json
+import multiprocessing as mp
 import os
+import warnings
+from concurrent.futures import Future, ProcessPoolExecutor
 from glob import glob
 from typing import List
 
-import librosa
 import numpy as np
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import column, create_engine, text
 from tqdm import tqdm
 
 from src.datasets import MMD_audio_matches, MMD_md5_metainfo
+from src.db import connection_config
 from src.utils import create_logger, env
+from src.midi_feature import calc_midi_features, md5_to_filepath, MidiFeatures
 
+warnings.simplefilter('ignore')
 logger = create_logger(os.path.basename(__file__))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Fetching MIDI Data from Spotify API",
+        description="Fetching MIDI Data from Meta MIDI Dataset",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-N",
                         "--num_of_files_limit",
                         metavar="NUM_OF_MIDI FILE",
                         type=int,
                         help="The limit number of midi files to calculate features",
-                        default=1000)
+                        default=10000)
     args = parser.parse_args()
 
-    midi_files = glob(os.path.join(
-        env["DATASET_PATH"], "MMD_MIDI", "**", "*.mid"), recursive=True)
-    n_blocks = 5
-    results = []
-    for path in tqdm(midi_files[:args.num_of_files_limit]):
+    # Connect to DB
+    if connection_config["host"]:
+        engine = create_engine(
+            "postgresql://{user}:{password}@{host}/{database}".format(
+                **connection_config), echo=True)
+    else:
+        engine = create_engine(
+            "postgresql://{user}:{password}@/{database}?host={socket}".format(
+                **connection_config), echo=True)
 
-        md5 = None
-        total_used_pitch = None
-        bar_used_pitch = None
-        total_used_note = None
-        bar_used_note = None
-        bar_pitch_class_histogram = None
-        pitch_range = None
-        avg_pitch_shift = None
-        avg_IOI = None
-        note_length_hist = None
-        results.append([
-            md5,
-            total_used_pitch,
-            bar_used_pitch,
-            total_used_note,
-            bar_used_note,
-            bar_pitch_class_histogram,
-            pitch_range,
-            avg_pitch_shift,
-            avg_IOI,
-            note_length_hist,
-        ])
+    # extract track id data from song table once set before
+    q = text("SELECT md5 FROM song;")
+    logger.debug(q)
+    logger.info("Loading database: songs.md5")
+    res_df = pd.read_sql_query(sql=q, con=engine)
+    res_df.columns = ["md5"]
+    logger.info(f"Got {len(res_df)} records")
+    midi_files = [md5_to_filepath(md5) for md5 in res_df.md5.values]
 
-    results = pd.DataFrame(results)
-    results.columns = [
+    results: List[MidiFeatures] = []
+    num_cores = mp.cpu_count()
+    with ProcessPoolExecutor(max_workers=num_cores) as pool:
+        with tqdm(total=len(midi_files[:args.num_of_files_limit or 999999999]),
+                  desc="Loading Audio files") as progress:
+            futures: List[Future] = []
+            for idx, data_path in enumerate(midi_files[:args.num_of_files_limit or 999999999]):
+                future = pool.submit(calc_midi_features,
+                                     data_path)
+                future.add_done_callback(lambda p: progress.update())
+                futures.append(future)
+            for future in futures:
+                result: MidiFeatures = future.result()
+                if result is not None:
+                    results.append(result)
+    results_df = pd.DataFrame(results)
+    results_df.columns = [
         "md5",
-        "total_used_pitch",
-        "bar_used_pitch",
-        "total_used_note",
-        "bar_used_note",
-        "bar_pitch_class_histogram",
         "pitch_range",
-        "avg_pitch_shift",
-        "avg_IOI",
-        "note_length_hist",
+        "n_pitches_used",
+        "n_pitch_classes_used",
+        "polyphony",
+        "polyphony_rate",
+        "scale_consistency",
+        "pitch_entropy",
+        "pitch_class_entropy",
+        "empty_beat_rate",
+        "drum_in_duple_rate",
+        "drum_in_triple_rate",
+        "drum_pattern_consistency"
     ]
-
-    connection_config = {
-        "user": env["DATABASE_USER"],
-        "password": env["DATABASE_PASSWORD"],
-        "host": env["DATABASE_HOST"],
-        "database": "songs"
-    }
-    engine = create_engine(
-        "postgresql://{user}:{password}@{host}/{database}".format(
-            **connection_config), echo=True)
-
-    results.drop_duplicates(subset=["sid"], inplace=True)
-    results.to_sql("midi_features", con=engine,
-                   if_exists="append", index=False)
+    results_df.drop_duplicates(subset=["md5"], inplace=True)
+    results_df.to_sql("midi_features", con=engine,
+                      if_exists="append", index=False)
