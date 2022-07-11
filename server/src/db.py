@@ -13,7 +13,7 @@ connection_config = {
     "password": env["DATABASE_PASSWORD"],
     "host": env["DATABASE_HOST"],
     # "socket": env["DATABASE_SOCKET"],  # if needed
-    "database": "gmap_demo_app"
+    "database": "songs"
 }
 
 # Models
@@ -33,7 +33,7 @@ class Song(Base):
 class MidiFeatures(Base):
     __tablename__ = 'midi_features'
 
-    md5 = Column(Integer, ForeignKey("song.md5"))
+    md5 = Column(Integer, ForeignKey("song.md5"), primary_key=True)
     total_used_pitch = Column(Integer)
     bar_used_pitch = Column(Float)
     total_used_note = Column(Integer)
@@ -48,7 +48,8 @@ class MidiFeatures(Base):
 class AudioFeatures(Base):
     __tablename__ = 'audio_features'
 
-    spotify_track_id = Column(String, ForeignKey("song.spotify_track_id"))
+    spotify_track_id = Column(String, ForeignKey(
+        "song.spotify_track_id"), primary_key=True)
     tempo = Column(Float)
     zero_crossing_rate = Column(ARRAY(Float))
     harmonic_components = Column(ARRAY(Float))
@@ -61,7 +62,8 @@ class AudioFeatures(Base):
 class SpotifyFeatures(Base):
     __tablename__ = 'spotify_features'
 
-    spotify_track_id = Column(String, ForeignKey("song.spotify_track_id"))
+    spotify_track_id = Column(String, ForeignKey(
+        "song.spotify_track_id"), primary_key=True)
     acousticness = Column(Float)
     danceability = Column(Float)
     duration_ms = Column(Float)
