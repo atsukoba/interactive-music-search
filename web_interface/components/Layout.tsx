@@ -1,8 +1,9 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { styled } from "@mui/material/styles";
 import { Children, ReactNode, useEffect, useRef, useState } from "react";
-
+import { ChangeEventHandler, MouseEventHandler } from "react";
 import {
   Apps,
   Book,
@@ -35,6 +36,7 @@ import {
 } from "@mui/material";
 
 import PlotWrapper from "../components/PlotWrapper";
+import { postUserFile } from "../api/user_data";
 
 const drawerWidth = 210;
 
@@ -42,7 +44,39 @@ interface IProps {
   children: ReactNode;
 }
 
+const Input = styled("input")({
+  display: "none",
+});
+
 export default function Layout({ children }: IProps) {
+  const [selectedFile, selectFile] = useState<FormData | undefined>(undefined);
+
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const body = new FormData();
+      if (file.type === "audio/mpeg" || file.type === "audio/wav") {
+        body.append("audio", file);
+        selectFile(body);
+      } else if (file.type === "audio/midi") {
+        body.append("midi", file);
+        selectFile(body);
+      } else {
+        alert("File type incorrect to upload");
+      }
+    }
+  };
+
+  const onUploadButtonPush: MouseEventHandler<HTMLSpanElement> = async (
+    event
+  ) => {
+    if (selectedFile) {
+      const res = postUserFile(selectedFile);
+      console.dir(selectedFile);
+      console.dir(res);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -138,6 +172,32 @@ export default function Layout({ children }: IProps) {
                   <ListItemText primary={"GitHub"} />
                 </Link>
               </ListItemButton>
+            </ListItem>
+          </List>
+          <Divider />
+          <List>
+            <ListItem>
+              <label htmlFor="contained-button-file">
+                <Input
+                  accept="audio/*"
+                  id="contained-button-file"
+                  type="file"
+                  onChange={handleChange}
+                />
+                <Button variant="contained" component="span">
+                  Select Audio / MIDI File
+                </Button>
+              </label>
+            </ListItem>
+            <ListItem>
+              <Button
+                variant="contained"
+                component="span"
+                disabled={selectedFile === undefined}
+                onClick={onUploadButtonPush}
+              >
+                Upload
+              </Button>
             </ListItem>
           </List>
         </Box>
