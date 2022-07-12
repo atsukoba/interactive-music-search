@@ -8,12 +8,13 @@ from typing import List, Union
 import librosa
 import numpy as np
 import pandas as pd
-from sqlalchemy import column, create_engine, text
+from sqlalchemy import column, text
 from tqdm import tqdm
 
-from src.audio_feature import AudioFeatures, calc_audio_features, sid_to_filepath
+from src.audio_feature import (AudioFeatures, calc_audio_features,
+                               sid_to_filepath)
 from src.datasets import MMD_audio_matches, MMD_md5_metainfo
-from src.db import connection_config
+from src.db import create_engine
 from src.utils import AudioFeatureName, create_logger, env
 
 warnings.simplefilter('ignore')
@@ -33,15 +34,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Connect to DB
-    if connection_config["host"]:
-        engine = create_engine(
-            "postgresql://{user}:{password}@{host}/{database}".format(
-                **connection_config), echo=True)
-    else:
-        engine = create_engine(
-            "postgresql://{user}:{password}@/{database}?host={socket}".format(
-                **connection_config), echo=True)
-
+    engine = create_engine()
     # extract track id data from song table once set before
     q = text("SELECT spotify_track_id FROM song;")
     logger.debug(q)

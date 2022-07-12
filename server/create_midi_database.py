@@ -8,13 +8,13 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import column, create_engine, text
+from sqlalchemy import column, text
 from tqdm import tqdm
 
 from src.datasets import MMD_audio_matches, MMD_md5_metainfo
-from src.db import connection_config
+from src.db import create_engine
+from src.midi_feature import MidiFeatures, calc_midi_features, md5_to_filepath
 from src.utils import create_logger, env
-from src.midi_feature import calc_midi_features, md5_to_filepath, MidiFeatures
 
 warnings.simplefilter('ignore')
 logger = create_logger(os.path.basename(__file__))
@@ -33,15 +33,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Connect to DB
-    if connection_config["host"]:
-        engine = create_engine(
-            "postgresql://{user}:{password}@{host}/{database}".format(
-                **connection_config), echo=True)
-    else:
-        engine = create_engine(
-            "postgresql://{user}:{password}@/{database}?host={socket}".format(
-                **connection_config), echo=True)
-
+    engine = create_engine()
     # extract track id data from song table once set before
     q = text("SELECT md5 FROM song;")
     logger.debug(q)

@@ -27,15 +27,18 @@ AudioFeatureName = Literal[
 
 # MIDI Features
 MidiFeatureName = Literal[
-    "total_used_pitch",
-    "bar_used_pitch",
-    "total_used_note",
-    "bar_used_note",
-    "bar_pitch_class_histogram",
     "pitch_range",
-    "avg_pitch_shift",
-    "avg_IOI",
-    "note_length_hist"
+    "n_pitches_used",
+    "n_pitch_classes_used",
+    "polyphony",
+    "polyphony_rate",
+    "scale_consistency",
+    "pitch_entropy",
+    "pitch_class_entropy",
+    "empty_beat_rate",
+    "drum_in_duple_rate",
+    "drum_in_triple_rate",
+    "drum_pattern_consistency"
 ]
 
 

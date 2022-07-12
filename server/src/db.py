@@ -1,11 +1,17 @@
-import os
-from enum import unique
-
-from sqlalchemy import (Column, Float, ForeignKey, Integer, String, ARRAY,
-                        create_engine)
+from venv import create
+from sqlalchemy import (ARRAY, Column, Float,
+                        ForeignKey, Integer, String, text)
+from sqlalchemy import create_engine as ce
+import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
-from src.utils import env
+import pandas as pd
+import os
+
+from src.utils import create_logger, env
+from src.models import Base
+
+logger = create_logger(os.path.basename(__file__))
 
 # Config
 connection_config = {
@@ -16,68 +22,74 @@ connection_config = {
     "database": "songs"
 }
 
-# Models
-Base = declarative_base()
+
+def create_engine() -> sqlalchemy.engine.Engine:
+    if connection_config["host"]:
+        engine = ce(
+            "postgresql://{user}:{password}@{host}/{database}".format(
+                **connection_config), echo=True)
+    else:
+        engine = ce(
+            "postgresql://{user}:{password}@/{database}?host={socket}".format(
+                **connection_config), echo=True)
+    return engine
 
 
-class Song(Base):
-    __tablename__ = 'song'
+def create_session():
+    # Connect to DB
+    engine = create_engine()
+    SessionClass = sessionmaker(engine)
+    session = SessionClass()
 
-    md5 = Column(Integer, primary_key=True)
-    spotify_track_id = Column(String)
-    title = Column(String)
-    artist = Column(String)
-    year = Column(Integer)
+    Base.metadata.bind = engine  # bind
 
-
-class MidiFeatures(Base):
-    __tablename__ = 'midi_features'
-
-    md5 = Column(Integer, ForeignKey("song.md5"), primary_key=True)
-    total_used_pitch = Column(Integer)
-    bar_used_pitch = Column(Float)
-    total_used_note = Column(Integer)
-    bar_used_note = Column(Float)
-    bar_pitch_class_histogram = Column(Float)
-    pitch_range = Column(Integer)
-    avg_pitch_shift = Column(Float)
-    avg_IOI = Column(Float)
-    note_length_hist = Column(Float)
+    return session
 
 
-class AudioFeatures(Base):
-    __tablename__ = 'audio_features'
+class QueryDataSelector:
+    """
+    extract data from db using dataframes without ORM model
+    to use active trigger functions on PostgreSQL
+    """
 
-    spotify_track_id = Column(String, ForeignKey(
-        "song.spotify_track_id"), primary_key=True)
-    tempo = Column(Float)
-    zero_crossing_rate = Column(ARRAY(Float))
-    harmonic_components = Column(ARRAY(Float))
-    percussive_components = Column(ARRAY(Float))
-    spectral_centroid = Column(ARRAY(Float))
-    spectral_rolloff = Column(ARRAY(Float))
-    chroma_frequencies = Column(ARRAY(Float))
+    def __init__(self, engine: sqlalchemy.engine.Engine):
+        self.engine = engine
 
+    def get_all_cood(self) -> pd.DataFrame:
+        q = text(
+            f"SELECT longitude, latitude FROM place;"
+        )
+        logger.debug(q)
+        df = pd.read_sql_query(sql=q, con=self.engine)
+        return df
 
-class SpotifyFeatures(Base):
-    __tablename__ = 'spotify_features'
+    def place_time_within(self, start_date: str, end_date: str) -> pd.DataFrame:
+        q = text(
+            f"SELECT P.* FROM place P INNER JOIN event E on E.id = P.event_id WHERE start_time >= '{start_date}' AND start_time <= '{end_date}';"
+        )
+        logger.debug(q)
+        df = pd.read_sql_query(sql=q, con=self.engine)
+        logger.debug(df.head(5))
+        return df
 
-    spotify_track_id = Column(String, ForeignKey(
-        "song.spotify_track_id"), primary_key=True)
-    acousticness = Column(Float)
-    danceability = Column(Float)
-    duration_ms = Column(Float)
-    energy = Column(Float)
-    instrumentalness = Column(Float)
-    key = Column(Float)
-    liveness = Column(Float)
-    loudness = Column(Float)
-    mode = Column(Float)
-    speechiness = Column(Float)
-    tempo = Column(Float)
-    time_signature = Column(Float)
-    valence = Column(Float)
+    def move_time_within(self, start_date: str, end_date: str) -> pd.DataFrame:
+        q = text(
+            f"SELECT A.* FROM activity A INNER JOIN event E on E.id = A.event_id WHERE start_time >= '{start_date}' AND start_time <= '{end_date}';"
+        )
+        logger.debug(q)
+        df = pd.read_sql_query(sql=q, con=self.engine)
+        logger.debug(df.head(5))
+        return df
+
+    def move_time_distance_within(self, start_date: str, end_date: str, distance: float) -> pd.DataFrame:
+        q = text(
+            f"SELECT A.* FROM activity A INNER JOIN event E on E.id = A.event_id WHERE start_time >= '{start_date}' AND start_time <= '{end_date}' AND distance(A.start_latitude, A.start_longitude, A.end_latitude, A.end_longitude) <= {distance};"
+        )
+        logger.debug(q)
+        df = pd.read_sql_query(sql=q, con=self.engine)
+        logger.debug(df.head(5))
+        return df
 
 
 if __name__ == "__main__":
-    pass
+    ...
