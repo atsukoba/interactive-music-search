@@ -1,8 +1,9 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Email, Inbox, GitHub, Book, VerifiedUser } from "@mui/icons-material";
+import { FormEventHandler, useEffect, useRef, useState } from "react";
+
+import { Book, Email, GitHub, Inbox, VerifiedUser } from "@mui/icons-material";
 import {
   AppBar,
   Box,
@@ -23,12 +24,47 @@ import {
   Typography,
 } from "@mui/material";
 
-import PlotWrapper from "../components/PlotWrapper";
 import Layout from "../components/Layout";
+import PlotWrapper from "../components/PlotWrapper";
 
 const drawerWidth = 210;
 
 export default function Home() {
+  // NOTE: handle `any` below
+  let state: any;
+  let setState: any;
+  [state, setState] = useState({
+    pitch_range: true,
+    n_pitches_used: false,
+    n_pitch_classes_used: false,
+    polyphony: false,
+    polyphony_rate: false,
+    scale_consistency: false,
+    pitch_entropy: false,
+    pitch_class_entropy: false,
+    empty_beat_rate: false,
+    drum_in_duple_rate: false,
+    drum_in_triple_rate: false,
+    drum_pattern_consistency: false,
+    tempo: true,
+    zero_crossing_rate: false,
+    harmonic_components: false,
+    percussive_components: false,
+    spectral_centroid: false,
+    spectral_rolloff: false,
+    chroma_frequencies: true,
+  });
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let newState = {
+      ...state,
+      [event.target.name]: event.target.checked,
+    };
+    setState(newState);
+    // list of feature names
+    console.log(Object.keys(newState).filter((key) => newState[key]));
+  };
+
   return (
     <Layout>
       <Grid container spacing={2} style={{ height: "calc(100vh - 64px)" }}>
@@ -42,76 +78,211 @@ export default function Home() {
           <Typography mb={2}>Features</Typography>
           <FormGroup>
             <Typography my={2}>MIDI</Typography>
-            <FormControlLabel control={<Checkbox />} label="pitch_range" />
-            <FormControlLabel control={<Checkbox />} label="n_pitches_used" />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.pitch_range}
+                  name="pitch_range"
+                  onChange={handleChange}
+                />
+              }
+              label="pitch_range"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.n_pitches_used}
+                  name="n_pitches_used"
+                  onChange={handleChange}
+                />
+              }
+              label="n_pitches_used"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.n_pitch_classes_used}
+                  name="n_pitch_classes_used"
+                  onChange={handleChange}
+                />
+              }
               label="n_pitch_classes_used"
             />
-            <FormControlLabel control={<Checkbox />} label="polyphony" />
-            <FormControlLabel control={<Checkbox />} label="polyphony_rate" />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.polyphony}
+                  name="polyphony"
+                  onChange={handleChange}
+                />
+              }
+              label="polyphony"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.polyphony_rate}
+                  name="polyphony_rate"
+                  onChange={handleChange}
+                />
+              }
+              label="polyphony_rate"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.scale_consistency}
+                  name="scale_consistency"
+                  onChange={handleChange}
+                />
+              }
               label="scale_consistency"
             />
-            <FormControlLabel control={<Checkbox />} label="pitch_entropy" />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.pitch_entropy}
+                  name="pitch_entropy"
+                  onChange={handleChange}
+                />
+              }
+              label="pitch_entropy"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.pitch_class_entropy}
+                  name="pitch_class_entropy"
+                  onChange={handleChange}
+                />
+              }
               label="pitch_class_entropy"
             />
-            <FormControlLabel control={<Checkbox />} label="empty_beat_rate" />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.empty_beat_rate}
+                  name="empty_beat_rate"
+                  onChange={handleChange}
+                />
+              }
+              label="empty_beat_rate"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.drum_in_duple_rate}
+                  name="drum_in_duple_rate"
+                  onChange={handleChange}
+                />
+              }
               label="drum_in_duple_rate"
             />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.drum_in_triple_rate}
+                  name="drum_in_triple_rate"
+                  onChange={handleChange}
+                />
+              }
               label="drum_in_triple_rate"
             />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.drum_pattern_consistency}
+                  name="drum_pattern_consistency"
+                  onChange={handleChange}
+                />
+              }
               label="drum_pattern_consistency"
             />
             <Divider />
             <Typography my={2}>Audio</Typography>
             <FormControlLabel
-              control={<Checkbox defaultChecked />}
+              control={
+                <Checkbox
+                  checked={state.tempo}
+                  name="tempo"
+                  onChange={handleChange}
+                />
+              }
               label="tempo"
             />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.zero_crossing_rate}
+                  name="zero_crossing_rate"
+                  onChange={handleChange}
+                />
+              }
               label="zero_crossing_rate"
             />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.harmonic_components}
+                  name="harmonic_components"
+                  onChange={handleChange}
+                />
+              }
               label="harmonic_components"
             />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.percussive_components}
+                  name="percussive_components"
+                  onChange={handleChange}
+                />
+              }
               label="percussive_components"
             />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.spectral_centroid}
+                  name="spectral_centroid"
+                  onChange={handleChange}
+                />
+              }
               label="spectral_centroid"
             />
-            <FormControlLabel control={<Checkbox />} label="spectral_rolloff" />
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  checked={state.spectral_rolloff}
+                  name="spectral_rolloff"
+                  onChange={handleChange}
+                />
+              }
+              label="spectral_rolloff"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={state.chroma_frequencies}
+                  name="chroma_frequencies"
+                  onChange={handleChange}
+                />
+              }
               label="chroma_frequencies"
             />
             {/* todo: implement Spotify features backend */}
-            {/* <Divider />
-            <Typography my={2}>Spotify</Typography>
-            <FormControlLabel control={<Checkbox />} label="Feature 13" />
-            <FormControlLabel control={<Checkbox />} label="Feature 14" />
-            <FormControlLabel control={<Checkbox />} label="Feature 15" />
-            <FormControlLabel control={<Checkbox />} label="Feature 16" />
-            <Divider />
-            <Typography my={2}>Kansei</Typography>
-            <FormControlLabel control={<Checkbox />} label="Feature 17" />
-            <FormControlLabel control={<Checkbox />} label="Feature 18" />
-            <FormControlLabel control={<Checkbox />} label="Feature 19" />
-            <FormControlLabel control={<Checkbox />} label="Feature 20" /> */}
+            {/* <Divider 
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}13" />
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}14" />
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}15" />
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}/>
+            <Typography my={2}>Spotify</Typograph16" />
+            <Divider 
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}17" />
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}18" />
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}19" />
+            <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}/>
+            <Typography my={2}>Kansei</Typograph20" /> */}
             <Box my={2}>
               <Button variant="contained">Toggle All</Button>
             </Box>
