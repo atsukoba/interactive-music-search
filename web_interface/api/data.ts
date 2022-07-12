@@ -1,10 +1,5 @@
 import { Data } from "plotly.js";
-
-const apiUrl = process.env.API_URL || "http://localhost:9823";
-const headers = new Headers({
-  Accept: "application/json",
-  "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-});
+import { apiUrl, headers } from "./common";
 
 interface ResponseDatum {
   title: string;
