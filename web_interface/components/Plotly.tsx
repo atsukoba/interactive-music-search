@@ -9,8 +9,9 @@ import {
   ScatterMarker,
 } from "plotly.js";
 import React, { useEffect, useRef, useState } from "react";
+
 import { useGetElementProperty } from "../utils/ref";
-import { sampleData, sampleLayout, sampleConfig } from "../utils/sampleData";
+import { sampleConfig, sampleData, sampleLayout } from "../utils/sampleData";
 
 // avoid error on using react-plotly on Next with typescript
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
@@ -27,10 +28,10 @@ interface IProps {
 }
 
 interface BBox {
-  x0: float;
-    x1: float;
-    y0: float;
-    y1: float;
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
 }
 
 interface PlotMouseEventPoint3D {
@@ -42,10 +43,12 @@ interface PlotMouseEvent3D {
   points: Array<PlotMouseEventPoint3D>;
 }
 
-const onClickDataPoint = (e: PlotMouseEvent3D) => {
-  let x = e.points[0].bbox.x0 + e.points[0].bbox.x1
-  let y = e.points[0].bbox.y0 + e.points[0].bbox.y1
+const onClickDataPoint = (e: any) => {
+  // NOTE: defined types of PlotMouseEvent are incorrect
+  let x = e.points[0].bbox.x0 + e.points[0].bbox.x1;
+  let y = e.points[0].bbox.y0 + e.points[0].bbox.y1;
   console.log("Clicked Song: ", e.points[0].data);
+  console.log("Position", x, y);
 };
 
 const Plotly = ({ newData, windowSize }: IProps) => {
