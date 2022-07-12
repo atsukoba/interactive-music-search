@@ -16,7 +16,7 @@ class RequestType(TypedDict):
 logger = create_logger(os.path.basename(__file__))
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})  # insecure ?
 
 
 @app.route("/", methods=["GET"])
@@ -31,9 +31,16 @@ def parrot():
     return jsonify(request.get_data())
 
 
+@app.route("/user_data", methods=["POST"])
+def user_data():
+    data = request.get_data()
+    logger.info(data)
+
+
 @app.route("/get_features_sample", methods=['GET', 'POST'])
 def sample():
-    req_json: Optional[RequestType] = request.get_json(force=True)  # Get POST JSON
+    req_json: Optional[RequestType] = request.get_json(
+        force=True)  # Get POST JSON
     print(req_json)
     if req_json:
         return jsonify(get_sample_n_data(req_json["n_songs"]))
