@@ -207,6 +207,7 @@ export default function Layout({ children }: IProps) {
               </Button>
             </ListItem>
           </List>
+          <Divider />
         </Box>
       </Drawer>
       <Box

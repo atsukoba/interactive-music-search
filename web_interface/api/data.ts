@@ -1,4 +1,5 @@
 import { Data } from "plotly.js";
+import { features } from "process";
 
 import { apiUrl, headers } from "./common";
 
@@ -26,6 +27,37 @@ export const getSampleData = async (n_songs: number) => {
   // }
 
   const res = await fetch(`${apiUrl}/get_features_sample`, params);
+  const resData = await res.json();
+  const data: Data[] = resData.map((e: ResponseDatum) => {
+    return {
+      name: e.title,
+      text: [`${e.artist} - ${e.title}`],
+      mode: "markers",
+      opacity: [0.5],
+      type: "scatter3d",
+      x: [e.x],
+      y: [e.y],
+      z: [e.z],
+      hovertemplate: [
+        "<b>%{text}</b><br><br>" +
+          "%{xaxis.title.text}: %{x}<br>" +
+          "%{yaxis.title.text}: %{y}<br>" +
+          "%{zaxis.title.text}: %{z}<br>" +
+          "<extra></extra>",
+      ],
+    };
+  });
+  return data;
+};
+
+export const getData = async (features: Array<string>) => {
+  const params = {
+    method: "POST",
+    body: JSON.stringify({ features: features }),
+    headers: headers,
+  };
+
+  const res = await fetch(`${apiUrl}/get_features`, params);
   const resData = await res.json();
   const data: Data[] = resData.map((e: ResponseDatum) => {
     return {
