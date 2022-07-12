@@ -70,3 +70,10 @@ export const sampleConfig: Partial<Config> = {
   autosizable: true,
   fillFrame: false,
 };
+
+// For scatter-gl
+export interface GLData {
+  labels: number[];
+  labelNames: string[];
+  projection: [number, number, number][];
+}

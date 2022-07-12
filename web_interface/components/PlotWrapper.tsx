@@ -1,30 +1,58 @@
-import { Data } from "plotly.js";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 
 import { Box } from "@mui/material";
 
 import { getSampleData } from "../api/data";
-import { useGetElementProperty } from "../utils/ref";
-import Plotly from "./Plotly";
+import { RenderMode, ScatterGL } from "../scatter_gl";
+import { Dataset, Point3D, PointMetadata } from "../scatter_gl/data";
+import { GLData } from "../utils/sampleData";
 
 export default function PlotWrapper() {
   const targetRef = useRef(null);
-  const [data, setData] = useState<Data[]>([]);
-  const [size, setSize] = useState<Array<number>>([0, 0]);
-  const { getElementProperty } =
-    useGetElementProperty<HTMLDivElement>(targetRef);
+  const [data, setData] = useState<GLData | undefined>(undefined);
 
   const fetchData = async () => {
     const d = await getSampleData(60);
     console.log(d);
-    setData([...d]);
   };
 
   useEffect(() => {
-    const size = [getElementProperty("width"), getElementProperty("height")];
-    console.log(size);
-    setSize(size);
-    fetchData().catch(console.error);
+    const containerElement = document.getElementById("container")!;
+
+    const data: GLData = require("../utils/scatter-gl-sample-data.json");
+    const dataPoints: Point3D[] = [];
+    const metadata: PointMetadata[] = [];
+    data.projection.forEach((vector, index) => {
+      const labelIndex = data.labels[index];
+      dataPoints.push(vector);
+      metadata.push({
+        labelIndex,
+        label: data.labelNames[labelIndex],
+      });
+    });
+    const dataset = new Dataset(dataPoints, metadata);
+    const scatterGL = new ScatterGL(containerElement, {
+      onClick: (point: number | null) => {
+        console.log(`click ${point}`);
+      },
+      onHover: (point: number | null) => {
+        console.log(`hover ${point}`);
+      },
+      onSelect: (points: number[]) => {
+        console.log(points);
+      },
+      renderMode: RenderMode.POINT,
+      orbitControls: {
+        zoomSpeed: 1.125,
+      },
+    });
+    scatterGL.render(dataset);
+    // Add in a resize observer for automatic window resize.
+    window.addEventListener("resize", () => {
+      scatterGL.resize();
+    });
   }, []);
 
   useEffect(() => {
@@ -33,7 +61,7 @@ export default function PlotWrapper() {
 
   return (
     <Box style={{ height: "100%" }} ref={targetRef}>
-      <Plotly newData={data} windowSize={size} />
+      <canvas id="container"></canvas>
     </Box>
   );
 }
