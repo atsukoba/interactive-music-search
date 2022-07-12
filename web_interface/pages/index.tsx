@@ -42,24 +42,65 @@ export default function Home() {
           <Typography mb={2}>Features</Typography>
           <FormGroup>
             <Typography my={2}>MIDI</Typography>
+            <FormControlLabel control={<Checkbox />} label="pitch_range" />
+            <FormControlLabel control={<Checkbox />} label="n_pitches_used" />
             <FormControlLabel
-              control={<Checkbox defaultChecked />}
-              label="Feature 1"
+              control={<Checkbox />}
+              label="n_pitch_classes_used"
             />
-            <FormControlLabel control={<Checkbox />} label="Feature 2" />
-            <FormControlLabel control={<Checkbox />} label="Feature 3" />
-            <FormControlLabel control={<Checkbox />} label="Feature 4" />
-            <FormControlLabel control={<Checkbox />} label="Feature 5" />
+            <FormControlLabel control={<Checkbox />} label="polyphony" />
+            <FormControlLabel control={<Checkbox />} label="polyphony_rate" />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="scale_consistency"
+            />
+            <FormControlLabel control={<Checkbox />} label="pitch_entropy" />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="pitch_class_entropy"
+            />
+            <FormControlLabel control={<Checkbox />} label="empty_beat_rate" />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="drum_in_duple_rate"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="drum_in_triple_rate"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="drum_pattern_consistency"
+            />
             <Divider />
             <Typography my={2}>Audio</Typography>
-            <FormControlLabel control={<Checkbox />} label="Feature 6" />
-            <FormControlLabel control={<Checkbox />} label="Feature 7" />
-            <FormControlLabel control={<Checkbox />} label="Feature 8" />
-            <FormControlLabel control={<Checkbox />} label="Feature 9" />
-            <FormControlLabel control={<Checkbox />} label="Feature 10" />
-            <FormControlLabel control={<Checkbox />} label="Feature 11" />
-            <FormControlLabel control={<Checkbox />} label="Feature 12" />
-            <Divider />
+            <FormControlLabel
+              control={<Checkbox defaultChecked />}
+              label="tempo"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="zero_crossing_rate"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="harmonic_components"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="percussive_components"
+            />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="spectral_centroid"
+            />
+            <FormControlLabel control={<Checkbox />} label="spectral_rolloff" />
+            <FormControlLabel
+              control={<Checkbox />}
+              label="chroma_frequencies"
+            />
+            {/* todo: implement Spotify features backend */}
+            {/* <Divider />
             <Typography my={2}>Spotify</Typography>
             <FormControlLabel control={<Checkbox />} label="Feature 13" />
             <FormControlLabel control={<Checkbox />} label="Feature 14" />
@@ -70,7 +111,7 @@ export default function Home() {
             <FormControlLabel control={<Checkbox />} label="Feature 17" />
             <FormControlLabel control={<Checkbox />} label="Feature 18" />
             <FormControlLabel control={<Checkbox />} label="Feature 19" />
-            <FormControlLabel control={<Checkbox />} label="Feature 20" />
+            <FormControlLabel control={<Checkbox />} label="Feature 20" /> */}
             <Box my={2}>
               <Button variant="contained">Toggle All</Button>
             </Box>
