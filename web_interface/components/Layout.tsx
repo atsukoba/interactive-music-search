@@ -1,9 +1,16 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { styled } from "@mui/material/styles";
-import { Children, ReactNode, useEffect, useRef, useState } from "react";
-import { ChangeEventHandler, MouseEventHandler } from "react";
+import {
+  ChangeEventHandler,
+  Children,
+  MouseEventHandler,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import {
   Apps,
   Book,
@@ -11,8 +18,8 @@ import {
   GitHub,
   Home,
   Inbox,
-  TableChart,
   Search,
+  TableChart,
   VerifiedUser,
 } from "@mui/icons-material";
 import {
@@ -34,8 +41,8 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-import PlotWrapper from "../components/PlotWrapper";
 import { postUserFile } from "../api/user_data";
 
 const drawerWidth = 210;

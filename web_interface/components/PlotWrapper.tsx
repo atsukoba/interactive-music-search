@@ -1,9 +1,11 @@
-import { Box } from "@mui/material";
-import { useGetElementProperty } from "../utils/ref";
-import { useRef, useState, useEffect } from "react";
-import Plotly from "./Plotly";
-import { getSampleData } from "../api/sample";
 import { Data } from "plotly.js";
+import { useEffect, useRef, useState } from "react";
+
+import { Box } from "@mui/material";
+
+import { getSampleData } from "../api/data";
+import { useGetElementProperty } from "../utils/ref";
+import Plotly from "./Plotly";
 
 export default function PlotWrapper() {
   const targetRef = useRef(null);

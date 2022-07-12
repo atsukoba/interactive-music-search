@@ -1,4 +1,5 @@
 import { Data } from "plotly.js";
+
 import { apiUrl, headers } from "./common";
 
 interface ResponseDatum {
