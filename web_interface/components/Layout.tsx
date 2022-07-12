@@ -186,7 +186,7 @@ export default function Layout({ children }: IProps) {
             <ListItem>
               <label htmlFor="contained-button-file">
                 <Input
-                  accept="audio/*"
+                  accept="audio/wav,audio/mpeg,audio/midi,audio/x-midi"
                   id="contained-button-file"
                   type="file"
                   onChange={handleChange}
