@@ -93,6 +93,9 @@ def average_in_n_block(d: np.ndarray, n=5) -> List[float]:
 
 
 def calc_audio_features(path: str) -> Optional[AudioFeatures]:
+    """
+    read audio file from the disk and returns List of audio feature values calculated
+    """
     spotidy_track_id = path.split(os.path.sep)[-1].replace(".mp3", "")
 
     if is_downloaded(path):
