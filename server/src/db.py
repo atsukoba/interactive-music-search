@@ -53,12 +53,19 @@ class QueryDataSelector:
     to use active trigger functions on PostgreSQL
     """
 
-    def __init__(self, engine: sqlalchemy.engine.Engine):
-        self.engine = engine
+    engine: Optional[sqlalchemy.engine.Engine] = None
 
-    def get_features(self,
+    @classmethod
+    def set_engine(cls):
+        cls.engine = create_engine()
+
+    @classmethod
+    def get_features(cls,
                      midi_feature_names: List[MidiFeatureName],
                      audio_feature_names: List[AudioFeatureName]) -> Optional[pd.DataFrame]:
+
+        if cls.engine is None:
+            return
 
         if len(midi_feature_names) > 0 and len(audio_feature_names) > 0:
             q = text(
@@ -82,7 +89,7 @@ class QueryDataSelector:
             return
         logger.debug(q)
         try:
-            df = pd.read_sql_query(sql=q, con=self.engine)
+            df = pd.read_sql_query(sql=q, con=cls.engine)
             return df
         except Exception as e:
             logger.warn("database error: {e}")
