@@ -3094,9 +3094,9 @@ react-plotly.js@^2.5.1:
   dependencies:
     prop-types "^15.7.2"
 
-react-scatter-board@maayanlab/react-scatter-board:
+react-scatter-board@squatsandsciencelabs/react-scatter-board:
   version "1.2.0"
-  resolved "https://codeload.github.com/maayanlab/react-scatter-board/tar.gz/a06434e3132e5fe0eacd6251caa7c2ae5a3e3571"
+  resolved "https://codeload.github.com/squatsandsciencelabs/react-scatter-board/tar.gz/7edef8bc798a680d2d603cadc2120fda18b49df6"
   dependencies:
     d3 "^5.15.0"
     d3-scale "^3.2.1"

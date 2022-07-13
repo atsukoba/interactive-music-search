@@ -5,7 +5,8 @@ import { Box } from "@mui/material";
 
 import { getSampleData } from "../api/data";
 import { useGetElementProperty } from "../utils/ref";
-import Plotly from "./Plotly";
+// import Plotly from "./Plotly";
+import { Scatter } from "./ScatterBoard";
 
 export default function PlotWrapper() {
   const targetRef = useRef(null);
@@ -33,7 +34,8 @@ export default function PlotWrapper() {
 
   return (
     <Box style={{ height: "100%" }} ref={targetRef}>
-      <Plotly newData={data} windowSize={size} />
+      {/* <Plotly newData={data} windowSize={size} /> */}
+      <Scatter />
     </Box>
   );
 }
