@@ -1,3 +1,4 @@
+from typing import List, Optional
 from venv import create
 from sqlalchemy import (ARRAY, Column, Float,
                         ForeignKey, Integer, String, text)
@@ -8,7 +9,7 @@ from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 import pandas as pd
 import os
 
-from src.utils import create_logger, env
+from src.utils import AudioFeatureName, MidiFeatureName, create_logger, env
 from src.models import Base
 
 logger = create_logger(os.path.basename(__file__))
@@ -55,40 +56,37 @@ class QueryDataSelector:
     def __init__(self, engine: sqlalchemy.engine.Engine):
         self.engine = engine
 
-    def get_all_cood(self) -> pd.DataFrame:
-        q = text(
-            f"SELECT longitude, latitude FROM place;"
-        )
-        logger.debug(q)
-        df = pd.read_sql_query(sql=q, con=self.engine)
-        return df
+    def get_features(self,
+                     midi_feature_names: List[MidiFeatureName],
+                     audio_feature_names: List[AudioFeatureName]) -> Optional[pd.DataFrame]:
 
-    def place_time_within(self, start_date: str, end_date: str) -> pd.DataFrame:
-        q = text(
-            f"SELECT P.* FROM place P INNER JOIN event E on E.id = P.event_id WHERE start_time >= '{start_date}' AND start_time <= '{end_date}';"
-        )
+        if len(midi_feature_names) > 0 and len(audio_feature_names) > 0:
+            q = text(
+                "SELECT song.title, " +
+                ','.join(['M.' + m for m in midi_feature_names]) + ", " +
+                ','.join(['A.' + a for a in audio_feature_names]) + " " +
+                "FROM song INNER JOIN midi_features M on M.md5 = song.md5 " +
+                "INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;"
+            )
+        elif len(midi_feature_names) > 0:
+            q = text(
+                "SELECT song.title, " +
+                ','.join(['M.' + m for m in midi_feature_names]) + " " +
+                "FROM song INNER JOIN midi_features M on M.md5 = song.md5")
+        elif len(audio_feature_names) > 0:
+            q = text(
+                "SELECT song.title, " +
+                ','.join(['A.' + a for a in audio_feature_names]) + " " +
+                "FROM song INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;")
+        else:
+            return
         logger.debug(q)
-        df = pd.read_sql_query(sql=q, con=self.engine)
-        logger.debug(df.head(5))
-        return df
-
-    def move_time_within(self, start_date: str, end_date: str) -> pd.DataFrame:
-        q = text(
-            f"SELECT A.* FROM activity A INNER JOIN event E on E.id = A.event_id WHERE start_time >= '{start_date}' AND start_time <= '{end_date}';"
-        )
-        logger.debug(q)
-        df = pd.read_sql_query(sql=q, con=self.engine)
-        logger.debug(df.head(5))
-        return df
-
-    def move_time_distance_within(self, start_date: str, end_date: str, distance: float) -> pd.DataFrame:
-        q = text(
-            f"SELECT A.* FROM activity A INNER JOIN event E on E.id = A.event_id WHERE start_time >= '{start_date}' AND start_time <= '{end_date}' AND distance(A.start_latitude, A.start_longitude, A.end_latitude, A.end_longitude) <= {distance};"
-        )
-        logger.debug(q)
-        df = pd.read_sql_query(sql=q, con=self.engine)
-        logger.debug(df.head(5))
-        return df
+        try:
+            df = pd.read_sql_query(sql=q, con=self.engine)
+            return df
+        except Exception as e:
+            logger.warn("database error: {e}")
+            return
 
 
 if __name__ == "__main__":
