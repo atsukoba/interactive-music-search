@@ -26,6 +26,9 @@ import {
 
 import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
+import { DataContext } from "../utils/context";
+import { getSampleData, getData } from "../api/data";
+import { Data } from "plotly.js";
 
 const drawerWidth = 210;
 
@@ -55,15 +58,30 @@ export default function Home() {
     chroma_frequencies: true,
   });
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     let newState = {
       ...state,
       [event.target.name]: event.target.checked,
     };
     setState(newState);
     // list of feature names
-    console.log(Object.keys(newState).filter((key) => newState[key]));
+    const feature_names = Object.keys(newState).filter((key) => newState[key]);
+    console.log(feature_names);
+    const d = await getData(feature_names);
+    console.log(d);
+    setData([...d]);
   };
+
+  const [data, setData] = useState<Data[]>([]);
+  const fetchData = async () => {
+    const d = await getSampleData(60);
+    console.log(d);
+    setData([...d]);
+  };
+
+  useEffect(() => {
+    fetchData().catch(console.error);
+  }, []);
 
   return (
     <Layout>
@@ -300,7 +318,9 @@ export default function Home() {
           xl={10}
           style={{ height: "100%", overflow: "scroll" }}
         >
-          <PlotWrapper />
+          <DataContext.Provider value={data}>
+            <PlotWrapper />
+          </DataContext.Provider>
         </Grid>
       </Grid>
     </Layout>
