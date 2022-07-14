@@ -10,7 +10,7 @@ import pandas as pd
 import os
 
 from src.utils import AudioFeatureName, MidiFeatureName, create_logger, env
-from src.models import Base
+
 
 logger = create_logger(os.path.basename(__file__))
 
@@ -36,17 +36,6 @@ def create_engine() -> sqlalchemy.engine.Engine:
     return engine
 
 
-def create_session():
-    # Connect to DB
-    engine = create_engine()
-    SessionClass = sessionmaker(engine)
-    session = SessionClass()
-
-    Base.metadata.bind = engine  # bind
-
-    return session
-
-
 class QueryDataSelector:
     """
     extract data from db using dataframes without ORM model
@@ -69,7 +58,7 @@ class QueryDataSelector:
 
         if len(midi_feature_names) > 0 and len(audio_feature_names) > 0:
             q = text(
-                "SELECT song.title, " +
+                "SELECT song.title, song.artist, song.publish_year, " +
                 ','.join(['M.' + m for m in midi_feature_names]) + ", " +
                 ','.join(['A.' + a for a in audio_feature_names]) + " " +
                 "FROM song INNER JOIN midi_features M on M.md5 = song.md5 " +
@@ -77,12 +66,12 @@ class QueryDataSelector:
             )
         elif len(midi_feature_names) > 0:
             q = text(
-                "SELECT song.title, " +
+                "SELECT song.title, song.artist, song.publish_year, " +
                 ','.join(['M.' + m for m in midi_feature_names]) + " " +
                 "FROM song INNER JOIN midi_features M on M.md5 = song.md5")
         elif len(audio_feature_names) > 0:
             q = text(
-                "SELECT song.title, " +
+                "SELECT song.title, song.artist, song.publish_year, " +
                 ','.join(['A.' + a for a in audio_feature_names]) + " " +
                 "FROM song INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;")
         else:
@@ -90,6 +79,7 @@ class QueryDataSelector:
         logger.debug(q)
         try:
             df = pd.read_sql_query(sql=q, con=cls.engine)
+            logger.debug(f"got {len(df)} records")
             return df
         except Exception as e:
             logger.warn("database error: {e}")

@@ -4,7 +4,7 @@ import logging
 import os
 import pickle
 from datetime import datetime
-from typing import Dict, Literal, Optional, TypedDict
+from typing import Dict, List, Literal, Optional, TypedDict
 
 import requests
 from miditoolkit.midi.parser import MidiFile
@@ -27,6 +27,30 @@ AudioFeatureName = Literal[
 
 # MIDI Features
 MidiFeatureName = Literal[
+    "pitch_range",
+    "n_pitches_used",
+    "n_pitch_classes_used",
+    "polyphony",
+    "polyphony_rate",
+    "scale_consistency",
+    "pitch_entropy",
+    "pitch_class_entropy",
+    "empty_beat_rate",
+    "drum_in_duple_rate",
+    "drum_in_triple_rate",
+    "drum_pattern_consistency"
+]
+
+AudioFeatureNames: List[AudioFeatureName] = [
+    "zero_crossing_rate",
+    "harmonic",
+    "percussive",
+    "spectral_centroids",
+    "spectral_rolloff",
+    "chromagram"
+]
+
+MidiFeatureNames: List[MidiFeatureName] = [
     "pitch_range",
     "n_pitches_used",
     "n_pitch_classes_used",

@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, TypedDict, Union
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 
-from src.sample_data import get_sample_n_data
+from src.data import get_sample_n_data, get_n_data
 from src.utils import create_logger, env
 
 
@@ -38,15 +38,14 @@ def user_data():
 
 
 @app.route("/get_features_sample", methods=['GET', 'POST'])
-def sample():
+def get_features_sample():
     req_json: Optional[RequestType] = request.get_json(
         force=True)  # Get POST JSON
-    print(req_json)
+    logger.info(req_json)
     if req_json:
         return jsonify(get_sample_n_data(req_json["n_songs"]))
 
 
-@app.route("/get_features", methods=["POST"])
 def get_3d_features():
     req_json: Optional[RequestType] = request.get_json()  # Get POST JSON
     if req_json is None:
@@ -79,20 +78,17 @@ def get_3d_features():
     return jsonify(result)
 
 
+@app.route("/get_features", methods=["POST"])
 def get_features():
-    req_json = request.get_json()  # Get POST JSON
+    req_json = request.get_json(force=True)  # Get POST JSON
     if req_json is None:
         logger.warn("request body is empty")
-        return jsonify({})
+        return jsonify({'message': 'request error'}), 500
     logger.debug(f"request: {req_json}")
-    NAME = req_json["name"]
-    result = {
-        "data": {
-            "id": 1,
-            "name": NAME
-        }
-    }
-    return jsonify(result)
+    res = get_n_data(req_json["feature_names"], 500)
+    if res is None:
+        return jsonify({'message': 'db error'}), 500
+    return jsonify(res)
 
 
 if __name__ == "__main__":

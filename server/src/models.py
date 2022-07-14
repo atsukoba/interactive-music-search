@@ -3,10 +3,11 @@ from datetime import datetime
 from enum import unique
 
 from sqlalchemy import (ARRAY, Column, DateTime, Float, ForeignKey, Integer,
-                        String, Text, create_engine)
+                        String, Text)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 
+from src.db import create_engine
 from src.utils import env
 
 # Models
@@ -77,6 +78,16 @@ class SpotifyFeatures(Base):
     time_signature = Column(Float)
     valence = Column(Float)
 
+
+def create_session():
+    # Connect to DB
+    engine = create_engine()
+    SessionClass = sessionmaker(engine)
+    session = SessionClass()
+
+    Base.metadata.bind = engine  # bind
+
+    return session
 
 if __name__ == "__main__":
     pass
