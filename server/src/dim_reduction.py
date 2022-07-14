@@ -1,9 +1,11 @@
 import os
-from typing import List, Optional
+from typing import Any, Callable, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
-from scipy import linalg
+import pandas as pd
+import scipy
+from networkx import Graph
 from scipy.spatial.distance import pdist, squareform
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE, _utils
@@ -74,9 +76,9 @@ class HTSNE:
         self.perplexity = 30  # Number of local neighbors.
         self.N_ITER = 1000
         self.X_embedded = None
-        self.labels = None
+        self.labels = pd.DataFrame([])
         self.labeldict = {}
-        self.graph = None
+        self.graph: Optional[Graph] = None
         self.max_shortestpath = 0
         self._init_graph(graph_labels, aj_matrix)
 
@@ -105,14 +107,14 @@ class HTSNE:
             cnt += 1
         nx.draw(self.graph, labels=glabels)
 
-    def fit(self, X: np.ndarray, xlabels: List[str], factor: float, random=True,
+    def fit(self, X: np.ndarray, xlabels: pd.DataFrame, factor: int, random=True,
             n_iterations: Optional[int] = None, transpose=True, X_embedded=None) -> np.ndarray:
         """_summary_
 
         Args:
             X (np.ndarray): _description_
-            xlabels (List[str]): _description_
-            factor (float): _description_
+            xlabels (pd.DataFrame): _description_
+            factor (int): _description_
             random (bool, optional): _description_. Defaults to True.
             n_iterations (Optional[int], optional): _description_. Defaults to None.
             transpose (bool, optional): _description_. Defaults to True.
@@ -161,7 +163,7 @@ class HTSNE:
 
         return self._tsne(P, degrees_of_freedom, n_samples, X_embedded=self.X_embedded)
 
-    def path_dist(self, label1, label2):
+    def path_dist(self, label1: int, label2: int):
         i = self.labeldict.get(self.labels.values[label1][0])
         j = self.labeldict.get(self.labels.values[label2][0])
         # -2 is common to all graphs so siblings have a zero weight
@@ -171,7 +173,7 @@ class HTSNE:
         dists = np.zeros((x.shape[0], x.shape[1]))
         for i, row_x in enumerate(x):     # loops over rows of `x`
             for j, row_y in enumerate(x):  # loops over rows of `y`
-                dists[i, j] = (1-factor)+self.path_dist(i, j)*factor
+                dists[i, j] = (1 - factor) + self.path_dist(i, j) * factor
         return dists
 
     def _joint_probabilities(self, distances, desired_perplexity, verbose):
@@ -184,22 +186,40 @@ class HTSNE:
         P = np.maximum(squareform(P) / sum_P, self.MACHINE_EPSILON)
         return P
 
-    def _gradient_descent(self, obj_func=None, p0=None, args=None, it=0, n_iter=None, n_iter_check=1, n_iter_without_progress=300,
+    def _gradient_descent(self, obj_func: Callable, p0: np.ndarray, args: List[Any],
+                          it=0, n_iter=None, n_iter_check=1, n_iter_without_progress=300,
                           momentum=0.8, learning_rate=200.0, min_gain=0.01, min_grad_norm=1e-7):
+        """
 
+        Args:
+            obj_func (Callable): _description_
+            p0 (np.ndarray): _description_
+            args (dict): _description_
+            it (int, optional): _description_. Defaults to 0.
+            n_iter (_type_, optional): _description_. Defaults to None.
+            n_iter_check (int, optional): _description_. Defaults to 1.
+            n_iter_without_progress (int, optional): _description_. Defaults to 300.
+            momentum (float, optional): _description_. Defaults to 0.8.
+            learning_rate (float, optional): _description_. Defaults to 200.0.
+            min_gain (float, optional): _description_. Defaults to 0.01.
+            min_grad_norm (_type_, optional): _description_. Defaults to 1e-7.
+
+        Returns:
+            _type_: _description_
+        """
         if n_iter == None:
             n_iter = self.N_ITER
 
         p = p0.copy().ravel()
         update = np.zeros_like(p)
         gains = np.ones_like(p)
-        error = np.finfo(np.float).max
-        best_error = np.finfo(np.float).max
+        error = np.finfo(np.float16).max
+        best_error = np.finfo(np.float16).max
         best_iter = i = it
 
         for i in range(it, n_iter):
             error, grad = obj_func(p, *args)
-            grad_norm = linalg.norm(grad)
+            grad_norm = scipy.linalg.norm(grad)  # type: ignore
             inc = update * grad < 0.0
             dec = np.invert(inc)
             gains[inc] += 0.2
@@ -221,7 +241,9 @@ class HTSNE:
                 break
         return p
 
-    def _kl_divergence(self, params=None, P=None, degrees_of_freedom=None, n_samples=None, n_components=None):
+    def _kl_divergence(self, params: np.ndarray, P: np.ndarray,
+                       degrees_of_freedom: int, n_samples: int,
+                       n_components: int) -> Tuple[np.ndarray, np.ndarray]:
         if n_components == None:
             n_components = self.n_components
 
