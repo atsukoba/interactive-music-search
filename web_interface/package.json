@@ -19,7 +19,8 @@
     "plotly.js": "^2.12.1",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "react-plotly.js": "^2.5.1"
+    "react-plotly.js": "^2.5.1",
+    "react-scatter-board": "maayanlab/react-scatter-board"
   },
   "devDependencies": {
     "@types/node": "^17.0.34",

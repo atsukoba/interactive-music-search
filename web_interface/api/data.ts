@@ -1,4 +1,4 @@
-import { Data } from "plotly.js";
+import { PlotData } from "plotly.js";
 import { features } from "process";
 
 import { apiUrl, headers } from "./common";
@@ -6,6 +6,8 @@ import { apiUrl, headers } from "./common";
 interface ResponseDatum {
   title: string;
   artist: string;
+  year: number | undefined;
+  genre: string | undefined;
   x: number;
   y: number;
   z: number;
@@ -17,20 +19,11 @@ export const getSampleData = async (n_songs: number) => {
     body: JSON.stringify({ n_songs: n_songs }),
     headers: headers,
   };
-
-  // data = {
-  //   "title": "Song Title",
-  //   "artist": "Artist Name",
-  //   "x": randint(0, 100),
-  //   "y": randint(0, 100),
-  //   "z": randint(0, 100),
-  // }
-
   const res = await fetch(`${apiUrl}/get_features_sample`, params);
   const resData = await res.json();
-  const data: Data[] = resData.map((e: ResponseDatum) => {
+  const data: PlotData[] = resData.map((e: ResponseDatum) => {
     return {
-      name: e.title,
+      name: `${e.title} / ${e.artist}`,
       text: [`${e.artist} - ${e.title}`],
       mode: "markers",
       opacity: [0.5],
@@ -53,15 +46,15 @@ export const getSampleData = async (n_songs: number) => {
 export const getData = async (features: Array<string>) => {
   const params = {
     method: "POST",
-    body: JSON.stringify({ features: features }),
+    body: JSON.stringify({ feature_names: features }),
     headers: headers,
   };
 
   const res = await fetch(`${apiUrl}/get_features`, params);
   const resData = await res.json();
-  const data: Data[] = resData.map((e: ResponseDatum) => {
+  const data: PlotData[] = resData.map((e: ResponseDatum) => {
     return {
-      name: e.title,
+      name: `${e.title} / ${e.artist}`,
       text: [`${e.artist} - ${e.title}`],
       mode: "markers",
       opacity: [0.5],
