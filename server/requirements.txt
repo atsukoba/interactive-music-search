@@ -1,5 +1,5 @@
 flask
-py-postgresql
+sqlalchemy
 glob2
 miditoolkit
 muspy
@@ -8,3 +8,4 @@ spotipy
 pandas
 numpy
 scikit-learn
+networkx
