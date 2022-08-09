@@ -23,7 +23,13 @@ export default function PlotWrapper() {
   return (
     <Box style={{ height: "100%" }} ref={targetRef}>
       <DataContext.Consumer>
-        {(d) => <Plotly newData={d} windowSize={size} />}
+        {(d) => (
+          <Plotly
+            newData={d.data}
+            sidMapping={d.sidMapping}
+            windowSize={size}
+          />
+        )}
       </DataContext.Consumer>
     </Box>
   );

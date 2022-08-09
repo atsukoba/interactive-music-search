@@ -212,7 +212,7 @@ export default function Layout({ children }: IProps) {
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3 }}
+        sx={{ flexGrow: 1, p: 3, pr: 0 }}
         style={{ height: "100vh", overscrollBehaviorY: "none" }}
       >
         <Toolbar />
