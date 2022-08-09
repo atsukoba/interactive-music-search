@@ -1,7 +1,14 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { FormEventHandler, useEffect, useRef, useState } from "react";
+import { Data } from "plotly.js";
+import {
+  FormEventHandler,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Book, Email, GitHub, Inbox, VerifiedUser } from "@mui/icons-material";
 import {
@@ -12,25 +19,28 @@ import {
   CssBaseline,
   Divider,
   Drawer,
+  FormControl,
   FormControlLabel,
   FormGroup,
   Grid,
+  InputLabel,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 
+import { getData, getSampleData } from "../api/data";
 import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
 import { DataContext } from "../utils/context";
-import { getSampleData, getData } from "../api/data";
-import { Data } from "plotly.js";
 
-const drawerWidth = 210;
+const drawerWidth = 180;
 
 export default function Home() {
   // NOTE: handle `any` below
@@ -58,6 +68,8 @@ export default function Home() {
     chroma_frequencies: true,
   });
 
+  const [dimMethod, setDimMethod] = useState("PCA");
+
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     let newState = {
       ...state,
@@ -67,9 +79,16 @@ export default function Home() {
     // list of feature names
     const feature_names = Object.keys(newState).filter((key) => newState[key]);
     console.log(feature_names);
-    const d = await getData(feature_names);
+    const d = await getData(feature_names, 100, dimMethod);
     console.log(d);
     setData([...d]);
+  };
+
+  const handleMethodChange = (
+    event: SelectChangeEvent<string>,
+    child: ReactNode
+  ) => {
+    setDimMethod(event.target.value);
   };
 
   const [data, setData] = useState<Data[]>([]);
@@ -93,6 +112,22 @@ export default function Home() {
           xl={2}
           style={{ height: "100%", overflow: "scroll" }}
         >
+          <Typography mb={2}>Data</Typography>
+          <FormControl sx={{ my: 1, minWidth: 160 }} size="small">
+            <InputLabel id="demo-select-small">
+              Dimentionality Reduction
+            </InputLabel>
+            <Select
+              labelId="demo-select-small"
+              id="demo-select-small"
+              value={dimMethod}
+              label="Method"
+              onChange={handleMethodChange}
+            >
+              <MenuItem value={"PCA"}>PCA</MenuItem>
+              <MenuItem value={"tSNE"}>tSNE</MenuItem>
+            </Select>
+          </FormControl>
           <Typography mb={2}>Features</Typography>
           <FormGroup>
             <Typography my={2}>MIDI</Typography>
