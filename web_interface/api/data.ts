@@ -43,10 +43,18 @@ export const getSampleData = async (n_songs: number) => {
   return data;
 };
 
-export const getData = async (features: Array<string>) => {
+export const getData = async (
+  features: Array<string>,
+  n_songs: number,
+  method: string
+) => {
   const params = {
     method: "POST",
-    body: JSON.stringify({ feature_names: features }),
+    body: JSON.stringify({
+      feature_names: features,
+      n_songs: n_songs,
+      method: method,
+    }),
     headers: headers,
   };
 
