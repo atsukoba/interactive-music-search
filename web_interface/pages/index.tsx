@@ -262,7 +262,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="tempo"
+              label="Tempo"
             />
             <FormControlLabel
               control={
@@ -272,7 +272,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="zero_crossing_rate"
+              label="Zero Crossing Rate"
             />
             <FormControlLabel
               control={
@@ -282,7 +282,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="harmonic_components"
+              label="Harmonic Components"
             />
             <FormControlLabel
               control={
@@ -292,7 +292,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="percussive_components"
+              label="Percussive Components"
             />
             <FormControlLabel
               control={
@@ -302,7 +302,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="spectral_centroid"
+              label="Spectral Centroid"
             />
             <FormControlLabel
               control={
@@ -312,7 +312,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="spectral_rolloff"
+              label="Spectral Rolloff"
             />
             <FormControlLabel
               control={
@@ -322,7 +322,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="chroma_frequencies"
+              label="Chroma Frequencies"
             />
             {/* todo: implement Spotify features backend */}
             {/* <Divider 
