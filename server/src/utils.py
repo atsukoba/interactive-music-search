@@ -15,15 +15,53 @@ AudioPath = str
 SID = str
 MD5 = str
 
+"""Audio Feature Table
+
+        Column         |        Type        | Collation | Nullable | Default
+-----------------------+--------------------+-----------+----------+---------
+ spotify_track_id      | text               |           |          |
+ tempo                 | double precision   |           |          |
+ zero_crossing_rate    | double precision[] |           |          |
+ harmonic_components   | double precision[] |           |          |
+ percussive_components | double precision[] |           |          |
+ spectral_centroid     | double precision[] |           |          |
+ spectral_rolloff      | double precision[] |           |          |
+ chroma_frequencies    | double precision[] |           |          |
+
+Foreign-key constraints:
+"audio_features_spotify_track_id_fkey" FOREIGN KEY (spotify_track_id) REFERENCES song(spotify_track_id)
+"""
+
 # Audio Features
 AudioFeatureName = Literal[
+    "tempo",
     "zero_crossing_rate",
-    "harmonic",
-    "percussive",
-    "spectral_centroids",
+    "harmonic_components",
+    "percussive_components",
+    "spectral_centroid",
     "spectral_rolloff",
-    "chromagram"
+    "chroma_frequencies"
 ]
+
+"""MIDI Feature Table
+          Column          |       Type       | Collation | Nullable | Default
+--------------------------+------------------+-----------+----------+---------
+ md5                      | text             |           |          |
+ pitch_range              | integer          |           |          |
+ n_pitches_used           | integer          |           |          |
+ n_pitch_classes_used     | integer          |           |          |
+ polyphony                | double precision |           |          |
+ polyphony_rate           | double precision |           |          |
+ scale_consistency        | double precision |           |          |
+ pitch_entropy            | double precision |           |          |
+ pitch_class_entropy      | double precision |           |          |
+ empty_beat_rate          | double precision |           |          |
+ drum_in_duple_rate       | double precision |           |          |
+ drum_in_triple_rate      | double precision |           |          |
+ drum_pattern_consistency | double precision |           |          |
+Foreign-key constraints:
+    "midi_features_md5_fkey" FOREIGN KEY (md5) REFERENCES song(md5)
+"""
 
 # MIDI Features
 MidiFeatureName = Literal[
@@ -42,12 +80,13 @@ MidiFeatureName = Literal[
 ]
 
 AudioFeatureNames: List[AudioFeatureName] = [
+    "tempo",
     "zero_crossing_rate",
-    "harmonic",
-    "percussive",
-    "spectral_centroids",
+    "harmonic_components",
+    "percussive_components",
+    "spectral_centroid",
     "spectral_rolloff",
-    "chromagram"
+    "chroma_frequencies"
 ]
 
 MidiFeatureNames: List[MidiFeatureName] = [
