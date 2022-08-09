@@ -40,7 +40,7 @@ import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
 import { DataContext, getTitleToSid } from "../utils/context";
 
-const drawerWidth = 230;
+const drawerWidth = 270;
 
 export default function Home() {
   // NOTE: handle `any` below
@@ -110,8 +110,8 @@ export default function Home() {
           item
           md={6}
           lg={2.5}
-          xl={2.5}
-          style={{ height: "100%", overflow: "scroll" }}
+          xl={"auto"}
+          style={{ height: "100%", overflow: "scroll", maxWidth: `${drawerWidth}px` }}
         >
           <Typography mb={2}>Data</Typography>
           <FormControl sx={{ my: 1, minWidth: 160 }} size="small">
@@ -129,9 +129,8 @@ export default function Home() {
               <MenuItem value={"tSNE"}>tSNE</MenuItem>
             </Select>
           </FormControl>
-          <Typography mb={2}>Features</Typography>
           <FormGroup>
-            <Typography my={2}>MIDI</Typography>
+            <Typography my={2}>MIDI Features</Typography>
             <FormControlLabel
               control={
                 <Checkbox
@@ -253,7 +252,7 @@ export default function Home() {
               label="drum_pattern_consistency"
             />
             <Divider />
-            <Typography my={2}>Audio</Typography>
+            <Typography my={2}>Audio Features</Typography>
             <FormControlLabel
               control={
                 <Checkbox
@@ -351,7 +350,7 @@ export default function Home() {
           item
           md={6}
           lg={9.5}
-          xl={9.5}
+          xl={true}
           style={{ height: "100%", overflow: "scroll", padding: 0 }}
         >
           <DataContext.Provider value={{ data, sidMapping }}>
