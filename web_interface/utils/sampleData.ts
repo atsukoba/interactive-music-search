@@ -36,9 +36,10 @@ export let sampleData: Data[] = [
   },
 ];
 export let sampleLayout: Partial<Layout> = {
-  title: "Songs Data",
+  // title: "Songs Data",
   hovermode: "closest",
   hoverlabel: { bgcolor: "#FFF" },
+  showlegend: false,
   scene: {
     aspectmode: "manual",
     aspectratio: {

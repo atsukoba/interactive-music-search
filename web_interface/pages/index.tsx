@@ -35,12 +35,12 @@ import {
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
-import { getData, getSampleData } from "../api/data";
+import { getData, getSampleData, responseToPlotlyData } from "../api/data";
 import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
-import { DataContext } from "../utils/context";
+import { DataContext, getTitleToSid } from "../utils/context";
 
-const drawerWidth = 180;
+const drawerWidth = 230;
 
 export default function Home() {
   // NOTE: handle `any` below
@@ -69,6 +69,7 @@ export default function Home() {
   });
 
   const [dimMethod, setDimMethod] = useState("PCA");
+  const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     let newState = {
@@ -79,9 +80,9 @@ export default function Home() {
     // list of feature names
     const feature_names = Object.keys(newState).filter((key) => newState[key]);
     console.log(feature_names);
-    const d = await getData(feature_names, 100, dimMethod);
-    console.log(d);
-    setData([...d]);
+    const data = await getData(feature_names, 200, dimMethod);
+    setSidMapping(getTitleToSid(data));
+    setData([...responseToPlotlyData(data)]);
   };
 
   const handleMethodChange = (
@@ -108,8 +109,8 @@ export default function Home() {
         <Grid
           item
           md={6}
-          lg={2}
-          xl={2}
+          lg={2.5}
+          xl={2.5}
           style={{ height: "100%", overflow: "scroll" }}
         >
           <Typography mb={2}>Data</Typography>
@@ -349,11 +350,11 @@ export default function Home() {
         <Grid
           item
           md={6}
-          lg={10}
-          xl={10}
-          style={{ height: "100%", overflow: "scroll" }}
+          lg={9.5}
+          xl={9.5}
+          style={{ height: "100%", overflow: "scroll", padding: 0 }}
         >
-          <DataContext.Provider value={data}>
+          <DataContext.Provider value={{ data, sidMapping }}>
             <PlotWrapper />
           </DataContext.Provider>
         </Grid>

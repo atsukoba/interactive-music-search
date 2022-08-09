@@ -1,9 +1,9 @@
 import { PlotData } from "plotly.js";
-import { features } from "process";
 
 import { apiUrl, headers } from "./common";
 
-interface ResponseDatum {
+export interface ResponseDatum {
+  sid: string;
   title: string;
   artist: string;
   year: number | undefined;
@@ -59,13 +59,19 @@ export const getData = async (
   };
 
   const res = await fetch(`${apiUrl}/get_features`, params);
-  const resData = await res.json();
-  const data: PlotData[] = resData.map((e: ResponseDatum) => {
+  const resData: ResponseDatum[] = await res.json();
+  return resData;
+};
+
+export const responseToPlotlyData = (
+  resData: ResponseDatum[]
+): Partial<PlotData>[] => {
+  const data: Partial<PlotData>[] = resData.map((e: ResponseDatum) => {
     return {
-      name: `${e.title} / ${e.artist}`,
-      text: [`${e.artist} - ${e.title}`],
+      name: e.title,
+      text: `${e.artist} - ${e.title}`,
       mode: "markers",
-      opacity: [0.5],
+      opacity: 0.5,
       type: "scatter3d",
       x: [e.x],
       y: [e.y],
@@ -77,6 +83,17 @@ export const getData = async (
           "%{zaxis.title.text}: %{z}<br>" +
           "<extra></extra>",
       ],
+      i: undefined,
+      j: undefined,
+      k: undefined,
+      xy: undefined,
+      error_x: undefined,
+      error_y: undefined,
+      xaxis: undefined,
+      yaxis: undefined,
+      lat: undefined,
+      lon: undefined,
+      line: undefined,
     };
   });
   return data;

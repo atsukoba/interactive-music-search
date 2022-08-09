@@ -3146,6 +3146,11 @@ react-select@^3.0.8:
     react-input-autosize "^3.0.0"
     react-transition-group "^4.3.0"
 
+react-spotify-embed@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/react-spotify-embed/-/react-spotify-embed-0.2.3.tgz#ec6c0928449d34b482542b47246d4125df94b921"
+  integrity sha512-T4ceNkGn5M1ry/Y39I8HyhjSxeF2qv2W4uSK8XoB12r4PWPSQyuX3LOcVV/1mycQQUzPQlgwT1E6KGITEjvcJg==
+
 react-syntax-highlighter@^9.0.1:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/react-syntax-highlighter/-/react-syntax-highlighter-9.0.1.tgz#cad91692e1976f68290f24762ac3451b1fec3d26"
