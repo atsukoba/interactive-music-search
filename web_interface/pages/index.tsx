@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Data } from "plotly.js";
 import {
+  ChangeEventHandler,
   FormEventHandler,
   ReactNode,
   useEffect,
@@ -30,6 +31,7 @@ import {
   ListItemIcon,
   ListItemText,
   MenuItem,
+  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -68,6 +70,7 @@ export default function Home() {
     chroma_frequencies: true,
   });
 
+  const [nOfSongs, setNOfSongs] = useState(100);
   const [dimMethod, setDimMethod] = useState("PCA");
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
@@ -80,7 +83,7 @@ export default function Home() {
     // list of feature names
     const feature_names = Object.keys(newState).filter((key) => newState[key]);
     console.log(feature_names);
-    const data = await getData(feature_names, 200, dimMethod);
+    const data = await getData(feature_names, nOfSongs, dimMethod);
     setSidMapping(getTitleToSid(data));
     setData([...responseToPlotlyData(data)]);
   };
@@ -90,6 +93,12 @@ export default function Home() {
     child: ReactNode
   ) => {
     setDimMethod(event.target.value);
+  };
+  
+  const handleNofSongsChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setNOfSongs(Number(event.target.value));
   };
 
   const [data, setData] = useState<Data[]>([]);
@@ -122,6 +131,18 @@ export default function Home() {
           }}
         >
           <Typography mb={2}>Data</Typography>
+          <TextField
+            id="outlined-number"
+            label="N of Songs"
+            type="number"
+            size="small"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={handleNofSongsChange}
+            value={nOfSongs}
+            sx={{ my: 1, minWidth: 160 }}
+          />
           <FormControl sx={{ my: 1, minWidth: 160 }} size="small">
             <InputLabel id="demo-select-small">
               Dimentionality Reduction
