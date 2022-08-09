@@ -52,13 +52,29 @@ class QueryDataSelector:
     def get_features(cls,
                      midi_feature_names: List[MidiFeatureName],
                      audio_feature_names: List[AudioFeatureName]) -> Optional[pd.DataFrame]:
+        """ got pandas.DataFrame object which contain values of selected features
+
+        Args:
+            midi_feature_names (List[MidiFeatureName]): _description_
+            audio_feature_names (List[AudioFeatureName]): _description_
+
+        Returns:
+            Optional[pd.DataFrame]:
+
+        for example
+        |  sid  |      title       | artist | year | pitch_range | harmonic |
+        |:-----:|:----------------:|:------:|:----:|:-----------:|:--------:|
+        | gyftu |     song title   | TheWho | 2020 |    20.0     |  0.0024  |
+        | gyftu |     song title   | TheWho | 2020 |    20.0     |  0.0024  |
+        | gyftu |     song title   | TheWho | 2020 |    20.0     |  0.0024  |
+        """
 
         if cls.engine is None:
             return
 
         if len(midi_feature_names) > 0 and len(audio_feature_names) > 0:
             q = text(
-                "SELECT song.title, song.artist, song.publish_year, " +
+                "SELECT song.spotify_track_id song.title, song.artist, song.publish_year, " +
                 ','.join(['M.' + m for m in midi_feature_names]) + ", " +
                 ','.join(['A.' + a for a in audio_feature_names]) + " " +
                 "FROM song INNER JOIN midi_features M on M.md5 = song.md5 " +
@@ -66,12 +82,12 @@ class QueryDataSelector:
             )
         elif len(midi_feature_names) > 0:
             q = text(
-                "SELECT song.title, song.artist, song.publish_year, " +
+                "SELECT song.spotify_track_id song.title, song.artist, song.publish_year, " +
                 ','.join(['M.' + m for m in midi_feature_names]) + " " +
                 "FROM song INNER JOIN midi_features M on M.md5 = song.md5")
         elif len(audio_feature_names) > 0:
             q = text(
-                "SELECT song.title, song.artist, song.publish_year, " +
+                "SELECT song.spotify_track_id song.title, song.artist, song.publish_year, " +
                 ','.join(['A.' + a for a in audio_feature_names]) + " " +
                 "FROM song INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;")
         else:
