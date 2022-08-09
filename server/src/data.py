@@ -1,7 +1,7 @@
 # for debugging front-end
 import os
 from random import choice, choices, randint
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 import numpy as np
 
 import pandas as pd
@@ -10,6 +10,7 @@ from src.datasets import MMD_md5_metainfo
 from src.db import QueryDataSelector
 from src.utils import (AudioFeatureName, AudioFeatureNames, MidiFeatureName,
                        MidiFeatureNames, create_logger, env)
+from src.dim_reduction import dim_reduction_tsne, dim_reduction_pca
 
 """ expected data structure on front-end 
 
@@ -52,8 +53,13 @@ def get_sample_n_data(n: int) -> List[Dict[str, Union[str, int]]]:
     } for l in choices(artist_song_list, k=n)[:n]]
 
 
+DimReductionMethod = Literal["PCA", "tSNE"]
+
+
 def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
-               n: int = 1000) -> Optional[List[Dict[str, Union[str, int]]]]:
+               n: int = 1000,
+               dim_reduction_method: DimReductionMethod = "PCA"
+               ) -> Optional[List[Dict[str, Union[str, int]]]]:
 
     m: List[MidiFeatureName] = [
         n for n in feature_names if n in MidiFeatureNames]
@@ -64,12 +70,26 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
 
     if res is not None:
         res = res.head(n)
+        sids = res.spotify_track_id.values
         titles = res.title.values
         artists = res.artist.values
         years = res.publish_year.values
-        data_matrix = res[feature_names[:3]].values
+        # dimentionality reduction
+        feature_values = res[feature_names].values
+        if len(feature_names) > 3:
+            if dim_reduction_method == "PCA":
+                data_matrix = dim_reduction_pca(feature_values)
+            elif dim_reduction_method == "tSNE":
+                data_matrix = dim_reduction_tsne(feature_values)
+            else:
+                logger.warn(f"No reduction method applied, not found {dim_reduction_method}")
+                data_matrix = feature_values[:, :3]
+        else:
+            data_matrix = feature_values
+        # scaling
         data_matrix = min_max(data_matrix, axis=0, scale=100).astype(float)
         return [{
+            "sid": sid,
             "title": t,
             "artist": a,
             "year": y,
@@ -77,9 +97,13 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
             "x": x,
             "y": y,
             "z": z,
-        } for t, a, y, x, y, z
-            in zip(titles, artists, years,
+        } for sid, t, a, y, x, y, z
+            in zip(sids, titles, artists, years,
                    data_matrix[:, 0], data_matrix[:, 1], data_matrix[:, 2])]
     else:
         logger.warn("Database returns no records!")
         logger.debug(res)
+
+
+if __name__ == "__main__":
+    pass

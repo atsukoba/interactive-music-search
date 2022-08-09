@@ -80,12 +80,29 @@ def get_3d_features():
 
 @app.route("/get_features", methods=["POST"])
 def get_features():
+    """ request/response body
+
+    Request:
+    {
+        'feature_names': [
+            'pitch_range', 'n_pitches_used', 'n_pitch_classes_used', 'polyphony',
+            'polyphony_rate', 'scale_consistency', 'pitch_entropy', 
+            'pitch_class_entropy', 'empty_beat_rate'
+        ],
+        'method': "PCA",
+        'n_songs': 100
+    }
+    Returns:
+        _type_: _description_
+    """
     req_json = request.get_json(force=True)  # Get POST JSON
     if req_json is None:
         logger.warn("request body is empty")
         return jsonify({'message': 'request error'}), 500
     logger.debug(f"request: {req_json}")
-    res = get_n_data(req_json["feature_names"], 500)
+    res = get_n_data(req_json["feature_names"],
+                     n=req_json["n_songs"],
+                     dim_reduction_method=req_json["method"])
     if res is None:
         return jsonify({'message': 'db error'}), 500
     return jsonify(res)
