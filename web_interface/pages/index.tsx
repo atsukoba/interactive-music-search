@@ -105,13 +105,21 @@ export default function Home() {
 
   return (
     <Layout>
-      <Grid container spacing={2} style={{ height: "calc(100vh - 64px)" }}>
+      <Grid
+        container
+        spacing={2}
+        style={{ height: "calc(100vh - 64px)", marginTop: 0 }}
+      >
         <Grid
           item
           md={6}
           lg={2.5}
           xl={"auto"}
-          style={{ height: "100%", overflow: "scroll", maxWidth: `${drawerWidth}px` }}
+          style={{
+            height: "100%",
+            overflow: "scroll",
+            maxWidth: `${drawerWidth}px`,
+          }}
         >
           <Typography mb={2}>Data</Typography>
           <FormControl sx={{ my: 1, minWidth: 160 }} size="small">

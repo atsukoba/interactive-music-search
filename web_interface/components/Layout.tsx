@@ -127,7 +127,7 @@ export default function Layout({ children }: IProps) {
         anchor="left"
         sx={{
           // width: drawerOpen ? drawerWidth : 0,
-          width:  0,
+          width: 0,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: {
             // width: drawerOpen ? drawerWidth : 0,
@@ -234,7 +234,7 @@ export default function Layout({ children }: IProps) {
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, pr: 0 }}
+        sx={{ flexGrow: 1, p: 0, pl: 3, fontSize: 0 }}
         style={{ height: "100vh", overscrollBehaviorY: "none" }}
       >
         <Toolbar />
