@@ -36,29 +36,29 @@ export let sampleData: Data[] = [
   },
 ];
 export let sampleLayout: Partial<Layout> = {
-  title: "Sample Songs Data",
+  title: "Songs Data",
   hovermode: "closest",
   hoverlabel: { bgcolor: "#FFF" },
   scene: {
     aspectmode: "manual",
     aspectratio: {
       x: 1,
-      y: 0.7,
+      y: 1,
       z: 1,
     },
     xaxis: {
       title: "Dance",
-      nticks: 9,
+      nticks: 20,
       range: [0, 100],
     },
     yaxis: {
       title: "ZCR",
-      nticks: 7,
+      nticks: 20,
       range: [0, 100],
     },
     zaxis: {
       title: "Notes",
-      nticks: 10,
+      nticks: 20,
       range: [0, 100],
     },
   },
