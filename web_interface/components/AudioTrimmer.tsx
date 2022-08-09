@@ -1,7 +1,7 @@
 import WaveSurfer from "wavesurfer.js";
 import { useRef, useEffect } from "react";
 
-export default function App() {
+export default function WaveEditor() {
   const waveformRef = useRef<HTMLDivElement>(null);
   let wf: WaveSurfer;
   useEffect(() => {
