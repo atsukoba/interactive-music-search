@@ -74,6 +74,20 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
         titles = res.title.values
         artists = res.artist.values
         years = res.publish_year.values
+        # normalize audio features
+        if len(a) > 0:
+            for feat_name in a:
+                if feat_name == "tempo":
+                    pass
+                elif feat_name == "chroma_frequencies":
+                    chroma_value = np.array(
+                        res[feat_name].values.tolist())  # type: ignore
+                    chroma_value = np.argmax(chroma_value, axis=1)
+                    res[feat_name] = chroma_value
+                else:
+                    value_array = np.array(
+                        res[feat_name].values.tolist()).mean(axis=1)
+                    res[feat_name] = value_array
         # dimentionality reduction
         feature_values = res[feature_names].values
         if len(feature_names) > 3:
@@ -82,7 +96,8 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
             elif dim_reduction_method == "tSNE":
                 data_matrix = dim_reduction_tsne(feature_values)
             else:
-                logger.warn(f"No reduction method applied, not found {dim_reduction_method}")
+                logger.warn(
+                    f"No reduction method applied, not found {dim_reduction_method}")
                 data_matrix = feature_values[:, :3]
         else:
             data_matrix = feature_values
