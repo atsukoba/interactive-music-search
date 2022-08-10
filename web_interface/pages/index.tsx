@@ -17,6 +17,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   CssBaseline,
   Divider,
   Drawer,
@@ -72,6 +73,7 @@ export default function Home() {
 
   const [nOfSongs, setNOfSongs] = useState(100);
   const [dimMethod, setDimMethod] = useState("PCA");
+  const [nowLoading, setNowLoading] = useState(false);
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,9 +85,11 @@ export default function Home() {
     // list of feature names
     const feature_names = Object.keys(newState).filter((key) => newState[key]);
     console.log(feature_names);
+    setNowLoading(true);
     const data = await getData(feature_names, nOfSongs, dimMethod);
     setSidMapping(getTitleToSid(data));
     setData([...responseToPlotlyData(data)]);
+    setNowLoading(false);
   };
 
   const handleMethodChange = (
@@ -94,17 +98,14 @@ export default function Home() {
   ) => {
     setDimMethod(event.target.value);
   };
-  
-  const handleNofSongsChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+
+  const handleNofSongsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNOfSongs(Number(event.target.value));
   };
 
   const [data, setData] = useState<Data[]>([]);
   const fetchData = async () => {
     const d = await getSampleData(60);
-    console.log(d);
     setData([...d]);
   };
 
@@ -114,6 +115,24 @@ export default function Home() {
 
   return (
     <Layout>
+      {nowLoading && (
+        <Box
+          sx={{
+            display: "flex",
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            alignItems: "center",
+            alignContent: "flex-start",
+            justifyContent: "center",
+            flexDirection: "column",
+            zIndex: "1000",
+          }}
+        >
+          <CircularProgress size={120} thickness={4.0} color={"primary"} />
+          <Typography my={2}>Loading Song Data...</Typography>
+        </Box>
+      )}
       <Grid
         container
         spacing={2}

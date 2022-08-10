@@ -62,7 +62,6 @@ export default function Layout({ children }: IProps) {
   const [selectedFile, selectFile] = useState<FormData | undefined>(undefined);
 
   const toggleDrawer: MouseEventHandler<HTMLButtonElement> = () => {
-    console.log(drawerOpen);
     setDrawerOpen(!drawerOpen);
   };
 
