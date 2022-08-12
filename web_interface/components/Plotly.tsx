@@ -14,13 +14,6 @@ import { useGetElementProperty } from "../utils/ref";
 import { sampleConfig, sampleData, sampleLayout } from "../utils/sampleData";
 import SpotifyPlayer from "./SpotifyPlayer";
 
-declare global {
-  interface Window {
-    onSpotifyIframeApiReady: (IFrameAPI: any) => void;
-    trustedTypes: any;
-    SpotifyIframeConfig: any;
-  }
-}
 
 // avoid error on using react-plotly on Next with typescript
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
