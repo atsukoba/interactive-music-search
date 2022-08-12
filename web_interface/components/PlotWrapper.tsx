@@ -3,10 +3,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { Box } from "@mui/material";
 
-import { getSampleData } from "../api/data";
 import { DataContext } from "../utils/context";
 import { useGetElementProperty } from "../utils/ref";
-import Plotly from "./Plotly";
 import PointsViewer from "./PointsViewer";
 
 export default function PlotWrapper() {

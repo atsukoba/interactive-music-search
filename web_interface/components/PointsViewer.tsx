@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MathUtils } from "three";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -10,9 +11,8 @@ import {
   GizmoViewport,
   GizmoViewcube,
 } from "@react-three/drei";
-import { useControls } from "leva";
-import { Data, PlotData } from "plotly.js";
 import SpotifyPlayer from "./SpotifyPlayer";
+import { ResponseDatum } from "../api/data";
 
 // const positions = Array.from({ length: 2000 }, (i) => [
 //   MathUtils.randFloatSpread(100),
@@ -29,7 +29,7 @@ declare global {
 }
 
 interface IProps {
-  newData: PlotData[];
+  newData: ResponseDatum[];
   sidMapping: Map<string, string>;
 }
 
@@ -62,11 +62,7 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
           />
           {positions.map((d, i) => {
             // console.log(d);
-            const pos = [
-              (d.x[0] as number) - 50,
-              (d.y[0] as number) - 50,
-              (d.z[0] as number) - 50,
-            ];
+            const pos = [d.x - 50, d.y - 50, d.z - 50];
             return (
               <PointEvent
                 key={i}
@@ -101,7 +97,7 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
 interface IPropsPointEvent {
   key: number;
   position: number[];
-  data: PlotData;
+  data: ResponseDatum;
   sidMapping: Map<string, string>;
   setSidFunc: Dispatch<SetStateAction<string>>;
 }
@@ -116,17 +112,19 @@ function PointEvent({
   const [hovered, setHover] = useState(false);
   const [clicked, setClick] = useState(false);
   return (
-    <Point
-      key={key}
-      color={clicked ? "hotpink" : hovered ? "yellow" : "orange"}
-      onPointerOver={(e: any) => (e.stopPropagation(), setHover(true))}
-      onPointerOut={(e: any) => setHover(false)}
-      onClick={(e: any) => {
-        e.stopPropagation();
-        setClick((state) => !state);
-        setSidFunc(sidMapping.get(data.name)!);
-      }}
-      position={position}
-    />
+    <>
+      <Point
+        key={key}
+        color={clicked ? "hotpink" : hovered ? "yellow" : "orange"}
+        onPointerOver={(e: any) => (e.stopPropagation(), setHover(true))}
+        onPointerOut={(e: any) => setHover(false)}
+        onClick={(e: any) => {
+          e.stopPropagation();
+          setClick((state) => !state);
+          setSidFunc(data.sid);
+        }}
+        position={position}
+      />
+    </>
   );
 }

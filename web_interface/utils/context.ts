@@ -4,7 +4,7 @@ import { createContext } from "react";
 import { ResponseDatum } from "../api/data";
 
 interface DataContextType {
-  data: Array<Data>;
+  data: Array<ResponseDatum>;
   sidMapping: Map<string, string>;
 }
 

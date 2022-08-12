@@ -1,7 +1,3 @@
-import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
-import { Data } from "plotly.js";
 import {
   ChangeEventHandler,
   FormEventHandler,
@@ -38,7 +34,12 @@ import {
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
-import { getData, getSampleData, responseToPlotlyData } from "../api/data";
+import {
+  getData,
+  getSampleData,
+  ResponseDatum,
+  responseToPlotlyData,
+} from "../api/data";
 import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
 import { DataContext, getTitleToSid } from "../utils/context";
@@ -47,7 +48,7 @@ const drawerWidth = 270;
 
 export default function Home() {
   // NOTE: handle `any` below
-  let state: any;
+  let state: { [name: string]: boolean };
   let setState: any;
   [state, setState] = useState({
     pitch_range: true,
@@ -88,7 +89,7 @@ export default function Home() {
     setNowLoading(true);
     const data = await getData(feature_names, nOfSongs, dimMethod);
     setSidMapping(getTitleToSid(data));
-    setData([...responseToPlotlyData(data)]);
+    setData([...data]);
     setNowLoading(false);
   };
 
@@ -103,14 +104,18 @@ export default function Home() {
     setNOfSongs(Number(event.target.value));
   };
 
-  const [data, setData] = useState<Data[]>([]);
-  const fetchData = async () => {
-    const d = await getSampleData(60);
+  const [data, setData] = useState<ResponseDatum[]>([]);
+  const fetchInitialData = async () => {
+    const d = await getData(
+      Object.keys(state).filter((k) => state[k]),
+      nOfSongs,
+      dimMethod
+    );
     setData([...d]);
   };
 
   useEffect(() => {
-    fetchData().catch(console.error);
+    fetchInitialData().catch(console.error);
   }, []);
 
   return (

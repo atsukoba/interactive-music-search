@@ -82,14 +82,14 @@ const Plotly = ({ newData, sidMapping, windowSize }: IProps) => {
 
   return (
     <>
-      <Plot
+      {/* <Plot
         data={newData}
         layout={layout}
         config={sampleConfig}
         style={{ width: "100%", height: "calc(100% - 100px)" }}
         onClick={onClickDataPoint}
       />
-      <SpotifyPlayer track_id={currentTrackId} />
+      <SpotifyPlayer track_id={currentTrackId} /> */}
     </>
   );
 };
