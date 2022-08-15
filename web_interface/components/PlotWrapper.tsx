@@ -16,7 +16,6 @@ export default function PlotWrapper() {
 
   useEffect(() => {
     const size = [getElementProperty("width"), getElementProperty("height")];
-    console.log(size);
     setSize(size);
   }, []);
 

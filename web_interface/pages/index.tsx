@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Data } from "plotly.js";
 import {
+  ChangeEventHandler,
   FormEventHandler,
   ReactNode,
   useEffect,
@@ -16,6 +17,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   CssBaseline,
   Divider,
   Drawer,
@@ -30,6 +32,7 @@ import {
   ListItemIcon,
   ListItemText,
   MenuItem,
+  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -40,7 +43,7 @@ import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
 import { DataContext, getTitleToSid } from "../utils/context";
 
-const drawerWidth = 230;
+const drawerWidth = 270;
 
 export default function Home() {
   // NOTE: handle `any` below
@@ -68,7 +71,9 @@ export default function Home() {
     chroma_frequencies: true,
   });
 
+  const [nOfSongs, setNOfSongs] = useState(100);
   const [dimMethod, setDimMethod] = useState("PCA");
+  const [nowLoading, setNowLoading] = useState(false);
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,9 +85,11 @@ export default function Home() {
     // list of feature names
     const feature_names = Object.keys(newState).filter((key) => newState[key]);
     console.log(feature_names);
-    const data = await getData(feature_names, 200, dimMethod);
+    setNowLoading(true);
+    const data = await getData(feature_names, nOfSongs, dimMethod);
     setSidMapping(getTitleToSid(data));
     setData([...responseToPlotlyData(data)]);
+    setNowLoading(false);
   };
 
   const handleMethodChange = (
@@ -92,10 +99,13 @@ export default function Home() {
     setDimMethod(event.target.value);
   };
 
+  const handleNofSongsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNOfSongs(Number(event.target.value));
+  };
+
   const [data, setData] = useState<Data[]>([]);
   const fetchData = async () => {
     const d = await getSampleData(60);
-    console.log(d);
     setData([...d]);
   };
 
@@ -105,15 +115,53 @@ export default function Home() {
 
   return (
     <Layout>
-      <Grid container spacing={2} style={{ height: "calc(100vh - 64px)" }}>
+      {nowLoading && (
+        <Box
+          sx={{
+            display: "flex",
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            alignItems: "center",
+            alignContent: "flex-start",
+            justifyContent: "center",
+            flexDirection: "column",
+            zIndex: "1000",
+          }}
+        >
+          <CircularProgress size={120} thickness={4.0} color={"primary"} />
+          <Typography my={2}>Loading Song Data...</Typography>
+        </Box>
+      )}
+      <Grid
+        container
+        spacing={2}
+        style={{ height: "calc(100vh - 64px)", marginTop: 0 }}
+      >
         <Grid
           item
           md={6}
           lg={2.5}
-          xl={2.5}
-          style={{ height: "100%", overflow: "scroll" }}
+          xl={"auto"}
+          style={{
+            height: "100%",
+            overflow: "scroll",
+            maxWidth: `${drawerWidth}px`,
+          }}
         >
           <Typography mb={2}>Data</Typography>
+          <TextField
+            id="outlined-number"
+            label="N of Songs"
+            type="number"
+            size="small"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={handleNofSongsChange}
+            value={nOfSongs}
+            sx={{ my: 1, minWidth: 160 }}
+          />
           <FormControl sx={{ my: 1, minWidth: 160 }} size="small">
             <InputLabel id="demo-select-small">
               Dimentionality Reduction
@@ -129,9 +177,8 @@ export default function Home() {
               <MenuItem value={"tSNE"}>tSNE</MenuItem>
             </Select>
           </FormControl>
-          <Typography mb={2}>Features</Typography>
           <FormGroup>
-            <Typography my={2}>MIDI</Typography>
+            <Typography my={2}>MIDI Features</Typography>
             <FormControlLabel
               control={
                 <Checkbox
@@ -253,7 +300,7 @@ export default function Home() {
               label="drum_pattern_consistency"
             />
             <Divider />
-            <Typography my={2}>Audio</Typography>
+            <Typography my={2}>Audio Features</Typography>
             <FormControlLabel
               control={
                 <Checkbox
@@ -262,7 +309,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="tempo"
+              label="Tempo"
             />
             <FormControlLabel
               control={
@@ -272,7 +319,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="zero_crossing_rate"
+              label="Zero Crossing Rate"
             />
             <FormControlLabel
               control={
@@ -282,7 +329,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="harmonic_components"
+              label="Harmonic Components"
             />
             <FormControlLabel
               control={
@@ -292,7 +339,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="percussive_components"
+              label="Percussive Components"
             />
             <FormControlLabel
               control={
@@ -302,7 +349,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="spectral_centroid"
+              label="Spectral Centroid"
             />
             <FormControlLabel
               control={
@@ -312,7 +359,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="spectral_rolloff"
+              label="Spectral Rolloff"
             />
             <FormControlLabel
               control={
@@ -322,7 +369,7 @@ export default function Home() {
                   onChange={handleChange}
                 />
               }
-              label="chroma_frequencies"
+              label="Chroma Frequencies"
             />
             {/* todo: implement Spotify features backend */}
             {/* <Divider 
@@ -351,7 +398,7 @@ export default function Home() {
           item
           md={6}
           lg={9.5}
-          xl={9.5}
+          xl={true}
           style={{ height: "100%", overflow: "scroll", padding: 0 }}
         >
           <DataContext.Provider value={{ data, sidMapping }}>

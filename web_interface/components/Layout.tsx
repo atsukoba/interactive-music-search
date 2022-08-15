@@ -18,6 +18,7 @@ import {
   GitHub,
   Home,
   Inbox,
+  Menu,
   Search,
   TableChart,
   VerifiedUser,
@@ -33,6 +34,7 @@ import {
   FormControlLabel,
   FormGroup,
   Grid,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -45,7 +47,7 @@ import { styled } from "@mui/material/styles";
 
 import { postUserFile } from "../api/user_data";
 
-const drawerWidth = 210;
+const drawerWidth = 270;
 
 interface IProps {
   children: ReactNode;
@@ -56,7 +58,12 @@ const Input = styled("input")({
 });
 
 export default function Layout({ children }: IProps) {
+  const [drawerOpen, setDrawerOpen] = useState<boolean | undefined>(false);
   const [selectedFile, selectFile] = useState<FormData | undefined>(undefined);
+
+  const toggleDrawer: MouseEventHandler<HTMLButtonElement> = () => {
+    setDrawerOpen(!drawerOpen);
+  };
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -93,6 +100,15 @@ export default function Layout({ children }: IProps) {
         style={{ backgroundColor: "#222222" }}
       >
         <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={toggleDrawer}
+            edge="start"
+            sx={{ mr: 2 }}
+          >
+            <Menu />
+          </IconButton>
           <Typography
             variant="h6"
             noWrap
@@ -104,11 +120,16 @@ export default function Layout({ children }: IProps) {
         </Toolbar>
       </AppBar>
       <Drawer
-        variant="permanent"
+        open={drawerOpen}
+        onClose={toggleDrawer}
+        variant="persistent"
+        anchor="left"
         sx={{
-          width: drawerWidth,
+          // width: drawerOpen ? drawerWidth : 0,
+          width: 0,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: {
+            // width: drawerOpen ? drawerWidth : 0,
             width: drawerWidth,
             boxSizing: "border-box",
           },
@@ -212,7 +233,7 @@ export default function Layout({ children }: IProps) {
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, pr: 0 }}
+        sx={{ flexGrow: 1, p: 0, pl: 3, fontSize: 0 }}
         style={{ height: "100vh", overscrollBehaviorY: "none" }}
       >
         <Toolbar />
