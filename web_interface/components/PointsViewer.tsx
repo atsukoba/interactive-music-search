@@ -1,18 +1,21 @@
 // @ts-nocheck
-import { MathUtils } from "three";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { MathUtils } from "three";
+
 import {
-  Points,
+  GizmoHelper,
+  GizmoViewcube,
+  GizmoViewport,
+  OrbitControls,
   Point,
   PointMaterial,
-  OrbitControls,
-  GizmoHelper,
-  GizmoViewport,
-  GizmoViewcube,
+  Points,
 } from "@react-three/drei";
-import SpotifyPlayer from "./SpotifyPlayer";
+import { Canvas } from "@react-three/fiber";
+
 import { ResponseDatum } from "../api/data";
+import { calcMappingCoordinates } from "../utils/context";
+import SpotifyPlayer from "./SpotifyPlayer";
 
 // const positions = Array.from({ length: 2000 }, (i) => [
 //   MathUtils.randFloatSpread(100),
@@ -34,7 +37,7 @@ interface IProps {
 }
 
 export default function PointsViewer({ newData, sidMapping }: IProps) {
-  const positions = newData;
+  const positions = calcMappingCoordinates(newData);
   console.log(positions);
   console.log(positions.length);
   // states
@@ -52,28 +55,6 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
         camera={{ position: [0, 0, 50] }}
         style={{ width: "100%", height: "calc(100% - 100px)" }}
       >
-        <Points limit={100000} range={positions.length}>
-          <PointMaterial
-            transparent={true}
-            vertexColors={true}
-            size={2}
-            sizeAttenuation={true}
-            depthWrite={false}
-          />
-          {positions.map((d, i) => {
-            // console.log(d);
-            const pos = [d.x - 50, d.y - 50, d.z - 50];
-            return (
-              <PointEvent
-                key={i}
-                position={pos}
-                data={d}
-                sidMapping={sidMapping}
-                setSidFunc={setCurrentTrackId}
-              />
-            );
-          })}
-        </Points>
         <OrbitControls />
         <GizmoHelper
           alignment="bottom-right" // widget alignment within scene
@@ -82,12 +63,33 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
           // onTarget={/* return current camera target (e.g. from orbit controls) to center animation */}
           // renderPriority={/* use renderPriority to prevent the helper from disappearing if there is another useFrame(..., 1)*/}
         >
-          {/* <GizmoViewport
+          <GizmoViewport
             axisColors={["red", "green", "blue"]}
             labelColor="black"
-          /> */}
-          <GizmoViewcube />
+          />
+          {/* <GizmoViewcube /> */}
         </GizmoHelper>
+        <Points limit={100000} range={positions.length}>
+          <PointMaterial
+            transparent={true}
+            vertexColors={true}
+            size={1}
+            sizeAttenuation={true}
+            depthWrite={false}
+          />
+          {positions.map((d, i) => {
+            // console.log(d);
+            return (
+              <PointEvent
+                key={i}
+                position={[d.x, d.y, d.z]}
+                data={d}
+                sidMapping={sidMapping}
+                setSidFunc={setCurrentTrackId}
+              />
+            );
+          })}
+        </Points>
       </Canvas>
       <SpotifyPlayer track_id={currentTrackId} />
     </>
@@ -103,7 +105,6 @@ interface IPropsPointEvent {
 }
 
 function PointEvent({
-  key,
   position,
   data,
   sidMapping,
@@ -111,17 +112,23 @@ function PointEvent({
 }: IPropsPointEvent) {
   const [hovered, setHover] = useState(false);
   const [clicked, setClick] = useState(false);
+  // artist: "Johann Walter"
+  // sid: "5hdHbhjiLq5lmDqcuIKPU8"
+  // title: "Nun bitten wir den heiligen Geist a 5"
+  // x: 42.5323289925652
+  // y: 40.28171529262906
+  // year: 40.28171529262906
+  // z: 80.27359674024238
   return (
     <>
       <Point
-        key={key}
-        color={clicked ? "hotpink" : hovered ? "yellow" : "orange"}
+        color={clicked ? "hotpink" : hovered ? "yellow" : "darkgrey"}
         onPointerOver={(e: any) => (e.stopPropagation(), setHover(true))}
         onPointerOut={(e: any) => setHover(false)}
         onClick={(e: any) => {
-          e.stopPropagation();
-          setClick((state) => !state);
+          // setClick((state) => !state);
           setSidFunc(data.sid);
+          e.stopPropagation();
         }}
         position={position}
       />
