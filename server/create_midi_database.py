@@ -29,7 +29,7 @@ if __name__ == "__main__":
                         metavar="NUM_OF_MIDI FILE",
                         type=int,
                         help="The limit number of midi files to calculate features",
-                        default=10000)
+                        default=None)
     args = parser.parse_args()
 
     # Connect to DB
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # extract track id data from song table once set before
     q = text("SELECT md5 FROM song;")
     logger.debug(q)
-    logger.info("Loading database: songs.md5")
+    logger.info("Loading database column: `songs.md5`")
     res_df = pd.read_sql_query(sql=q, con=engine)
     res_df.columns = ["md5"]
     logger.info(f"Got {len(res_df)} records")

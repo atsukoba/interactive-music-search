@@ -30,7 +30,7 @@ if __name__ == "__main__":
                         metavar="NUM_OF_MP3_FILE",
                         type=int,
                         help="The limit number of mp3 files to download from Spotify API",
-                        default=10000)
+                        default=None)
     args = parser.parse_args()
 
     # Connect to DB

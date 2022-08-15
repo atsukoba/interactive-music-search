@@ -24,8 +24,11 @@ if __name__ == "__main__":
     songs = pd.merge(
         MMD_md5_metainfo[["md5", "artist", "title"]],
         MMD_audio_matches[["md5", "sid"]]).dropna()
+    logger.info(f"Got {len(songs)} songs info")
     songs.columns = ["md5", "artist", "title", "spotify_track_id"]
+    logger.info(f"Removing duplicates...")
     songs.drop_duplicates(subset=["md5"], inplace=True)
     songs.drop_duplicates(subset=["spotify_track_id"], inplace=True)
+    logger.info(f"Got {len(songs)} unique songs info")
     # NOTE: need drop cascade to set if_exists=replace
     songs.to_sql("song", con=engine, if_exists="append", index=False)
