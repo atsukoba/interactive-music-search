@@ -95,7 +95,7 @@ class QueryDataSelector:
         logger.debug(q)
         try:
             df = pd.read_sql_query(sql=q, con=cls.engine)
-            logger.debug(f"got {len(df)} records")
+            logger.info(f"got {len(df)} records")
             return df
         except Exception as e:
             logger.warn("database error: {e}")

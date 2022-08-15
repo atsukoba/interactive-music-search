@@ -57,7 +57,7 @@ DimReductionMethod = Literal["PCA", "tSNE"]
 
 
 def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
-               n: int = 1000,
+               n_data: int = 1000,
                dim_reduction_method: DimReductionMethod = "PCA"
                ) -> Optional[List[Dict[str, Union[str, int]]]]:
 
@@ -69,7 +69,7 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
     res: Optional[pd.DataFrame] = QueryDataSelector.get_features(m, a)
 
     if res is not None:
-        res = res.head(n)
+        res = res.head(n_data)
         sids = res.spotify_track_id.values
         titles = res.title.values
         artists = res.artist.values
@@ -86,10 +86,12 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
                     res[feat_name] = chroma_value
                 else:
                     value_array = np.array(
-                        res[feat_name].values.tolist()).mean(axis=1)
+                        res[feat_name].values.tolist()).mean(axis=1)  # type: ignore
                     res[feat_name] = value_array
         # dimentionality reduction
-        feature_values = res[feature_names].values
+        logger.info(f"all response: {res[feature_names].values.shape}")
+        feature_values = res[feature_names].dropna().values
+        logger.info(f"not NaN response: {feature_values.shape}")
         if len(feature_names) > 3:
             if dim_reduction_method == "PCA":
                 data_matrix = dim_reduction_pca(feature_values)
@@ -108,7 +110,7 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
             "title": t,
             "artist": a,
             "year": y,
-            # "genre": choice(["Rock", "Pops", "Jazz", "Classic"]),
+            "genre": choice(["Rock", "Pops", "Jazz", "Classic"]),
             "x": x,
             "y": y,
             "z": z,
