@@ -25,7 +25,7 @@ def dim_reduction_pca(data: np.ndarray) -> np.ndarray:
 
 def dim_reduction_tsne(data: np.ndarray) -> np.ndarray:
     logger.debug(f"input data dimentions: {data.shape}")
-    data_tsne = TSNE(n_components=3, n_jobs=12).fit_transform(data)
+    data_tsne = TSNE(n_components=3, n_iter=500, n_jobs=-1).fit_transform(data)
     logger.debug(f"t-SNE data dimentions: {data_tsne.shape}")
     return data_tsne
 
