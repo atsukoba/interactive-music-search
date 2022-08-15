@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, TypedDict, Union
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 
-from src.data import get_sample_n_data, get_n_data
+from src.data import get_n_data, get_sample_n_data
 from src.utils import create_logger, env
 
 
@@ -101,7 +101,7 @@ def get_features():
         return jsonify({'message': 'request error'}), 500
     logger.debug(f"request: {req_json}")
     res = get_n_data(req_json["feature_names"],
-                     n=req_json["n_songs"],
+                     n_data=req_json["n_songs"],
                      dim_reduction_method=req_json["method"])
     if res is None:
         return jsonify({'message': 'db error'}), 500
