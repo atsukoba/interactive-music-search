@@ -1,36 +1,17 @@
-// @ts-nocheck
-
 import {
   Dispatch,
-  SetStateAction,
-  useState,
-  useRef,
   ForwardRefExoticComponent,
+  SetStateAction,
   useEffect,
+  useRef,
+  useState,
 } from "react";
-import { MathUtils } from "three";
-
-import {
-  GizmoHelper,
-  GizmoViewport,
-  OrbitControls,
-  OrbitControlsProps,
-  Point,
-  PointMaterial,
-  Points,
-} from "@react-three/drei";
-import { Canvas, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 
 import { ResponseDatum } from "../api/data";
 import { calcMappingCoordinates } from "../utils/context";
+import { useGetElementProperty } from "../utils/ref";
 import SpotifyPlayer from "./SpotifyPlayer";
-import { useFrame } from "@react-three/fiber";
-
-// const positions = Array.from({ length: 2000 }, (i) => [
-//   MathUtils.randFloatSpread(100),
-//   MathUtils.randFloatSpread(100),
-//   MathUtils.randFloatSpread(100),
-// ]);
 
 declare global {
   interface Window {
@@ -42,93 +23,99 @@ declare global {
 
 interface IProps {
   newData: ResponseDatum[];
-  sidMapping: Map<string, string>;
 }
 
-const AutoOrbitControls = (props) => {
-  const { gl, camera } = useThree();
-  const controls = useRef<OrbitControlsProps>();
-
-  useFrame(() => {
-    if (controls.current.camera) {
-      controls.current.camera.rotation.y += 0.01;
-    }
-  });
-
-  useEffect(() => {
-    controls.current.enabled = false;
-    camera.updateProjectionMatrix();
-    controls.current.enabled = true;
-    controls.current.update();
-  }, []);
-
-  return (
-    <OrbitControls
-      ref={controls}
-      args={[camera, gl.domElement]}
-      enableDamping={false}
-      {...props}
-    />
-  );
-};
-
-export default function PointsViewer({ newData, sidMapping }: IProps) {
+export default function PointsViewer({ newData }: IProps) {
   const positions = calcMappingCoordinates(newData);
+  const targetRef = useRef(null);
+  const { getElementProperty } =
+    useGetElementProperty<HTMLCanvasElement>(targetRef);
   console.log(positions);
   // states
   const [currentTrackId, setCurrentTrackId] = useState("");
-  // const { range } = useControls({
-  //   range: { value: positions.length / 2, min: 0, max: positions.length },
-  // });
+
+  let canvas: HTMLElement;
+  console.log(THREE);
+  useEffect(() => {
+    if (canvas) return;
+    // canvasを取得
+    canvas = document.getElementById("canvas3d")!;
+
+    // シーン
+    const scene = new THREE.Scene();
+
+    // サイズ
+    const sizes = {
+      width: canvas.getBoundingClientRect().width,
+      height: canvas.getBoundingClientRect().height
+    };
+
+    // カメラ
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      sizes.width / sizes.height,
+      0.1,
+      1000
+    );
+
+    // レンダラー
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas || undefined,
+      antialias: true,
+      alpha: true,
+    });
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // ボックスジオメトリー
+    const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const boxMaterial = new THREE.MeshLambertMaterial({
+      color: "#2497f0",
+    });
+    const box = new THREE.Mesh(boxGeometry, boxMaterial);
+    box.position.z = -5;
+    box.rotation.set(10, 10, 10);
+    scene.add(box);
+
+    // ライト
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 0.2);
+    pointLight.position.set(1, 2, 3);
+    scene.add(pointLight);
+
+    // アニメーション
+    const clock = new THREE.Clock();
+    const tick = () => {
+      const elapsedTime = clock.getElapsedTime();
+      box.rotation.x = elapsedTime;
+      box.rotation.y = elapsedTime;
+      window.requestAnimationFrame(tick);
+      renderer.render(scene, camera);
+    };
+    tick();
+
+    window.addEventListener("resize", () => {
+      sizes.width = window.innerWidth;
+      sizes.height = window.innerHeight;
+      camera.aspect = sizes.width / sizes.height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(sizes.width, sizes.height);
+      renderer.setPixelRatio(window.devicePixelRatio);
+    });
+  }, []);
 
   return (
     <>
-      <Canvas
-        resize={{ scroll: true, debounce: { scroll: 10, resize: 0 } }}
-        raycaster={{ params: { Points: { threshold: 0.175 } } }}
-        dpr={[1, 2]}
-        camera={{ position: [0, 0, 70] }}
+      <canvas
+        id="canvas3d"
+        ref={targetRef}
         style={{
           width: "100%",
           height: "calc(100% - 100px)",
           backgroundColor: "#f7f7f7",
         }}
-      >
-        <OrbitControls enableDamping={false} />
-        <GizmoHelper
-          alignment="bottom-right" // widget alignment within scene
-          margin={[80, 80]} // widget margins (X, Y)
-        >
-          <GizmoViewport
-            axisColors={["red", "green", "blue"]}
-            labelColor="black"
-          />
-        </GizmoHelper>
-        <Points
-          limit={100000}
-          range={positions.length}
-          // matrixAutoUpdate={true}
-        >
-          <PointMaterial
-            transparent={true}
-            vertexColors={false}
-            size={0.5}
-            sizeAttenuation={true}
-            depthWrite={false}
-          />
-          {positions.map((d, i) => {
-            // console.log(d);
-            return (
-              <PointEvent
-                key={i}
-                position={[d.x, d.y, d.z]}
-                data={d}
-                setSidFunc={setCurrentTrackId}
-              />
-            );
-          })}
-        </Points>
-      </Canvas>
+      />
       <SpotifyPlayer track_id={currentTrackId} />
     </>
   );
@@ -139,34 +126,4 @@ interface IPropsPointEvent {
   position: number[];
   data: ResponseDatum;
   setSidFunc: Dispatch<SetStateAction<string>>;
-}
-
-function PointEvent({ position, data, setSidFunc }: IPropsPointEvent) {
-  
-  // const [hovered, setHover] = useState(false);
-  // const [clicked, setClick] = useState(false);
-  // artist: "Johann Walter"
-  // sid: "5hdHbhjiLq5lmDqcuIKPU8"
-  // title: "Nun bitten wir den heiligen Geist a 5"
-  // x: 42.5323289925652
-  // y: 40.28171529262906
-  // year: 40.28171529262906
-  // z: 80.27359674024238
-  return (
-    <>
-      <Point
-        // color={clicked ? "red" : hovered ? "pink" : "black"}
-        color={"black"}
-        position={position}
-        // onPointerOver={(e: any) => (e.stopPropagation(), setHover(true))}
-        // onPointerOut={(e: any) => setHover(false)}
-        onClick={(e: any) => {
-          console.log(e);
-          e.stopPropagation();
-          setSidFunc(data.sid);
-          // setClick((state) => !state);
-        }}
-      />
-    </>
-  );
 }
