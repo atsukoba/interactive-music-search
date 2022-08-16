@@ -72,7 +72,7 @@ export default function Home() {
     chroma_frequencies: true,
   });
 
-  const [nOfSongs, setNOfSongs] = useState(100);
+  const [nOfSongs, setNOfSongs] = useState(1000);
   const [dimMethod, setDimMethod] = useState("PCA");
   const [nowLoading, setNowLoading] = useState(false);
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
