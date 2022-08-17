@@ -17,14 +17,19 @@ import {
   Text,
   Circle,
   Sphere,
+  Instances,
+  Instance,
+  AdaptiveDpr,
+  useBVH,
 } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 
 import { ResponseDatum } from "../api/data";
 import { calcMappingCoordinates } from "../utils/context";
 import SpotifyPlayer from "./SpotifyPlayer";
+import { CardContent, Typography } from "@mui/material";
 
-const IS_DEVELOP_MODE = true;
+const IS_DEVELOP_MODE = false;
 
 declare global {
   interface Window {
@@ -36,25 +41,34 @@ declare global {
 
 interface IProps {
   newData: ResponseDatum[];
-  sidMapping: Map<string, string>;
 }
 
 const redColor = new Color(0xff0000);
 const blueColor = new Color(0x0000ff);
 
-export default function PointsViewer({ newData, sidMapping }: IProps) {
+export default function PointsViewer({ newData }: IProps) {
   const positions = calcMappingCoordinates(newData);
   console.log(positions);
   // states
-  const [isAutoRotating, setIsAutoRotating] = useState(false);
+  const [isAutoRotating, setIsAutoRotating] = useState(true);
+  const [currentTrackInfo, setcurrentTrackInfo] =
+    useState<ResponseDatum>(undefined);
   const [currentTrackId, setCurrentTrackId] = useState("");
+
+  const updateHoverTrackInfo = (d: ResponseDatum) => {
+    setcurrentTrackInfo({
+      ...currentTrackInfo,
+      title: d.title,
+      artist: d.artist,
+      genre: d.genre,
+    });
+  };
 
   return (
     <>
       <Canvas
         resize={{ scroll: true, debounce: { scroll: 10, resize: 0 } }}
         raycaster={{ params: { Points: { threshold: 0.175 } } }}
-        dpr={[1, 2]}
         camera={{ position: [0, 0, 80] }}
         style={{
           width: "100%",
@@ -68,6 +82,7 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
           setIsAutoRotating(true);
         }}
       >
+        <AdaptiveDpr pixelated />
         {IS_DEVELOP_MODE && <Stats showPanel={0} className="stats" />}
         <OrbitControls
           enableDamping={false}
@@ -92,37 +107,104 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
           return (
             <CliclableBox
               key={i}
+              id={i}
               x={d.x}
               y={d.y}
               z={d.z}
               data={d}
+              setTrackFunc={setcurrentTrackInfo}
               setSidFunc={setCurrentTrackId}
             />
           );
         })}
-        s
+        {/* <Instances limit={100000} range={positions.length}>
+          {positions.map((d, i) => {
+            // console.log(d);
+            return (
+              <CliclableBoxForInstance
+                key={i}
+                id={i}
+                x={d.x}
+                y={d.y}
+                z={d.z}
+                data={d}
+                setSidFunc={setCurrentTrackId}
+              />
+            );
+          })}
+        </Instances> */}
       </Canvas>
-      <SpotifyPlayer track_id={currentTrackId} />
+      <div
+        style={{
+          width: "100%",
+          height: "100px",
+          fontSize: 0,
+          display: "flex",
+          flexDirection: "row",
+          backgroundColor: "rgb(18, 18, 18)",
+        }}
+      >
+        <CardContent
+          style={{
+            width: "50%",
+            height: "100%",
+            color: "white",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <Typography sx={{ fontSize: 14 }}>
+            {currentTrackInfo ? currentTrackInfo.title : "Not Hovered"},
+            {currentTrackInfo ? currentTrackInfo.genre : "Not Hovered"}
+          </Typography>
+          <Typography
+            variant="h5"
+            component="div"
+            style={{ lineHeight: "auto" }}
+          >
+            {currentTrackInfo ? currentTrackInfo.artist : "Not Hovered"}
+          </Typography>
+          <Typography sx={{ fontSize: 12 }}>
+            x=
+            {currentTrackInfo
+              ? Math.round(currentTrackInfo.x * 100) / 100
+              : "N/A"}
+            , y=
+            {currentTrackInfo
+              ? Math.round(currentTrackInfo.y * 100) / 100
+              : "N/A"}
+            , z=
+            {currentTrackInfo
+              ? Math.round(currentTrackInfo.z * 100) / 100
+              : "N/A"}
+          </Typography>
+        </CardContent>
+        <SpotifyPlayer track_id={currentTrackId} />
+      </div>
     </>
   );
 }
 
 interface IPropsClickableBox {
+  id: number;
   x: number;
   y: number;
   z: number;
   data: ResponseDatum;
+  setTrackFunc: Dispatch<SetStateAction<ResponseDatum>>;
   setSidFunc: Dispatch<SetStateAction<string>>;
 }
 
-const CliclableBox = ({ x, y, z, data, setSidFunc }: IPropsClickableBox) => {
-  // const ref = useRef(null);
+const CliclableBox = ({
+  x,
+  y,
+  z,
+  data,
+  setTrackFunc,
+  setSidFunc,
+}: IPropsClickableBox) => {
   const [isHovered, setIsHovered] = useState(false);
-  // useFrame(() => {
-  //   ref.current.rotation.x += 0.01;
-  //   ref.current.rotation.y += 0.01;
-  // }, []);\
-
   const useCircle = false;
 
   return (
@@ -132,7 +214,7 @@ const CliclableBox = ({ x, y, z, data, setSidFunc }: IPropsClickableBox) => {
           args={[1, 1]}
           onPointerOver={(e) => {
             e.stopPropagation();
-            console.log(data);
+            setTrackFunc(data);
             setIsHovered(true);
           }}
           onPointerOut={(e) => {
@@ -150,7 +232,7 @@ const CliclableBox = ({ x, y, z, data, setSidFunc }: IPropsClickableBox) => {
         <mesh
           onPointerOver={(e) => {
             e.stopPropagation();
-            console.log(data);
+            setTrackFunc(data);
             setIsHovered(true);
           }}
           onPointerOut={(e) => {
@@ -164,7 +246,7 @@ const CliclableBox = ({ x, y, z, data, setSidFunc }: IPropsClickableBox) => {
             setSidFunc(data.sid);
           }}
         >
-          <Sphere args={[0.25]}>
+          <Sphere args={[0.5]}>
             <meshBasicMaterial color={isHovered ? "red" : "orange"} />
           </Sphere>
           {/* <RoundedBox args={[0.5, 0.5, 0.5]} radius={0.05}></RoundedBox> */}
@@ -180,6 +262,42 @@ const CliclableBox = ({ x, y, z, data, setSidFunc }: IPropsClickableBox) => {
           {data.title} / {data.artist}
         </Text>
       )}
+    </>
+  );
+};
+
+const CliclableBoxForInstance = ({
+  id,
+  x,
+  y,
+  z,
+  data,
+  setSidFunc,
+}: IPropsClickableBox) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <>
+      <Instance
+        scale={2}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          console.log(data);
+          setIsHovered(true);
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          setIsHovered(false);
+        }}
+        position={new Vector3(x, y, z)}
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log(data);
+          setSidFunc(data.sid);
+        }}
+      />
+      <meshStandardMaterial color={isHovered ? "red" : "orange"} />
+      <sphereGeometry id={id} args={[0.25]} />
     </>
   );
 };

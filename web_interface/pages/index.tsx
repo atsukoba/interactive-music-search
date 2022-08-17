@@ -208,7 +208,9 @@ export default function Home() {
           }}
         >
           <CircularProgress size={120} thickness={4.0} color={"primary"} />
-          <Typography my={2}>Loading Song Data...</Typography>
+          <Typography my={2} variant="h6">
+            Loading Song Data...
+          </Typography>
         </Box>
       )}
       <Grid
@@ -232,13 +234,13 @@ export default function Home() {
               color="primary"
               variant="outlined"
               onClick={updateData}
-              style={{ width: "calc(100% - 16px)" }}
+              style={{ width: "calc(100% - 20px)" }}
             >
               <AutorenewOutlinedIcon />
               Update Data
             </Button>
           </Box>
-          <Accordion>
+          <Accordion defaultExpanded={true}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
@@ -249,7 +251,7 @@ export default function Home() {
             <AccordionDetails>
               <TextField
                 id="outlined-number"
-                label="N of Songs"
+                label="Maximum Number of Songs"
                 type="number"
                 size="small"
                 InputLabelProps={{
@@ -257,9 +259,14 @@ export default function Home() {
                 }}
                 onChange={handleNofSongsChange}
                 value={nOfSongs}
-                sx={{ my: 2, minWidth: 160 }}
+                sx={{ my: 2 }}
+                style={{ width: "calc(100% - 20px)" }}
               />
-              <FormControl sx={{ ma: 2, mb: 4, minWidth: 160 }} size="small">
+              <FormControl
+                sx={{ ma: 2, mb: 4 }}
+                style={{ width: "calc(100% - 20px)" }}
+                size="small"
+              >
                 <InputLabel id="demo-select-small">
                   Dimentionality Reduction
                 </InputLabel>
@@ -277,7 +284,46 @@ export default function Home() {
             </AccordionDetails>
           </Accordion>
           <Divider />
-          <Accordion>
+          <Accordion defaultExpanded={true}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Typography my={2}>Music Genres</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={state.pitch_range}
+                      name="pitch_range"
+                      onChange={handleChange}
+                    />
+                  }
+                  label="pitch_range"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={state.n_pitches_used}
+                      name="n_pitches_used"
+                      onChange={handleChange}
+                    />
+                  }
+                  label="n_pitches_used"
+                />
+                <Box my={2}>
+                  <Button variant="contained" onClick={setMidiAll}>
+                    Toggle All
+                  </Button>
+                </Box>
+              </FormGroup>
+            </AccordionDetails>
+          </Accordion>
+          <Divider />
+          <Accordion defaultExpanded={true}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
@@ -416,7 +462,7 @@ export default function Home() {
             </AccordionDetails>
           </Accordion>
           <Divider />
-          <Accordion>
+          <Accordion defaultExpanded={true}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
@@ -526,10 +572,15 @@ export default function Home() {
         />
         <Grid
           item
-          md={6}
-          lg={9.5}
+          md={true}
+          lg={true}
           xl={true}
-          style={{ height: "100%", overflow: "scroll", padding: 0 }}
+          style={{
+            height: "100%",
+            overflow: "scroll",
+            padding: 0,
+            flexGrow: 1,
+          }}
         >
           <DataContext.Provider value={{ data, sidMapping }}>
             <PlotWrapper />
