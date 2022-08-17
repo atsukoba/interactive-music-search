@@ -8,7 +8,7 @@ import {
   ForwardRefExoticComponent,
   useEffect,
 } from "react";
-import { MathUtils } from "three";
+import { MathUtils, Vector3 } from "three";
 
 import {
   GizmoHelper,
@@ -26,12 +26,6 @@ import { calcMappingCoordinates } from "../utils/context";
 import SpotifyPlayer from "./SpotifyPlayer";
 import { useFrame } from "@react-three/fiber";
 
-// const positions = Array.from({ length: 2000 }, (i) => [
-//   MathUtils.randFloatSpread(100),
-//   MathUtils.randFloatSpread(100),
-//   MathUtils.randFloatSpread(100),
-// ]);
-
 declare global {
   interface Window {
     onSpotifyIframeApiReady: (IFrameAPI: any) => void;
@@ -44,33 +38,6 @@ interface IProps {
   newData: ResponseDatum[];
   sidMapping: Map<string, string>;
 }
-
-const AutoOrbitControls = (props) => {
-  const { gl, camera } = useThree();
-  const controls = useRef<OrbitControlsProps>();
-
-  useFrame(() => {
-    if (controls.current.camera) {
-      controls.current.camera.rotation.y += 0.01;
-    }
-  });
-
-  useEffect(() => {
-    controls.current.enabled = false;
-    camera.updateProjectionMatrix();
-    controls.current.enabled = true;
-    controls.current.update();
-  }, []);
-
-  return (
-    <OrbitControls
-      ref={controls}
-      args={[camera, gl.domElement]}
-      enableDamping={false}
-      {...props}
-    />
-  );
-};
 
 export default function PointsViewer({ newData, sidMapping }: IProps) {
   const positions = calcMappingCoordinates(newData);
@@ -94,7 +61,12 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
           backgroundColor: "#f7f7f7",
         }}
       >
-        <OrbitControls enableDamping={false} />
+        <OrbitControls
+          enableDamping={false}
+          zoomSpeed={1}
+          autoRotate={true}
+          autoRotateSpeed={10}
+        />
         <GizmoHelper
           alignment="bottom-right" // widget alignment within scene
           margin={[80, 80]} // widget margins (X, Y)
@@ -104,69 +76,53 @@ export default function PointsViewer({ newData, sidMapping }: IProps) {
             labelColor="black"
           />
         </GizmoHelper>
-        <Points
-          limit={100000}
-          range={positions.length}
-          // matrixAutoUpdate={true}
-        >
-          <PointMaterial
-            transparent={true}
-            vertexColors={false}
-            size={0.5}
-            sizeAttenuation={true}
-            depthWrite={false}
-          />
-          {positions.map((d, i) => {
-            // console.log(d);
-            return (
-              <PointEvent
-                key={i}
-                position={[d.x, d.y, d.z]}
-                data={d}
-                setSidFunc={setCurrentTrackId}
-              />
-            );
-          })}
-        </Points>
+        {positions.map((d, i) => {
+          // console.log(d);
+          return (
+            <CliclableBox
+              key={i}
+              x={d.x}
+              y={d.y}
+              z={d.z}
+              data={d}
+              setSidFunc={setCurrentTrackId}
+            />
+          );
+        })}
       </Canvas>
       <SpotifyPlayer track_id={currentTrackId} />
     </>
   );
 }
 
-interface IPropsPointEvent {
-  key: number;
-  position: number[];
+interface IPropsClickableBox {
+  x: number;
+  y: number;
+  z: number;
   data: ResponseDatum;
   setSidFunc: Dispatch<SetStateAction<string>>;
 }
 
-function PointEvent({ position, data, setSidFunc }: IPropsPointEvent) {
-  
-  // const [hovered, setHover] = useState(false);
-  // const [clicked, setClick] = useState(false);
-  // artist: "Johann Walter"
-  // sid: "5hdHbhjiLq5lmDqcuIKPU8"
-  // title: "Nun bitten wir den heiligen Geist a 5"
-  // x: 42.5323289925652
-  // y: 40.28171529262906
-  // year: 40.28171529262906
-  // z: 80.27359674024238
+const CliclableBox = ({ x, y, z, data, setSidFunc }: IPropsClickableBox) => {
+  // const ref = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  // useFrame(() => {
+  //   ref.current.rotation.x += 0.01;
+  //   ref.current.rotation.y += 0.01;
+  // }, []);
   return (
-    <>
-      <Point
-        // color={clicked ? "red" : hovered ? "pink" : "black"}
-        color={"black"}
-        position={position}
-        // onPointerOver={(e: any) => (e.stopPropagation(), setHover(true))}
-        // onPointerOut={(e: any) => setHover(false)}
-        onClick={(e: any) => {
-          console.log(e);
-          e.stopPropagation();
-          setSidFunc(data.sid);
-          // setClick((state) => !state);
-        }}
-      />
-    </>
+    <mesh
+      // ref={ref}
+      onPointerOver={() => setIsHovered(true)}
+      onPointerOut={() => setIsHovered(false)}
+      position={new Vector3(x, y, z)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSidFunc(data.sid);
+      }}
+    >
+      <boxBufferGeometry />
+      <meshLambertMaterial color={isHovered ? 0x44c2b5 : 0x9178e6} />
+    </mesh>
   );
-}
+};
