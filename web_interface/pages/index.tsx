@@ -228,7 +228,12 @@ export default function Home() {
           }}
         >
           <Box my={2}>
-            <Button color="primary" variant="outlined" onClick={updateData}>
+            <Button
+              color="primary"
+              variant="outlined"
+              onClick={updateData}
+              style={{ width: "calc(100% - 16px)" }}
+            >
               <AutorenewOutlinedIcon />
               Update Data
             </Button>
@@ -252,9 +257,9 @@ export default function Home() {
                 }}
                 onChange={handleNofSongsChange}
                 value={nOfSongs}
-                sx={{ my: 1, minWidth: 160 }}
+                sx={{ my: 2, minWidth: 160 }}
               />
-              <FormControl sx={{ ma: 1, mb: 2, minWidth: 160 }} size="small">
+              <FormControl sx={{ ma: 2, mb: 4, minWidth: 160 }} size="small">
                 <InputLabel id="demo-select-small">
                   Dimentionality Reduction
                 </InputLabel>
