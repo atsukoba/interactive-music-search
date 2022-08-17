@@ -5,12 +5,10 @@ import { ResponseDatum } from "../api/data";
 
 interface DataContextType {
   data: Array<ResponseDatum>;
-  sidMapping: Map<string, string>;
 }
 
 export const DataContext = createContext<DataContextType>({
-  data: [],
-  sidMapping: new Map<string, string>(),
+  data: []
 });
 
 export const getTitleToSid = (d: ResponseDatum[]): Map<string, string> => {
@@ -22,7 +20,8 @@ export const getTitleToSid = (d: ResponseDatum[]): Map<string, string> => {
 };
 
 export const calcMappingCoordinates = (
-  data: ResponseDatum[]
+  data: ResponseDatum[],
+  scaling: number = 1.0
 ): ResponseDatum[] => {
   let meanX: number = 0;
   let meanY: number = 0;
@@ -38,9 +37,9 @@ export const calcMappingCoordinates = (
   return data.map((d) => {
     return {
       ...d,
-      x: d.x - meanX,
-      y: d.y - meanY,
-      z: d.z - meanZ,
+      x: (d.x - meanX) * scaling,
+      y: (d.y - meanY) * scaling,
+      z: (d.z - meanZ) * scaling,
     };
   });
 };

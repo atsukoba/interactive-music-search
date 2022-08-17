@@ -46,7 +46,18 @@ import { DataContext, getTitleToSid } from "../utils/context";
 
 const drawerWidth = 270;
 
+const initialNumOfSongs = 3000;
+const initialMethod = "tSNE";
+
 export default function Home() {
+  return <Controller plotView={<PlotWrapper />} />;
+}
+
+interface IProps {
+  plotView: JSX.Element;
+}
+
+function Controller({ plotView }: IProps) {
   // NOTE: handle `any` below
   let state: { [name: string]: boolean };
   let setState: any;
@@ -57,7 +68,7 @@ export default function Home() {
     polyphony: false,
     polyphony_rate: false,
     scale_consistency: false,
-    pitch_entropy: false,
+    pitch_entropy: true,
     pitch_class_entropy: false,
     empty_beat_rate: false,
     drum_in_duple_rate: false,
@@ -71,11 +82,21 @@ export default function Home() {
     spectral_rolloff: false,
     chroma_frequencies: true,
   });
-
-  const [nOfSongs, setNOfSongs] = useState(1000);
-  const [dimMethod, setDimMethod] = useState("PCA");
+  const [nOfSongs, setNOfSongs] = useState(initialNumOfSongs);
+  const [dimMethod, setDimMethod] = useState(initialMethod);
   const [nowLoading, setNowLoading] = useState(false);
-  const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
+  const [data, setData] = useState<ResponseDatum[]>([]);
+
+  const fetchInitialData = async () => {
+    setNowLoading(true);
+    const d = await getData(
+      Object.keys(state).filter((k) => state[k]),
+      initialNumOfSongs,
+      initialMethod
+    );
+    setData([...d]);
+    setNowLoading(false);
+  };
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     let newState = {
@@ -88,7 +109,6 @@ export default function Home() {
     console.log(feature_names);
     setNowLoading(true);
     const data = await getData(feature_names, nOfSongs, dimMethod);
-    setSidMapping(getTitleToSid(data));
     setData([...data]);
     setNowLoading(false);
   };
@@ -102,16 +122,6 @@ export default function Home() {
 
   const handleNofSongsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNOfSongs(Number(event.target.value));
-  };
-
-  const [data, setData] = useState<ResponseDatum[]>([]);
-  const fetchInitialData = async () => {
-    const d = await getData(
-      Object.keys(state).filter((k) => state[k]),
-      nOfSongs,
-      dimMethod
-    );
-    setData([...d]);
   };
 
   useEffect(() => {
@@ -406,8 +416,8 @@ export default function Home() {
           xl={true}
           style={{ height: "100%", overflow: "scroll", padding: 0 }}
         >
-          <DataContext.Provider value={{ data, sidMapping }}>
-            <PlotWrapper />
+          <DataContext.Provider value={{ data }}>
+            {plotView}
           </DataContext.Provider>
         </Grid>
       </Grid>
