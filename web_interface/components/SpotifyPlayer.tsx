@@ -11,8 +11,8 @@ export default function SpotifyPlayer({ track_id }: IProps) {
     <iframe
       title="Spotify Web Player"
       src={`https://open.spotify.com/embed/track/${track_id}`}
-      width={"100%"}
-      height={"100px"}
+      width={"50%"}
+      height={"100%"}
       frameBorder={0}
       allow={"allow"}
       style={{

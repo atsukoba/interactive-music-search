@@ -115,7 +115,7 @@ export default function Layout({ children }: IProps) {
             component="div"
             style={{ fontWeight: "bold" }}
           >
-            <i>FeatureDive</i>: Interactive Song Search - v0.0.1
+            <i>FeatureDive</i>: Interactive Song Search
           </Typography>
         </Toolbar>
       </AppBar>
