@@ -8,18 +8,22 @@ import {
 } from "react";
 import { AxesHelper, Color, Vector3 } from "three";
 
+import { CardContent, Typography } from "@mui/material";
 import {
+  AdaptiveDpr,
+  AdaptiveEvents,
+  ArcballControls,
+  Box,
+  Circle,
   GizmoHelper,
   GizmoViewport,
+  Instance,
+  Instances,
   OrbitControls,
   RoundedBox,
+  Sphere,
   Stats,
   Text,
-  Circle,
-  Sphere,
-  Instances,
-  Instance,
-  AdaptiveDpr,
   useBVH,
 } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
@@ -27,7 +31,6 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { ResponseDatum } from "../api/data";
 import { calcMappingCoordinates } from "../utils/context";
 import SpotifyPlayer from "./SpotifyPlayer";
-import { CardContent, Typography } from "@mui/material";
 
 const IS_DEVELOP_MODE = false;
 
@@ -83,6 +86,8 @@ export default function PointsViewer({ newData }: IProps) {
         }}
       >
         <AdaptiveDpr pixelated />
+        <AdaptiveEvents />
+
         {IS_DEVELOP_MODE && <Stats showPanel={0} className="stats" />}
         <OrbitControls
           enableDamping={false}
@@ -247,7 +252,12 @@ const CliclableBox = ({
           }}
         >
           <Sphere args={[0.5]}>
-            <meshBasicMaterial color={isHovered ? "red" : "orange"} />
+            <meshBasicMaterial
+              color={isHovered ? "red" : "lightblue"}
+              fog={false}
+              wireframe={true}
+              wireframeLinewidth={2}
+            />
           </Sphere>
           {/* <RoundedBox args={[0.5, 0.5, 0.5]} radius={0.05}></RoundedBox> */}
         </mesh>
