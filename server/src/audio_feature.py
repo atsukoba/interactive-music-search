@@ -82,6 +82,92 @@ def download_mp3s_from_sids(sids: List[SID], spotify: spotipy.Spotify) -> None:
         logger.warn(f"got empty API result: with sids={sids}")
 
 
+def get_data_from_sids(
+        sids: List[str],
+        spotify: spotipy.Spotify,
+        save_mp3: bool = False,
+        save_jacket: bool = False) -> Optional[List[Union[int, float]]]:
+    try:
+        res_tracks = spotify.tracks(sids).get("tracks", [])
+        res_audio_features = spotify.audio_features(sids)
+        if len(res_tracks) != len(res_audio_features) or len(sids) == len(res_tracks):
+            return None
+    except Exception as e:
+        return None
+    urls = [res.get("preview_url", None) for res in res_tracks]
+    analysis_value_list = []
+    for res_feature, res_track in zip(res_audio_features, res_tracks):
+        track_id = res_feature.get("id", None)
+        title = res_track.get("name", None)
+        album_title = res_track.get("album", {}).get("name", None)
+        album_id = res_track.get("album", {}).get("id", None)
+        date = res_track.get("album", {}).get("release_date", None)
+        album_jacket_url = res_track.get("album", {}).get(
+            "images", [{}])[0].get("url", [None])
+        artist = res_track.get("artists", [{}])[0].get("name", None)
+        artist_id = res_track.get("artists", [{}])[0].get("id", None)
+        acousticness = res_feature.get("acousticness", None)
+        danceability = res_feature.get("danceability", None)
+        duration_ms = res_feature.get("duration_ms", None)
+        energy = res_feature.get("energy", None)
+        instrumentalness = res_feature.get("instrumentalness", None)
+        key = res_feature.get("key", None)
+        liveness = res_feature.get("liveness", None)
+        loudness = res_feature.get("loudness", None)
+        mode = res_feature.get("mode", None)
+        speechiness = res_feature.get("speechiness", None)
+        tempo = res_feature.get("tempo", None)
+        time_signature = res_feature.get("time_signature", None)
+        valence = res_feature.get("valence", None)
+        analysis_value_list.append(
+            [track_id,
+             title,
+             artist,
+             artist_id,
+             album_title,
+             album_id,
+             date,
+             acousticness,
+             danceability,
+             duration_ms,
+             energy,
+             instrumentalness,
+             key,
+             liveness,
+             loudness,
+             mode,
+             speechiness,
+             tempo,
+             time_signature,
+             valence,
+             album_jacket_url])
+    for res, sid in zip(res_tracks, sids):
+        sample_url = res.get("preview_url", None)
+        image_url = res.get("album", {}).get(
+            "images", [{}])[0].get("url", [None])
+        if save_mp3 and not Path(os.path.join(
+                env["DATASET_PATH"], "spotify_sample",
+                sid[0], sid[1], sid[2], sid + ".mp3")).exists() and sample_url is not None:
+            save_dir = os.path.join(
+                env["DATASET_PATH"], "spotify_sample", sid[0], sid[1], sid[2])
+            Path(save_dir).mkdir(exist_ok=True, parents=True)
+            try:
+                urlretrieve(sample_url, os.path.join(save_dir, sid + ".mp3"))
+            except Exception as e:
+                print(e)
+        if save_jacket and not Path(os.path.join(
+                env["DATASET_PATH"], "spotify_jackets",
+                sid[0], sid[1], sid[2], sid + ".jpg")).exists() and image_url is not None:
+            save_dir = os.path.join(
+                env["DATASET_PATH"], "spotify_jackets", sid[0], sid[1], sid[2])
+            Path(save_dir).mkdir(exist_ok=True, parents=True)
+            try:
+                urlretrieve(image_url, os.path.join(save_dir, sid + ".jpg"))
+            except Exception as e:
+                print(e)
+    return analysis_value_list
+
+
 def normalize(x: np.ndarray, axis=0) -> np.ndarray:
     return minmax_scale(x, axis=axis)
 
