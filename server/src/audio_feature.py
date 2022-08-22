@@ -90,11 +90,10 @@ def get_data_from_sids(
     try:
         res_tracks = spotify.tracks(sids).get("tracks", [])
         res_audio_features = spotify.audio_features(sids)
-        if len(res_tracks) != len(res_audio_features) or len(sids) == len(res_tracks):
+        if len(res_tracks) != len(res_audio_features) or len(sids) != len(res_tracks):
             return None
     except Exception as e:
         return None
-    urls = [res.get("preview_url", None) for res in res_tracks]
     analysis_value_list = []
     for res_feature, res_track in zip(res_audio_features, res_tracks):
         track_id = res_feature.get("id", None)
@@ -154,7 +153,7 @@ def get_data_from_sids(
             try:
                 urlretrieve(sample_url, os.path.join(save_dir, sid + ".mp3"))
             except Exception as e:
-                print(e)
+                logger.warn(e)
         if save_jacket and not Path(os.path.join(
                 env["DATASET_PATH"], "spotify_jackets",
                 sid[0], sid[1], sid[2], sid + ".jpg")).exists() and image_url is not None:
@@ -164,7 +163,7 @@ def get_data_from_sids(
             try:
                 urlretrieve(image_url, os.path.join(save_dir, sid + ".jpg"))
             except Exception as e:
-                print(e)
+                logger.warn(e)
     return analysis_value_list
 
 
