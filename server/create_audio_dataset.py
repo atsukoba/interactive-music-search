@@ -2,14 +2,15 @@ import argparse
 import os
 import time
 from glob import glob
+from typing import List
 
 import numpy as np
 import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from tqdm import tqdm
-from src.audio_feature import download_mp3s_from_sids
-
+from src.audio_feature import get_data_from_sids
+from src.datasets import MMD_audio_matches
 from src.utils import create_logger, env, slack_notify_info
 
 logger = create_logger(os.path.basename(__file__))
@@ -44,18 +45,47 @@ if __name__ == "__main__":
                         default=5)
     parser.add_argument('--shuffle',
                         action='store_true',
-                        default=True,
+                        default=False,
                         help="Shuffle Spotify Track ID list for downloading files")
+    parser.add_argument('--save_audio',
+                        action='store_true',
+                        default=True,
+                        help="save audio files to dataset base directory if true")
+    parser.add_argument('--save_jacket',
+                        action='store_true',
+                        default=False,
+                        help="save jacket images to dataset base directory if true")
     args = parser.parse_args()
 
-    # logger.info("Loading audio-matched data")
-    # with open(os.path.join(env["DATASET_PATH"], "MMD_audio_matched_genre.jsonl"), "r") as f:
-    #     MMD_audio_matched_genre = [json.loads(d) for d in list(f)]
+    column_names = [
+        "spotify_track_id",
+        "title",
+        "artist",
+        "artist_id",
+        "album_title",
+        "album_id",
+        "date",
+        "acousticness",
+        "danceability",
+        "duration_ms",
+        "energy",
+        "instrumentalness",
+        "key",
+        "liveness",
+        "loudness",
+        "mode",
+        "speechiness",
+        "tempo",
+        "time_signature",
+        "valence",
+        "album_jacket_url"
+    ]
+    if (csv_path := os.path.exists(os.path.join(env["DATASET_PATH"], "MMD_spotify_all.csv"))):
+        MMD_spotify_all_df = pd.read_csv(csv_path)
+    else:
+        MMD_spotify_all_df = pd.DataFrame(columns=column_names)
 
-    logger.info("Loading MMD_audio_matches meta data file")
-    MMD_audio_matches = pd.read_csv(os.path.join(
-        env["DATASET_PATH"], "MMD_audio_matches.tsv"), sep="\t")
-
+    # start loading
     sid_list: np.ndarray = MMD_audio_matches["sid"].values  # type: ignore
 
     if args.shuffle:
@@ -71,12 +101,18 @@ if __name__ == "__main__":
         [sid_list[_i:_i+50] for _i in range(0, len(sid_list), 50)],
             desc="Downloading mp3 files")):
         batch = batch.tolist()
-        download_mp3s_from_sids(batch, spotify)
+        features = get_data_from_sids(batch, spotify,
+                                      save_mp3=args.save_audio,
+                                      save_jacket=args.save_jacket)
+        if features:
+            MMD_spotify_all_df = MMD_spotify_all_df.append(
+                pd.DataFrame(features, columns=column_names), ignore_index=True)
         time.sleep(args.request_interval)
-
-        # notification
-        if env.get("slack_notification_url", None):
-            if (idx + 1) % 10 == 0:
+        if (idx + 1) % 10 == 0:
+            MMD_spotify_all_df.to_csv(os.path.join(
+                env["DATASET_PATH"], "MMD_spotify_all.csv"), header=True, index=False)
+            # notification
+            if env.get("slack_notification_url", None):
                 total_files = glob(os.path.join(
                     env["DATASET_PATH"], "**", "*.mp3"), recursive=True)
                 slack_notify_info(
