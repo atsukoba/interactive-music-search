@@ -31,6 +31,7 @@ def dim_reduction_tsne(data: np.ndarray) -> np.ndarray:
 
 
 def dim_reduction_htsne(data: np.ndarray) -> np.ndarray:
+    raise NotImplementedError
     logger.debug(f"input data dimentions: {data.shape}")
     data_tsne = TSNE(n_components=3).fit_transform(data)
     logger.debug(f"ht-SNE data dimentions: {data_tsne.shape}")

@@ -11,6 +11,10 @@ logger.info("Loading MMD_audio_matched_genre data")
 with open(os.path.join(env["DATASET_PATH"], "MMD_audio_matched_genre.jsonl"), "r") as f:
     MMD_audio_matched_genre = [json.loads(d) for d in list(f)]
 
+logger.info("Loading MMD_scraped_title_artist data")
+with open(os.path.join(env["DATASET_PATH"], "MMD_scraped_title_artist.jsonl"), "r") as f:
+    MMD_scraped_title_artist = [json.loads(d) for d in list(f)]
+
 logger.info("Loading MMD_md5_metainfo data")
 MMD_md5_metainfo = pd.read_csv(os.path.join(
     env["DATASET_PATH"], "MMD_md5_metainfo.tsv"),  sep="\t")
@@ -25,3 +29,4 @@ if __name__ == "__main__":
     logger.info("MMD_audio_matches")
     MMD_audio_matches.head()
     logger.info(MMD_audio_matched_genre[:5])
+    logger.info(MMD_scraped_title_artist[:5])
