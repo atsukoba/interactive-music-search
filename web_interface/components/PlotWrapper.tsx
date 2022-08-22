@@ -3,10 +3,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { Box } from "@mui/material";
 
-import { getSampleData } from "../api/data";
 import { DataContext } from "../utils/context";
 import { useGetElementProperty } from "../utils/ref";
-import Plotly from "./Plotly";
+import PointsViewer from "./PointsViewer";
 
 export default function PlotWrapper() {
   const targetRef = useRef(null);
@@ -20,15 +19,9 @@ export default function PlotWrapper() {
   }, []);
 
   return (
-    <Box style={{ height: "100%" }} ref={targetRef}>
+    <Box ref={targetRef} style={{ height: "100%" }}>
       <DataContext.Consumer>
-        {(d) => (
-          <Plotly
-            newData={d.data}
-            sidMapping={d.sidMapping}
-            windowSize={size}
-          />
-        )}
+        {(d) => <PointsViewer newData={d.data} />}
       </DataContext.Consumer>
     </Box>
   );

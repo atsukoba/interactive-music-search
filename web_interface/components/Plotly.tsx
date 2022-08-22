@@ -14,13 +14,6 @@ import { useGetElementProperty } from "../utils/ref";
 import { sampleConfig, sampleData, sampleLayout } from "../utils/sampleData";
 import SpotifyPlayer from "./SpotifyPlayer";
 
-declare global {
-  interface Window {
-    onSpotifyIframeApiReady: (IFrameAPI: any) => void;
-    trustedTypes: any;
-    SpotifyIframeConfig: any;
-  }
-}
 
 // avoid error on using react-plotly on Next with typescript
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
@@ -89,14 +82,14 @@ const Plotly = ({ newData, sidMapping, windowSize }: IProps) => {
 
   return (
     <>
-      <Plot
+      {/* <Plot
         data={newData}
         layout={layout}
         config={sampleConfig}
         style={{ width: "100%", height: "calc(100% - 100px)" }}
         onClick={onClickDataPoint}
       />
-      <SpotifyPlayer track_id={currentTrackId} />
+      <SpotifyPlayer track_id={currentTrackId} /> */}
     </>
   );
 };
