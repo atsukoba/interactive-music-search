@@ -80,7 +80,7 @@ if __name__ == "__main__":
         "valence",
         "album_jacket_url"
     ]
-    if (csv_path := os.path.exists(os.path.join(env["DATASET_PATH"], "MMD_spotify_all.csv"))):
+    if os.path.exists(csv_path := os.path.join(env["DATASET_PATH"], "MMD_spotify_all.csv")):
         MMD_spotify_all_df = pd.read_csv(csv_path)
     else:
         MMD_spotify_all_df = pd.DataFrame(columns=column_names)
@@ -104,18 +104,30 @@ if __name__ == "__main__":
         features = get_data_from_sids(batch, spotify,
                                       save_mp3=args.save_audio,
                                       save_jacket=args.save_jacket)
-        if features:
+        if features is not None:
             MMD_spotify_all_df = MMD_spotify_all_df.append(
                 pd.DataFrame(features, columns=column_names), ignore_index=True)
         time.sleep(args.request_interval)
         if (idx + 1) % 10 == 0:
             MMD_spotify_all_df.to_csv(os.path.join(
-                env["DATASET_PATH"], "MMD_spotify_all.csv"), header=True, index=False)
+                env["DATASET_PATH"], "MMD_spotify_all.csv"),
+                header=True, index=False)
+            logger.info(
+                f"MMD_spotify_all_df saved with size {MMD_spotify_all_df.shape}")
             # notification
             if env.get("slack_notification_url", None):
-                total_files = glob(os.path.join(
+                total_audio_files = glob(os.path.join(
                     env["DATASET_PATH"], "**", "*.mp3"), recursive=True)
+                total_image_files = glob(os.path.join(
+                    env["DATASET_PATH"], "**", "*.jpg"), recursive=True)
                 slack_notify_info(
                     "spotify data fetcher",
-                    f"now downloaded {len(total_files)} files...",
+                    f"now downloaded {len(total_audio_files)} mp3 files" +
+                    f"and {len(total_image_files)} jpg files.",
                     title="Spotify Datafetcher")
+
+    MMD_spotify_all_df.to_csv(os.path.join(
+        env["DATASET_PATH"], "MMD_spotify_all.csv"),
+        header=True, index=False)
+    logger.info(
+        f"Finally `MMD_spotify_all.csv` saved with size {MMD_spotify_all_df.shape}")
