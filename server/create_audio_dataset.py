@@ -1,4 +1,5 @@
 import argparse
+import math
 import os
 import time
 from glob import glob
@@ -9,6 +10,7 @@ import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from tqdm import tqdm
+
 from src.audio_feature import get_data_from_sids
 from src.datasets import MMD_audio_matches
 from src.utils import create_logger, env, slack_notify_info
@@ -82,11 +84,16 @@ if __name__ == "__main__":
     ]
     if os.path.exists(csv_path := os.path.join(env["DATASET_PATH"], "MMD_spotify_all.csv")):
         MMD_spotify_all_df = pd.read_csv(csv_path)
+        already_got_sids: np.ndarray = MMD_spotify_all_df["spotify_track_id"].unique(
+        )
     else:
         MMD_spotify_all_df = pd.DataFrame(columns=column_names)
+        already_got_sids: np.ndarray = np.array([])
 
-    # start loading
-    sid_list: np.ndarray = MMD_audio_matches["sid"].values  # type: ignore
+    sid_list: np.ndarray = MMD_audio_matches["sid"].unique()
+    logger.info(f"ALl Spotify Track IDs: {len(sid_list)}")
+    sid_list = np.setdiff1d(sid_list, already_got_sids)
+    logger.info(f"Target Spotify Track IDs: {len(sid_list)}")
 
     if args.shuffle:
         logger.info("Shuffling Spotify Track ID list...")
@@ -97,6 +104,8 @@ if __name__ == "__main__":
             f"Limit num of tracks to download ({len(sid_list)} -> {args.num_of_files_limit})...")
         sid_list = sid_list[:args.num_of_files_limit]
 
+    # start loading
+    logger.info(f"Start Loading (batch_size is 50, {math.floor(len(sid_list)/50)} steps)")
     for idx, batch in enumerate(tqdm(
         [sid_list[_i:_i+50] for _i in range(0, len(sid_list), 50)],
             desc="Downloading mp3 files")):
