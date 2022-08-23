@@ -90,7 +90,8 @@ def get_data_from_sids(
     try:
         res_tracks = spotify.tracks(sids).get("tracks", [])
         res_audio_features = spotify.audio_features(sids)
-        if len(res_tracks) != len(res_audio_features) or len(sids) != len(res_tracks):
+        if len(res_tracks) != len(res_audio_features) or \
+                len(sids) != len(res_tracks):
             return None
     except Exception as e:
         return None
@@ -101,15 +102,15 @@ def get_data_from_sids(
         album_title = res_track.get("album", {}).get("name", None)
         album_id = res_track.get("album", {}).get("id", None)
         date = res_track.get("album", {}).get("release_date", None)
+        # fallback for that the response has a empty value for each key
         album_jacket_url = None
-        # if condition as a fallback for the response has a empty value for each key
-        if len(images := res_track.get("album", {}).get("images", [])) > 0:
+        if len(images := res_track.get("album", {}).get("images", [{}])) > 0:
             album_jacket_url = images[0].get("url", None)
         artist = None
         artist_id = None
-        if len(artist_info := res_track.get("artists", [])) > 0:
-            artist = artist_info.get("name", None)
-            artist_id = artist_info.get("id", None)
+        if len(artist_info := res_track.get("artists", [{}])) > 0:
+            artist = artist_info[0].get("name", None)
+            artist_id = artist_info[0].get("id", None)
         acousticness = res_feature.get("acousticness", None)
         danceability = res_feature.get("danceability", None)
         duration_ms = res_feature.get("duration_ms", None)
@@ -147,11 +148,14 @@ def get_data_from_sids(
              album_jacket_url])
     for res, sid in zip(res_tracks, sids):
         sample_url = res.get("preview_url", None)
-        image_url = res.get("album", {}).get(
-            "images", [{}])[0].get("url", [None])
+        if len(images := res.get("album", {}).get("images", [])) > 0:
+            image_url = images[0].get("url", None)
+        else:
+            image_url = None
         if save_mp3 and not Path(os.path.join(
-                env["DATASET_PATH"], "spotify_sample",
-                sid[0], sid[1], sid[2], sid + ".mp3")).exists() and sample_url is not None:
+            env["DATASET_PATH"], "spotify_sample",
+            sid[0], sid[1], sid[2], sid + ".mp3")).exists() \
+                and sample_url is not None:
             save_dir = os.path.join(
                 env["DATASET_PATH"], "spotify_sample", sid[0], sid[1], sid[2])
             Path(save_dir).mkdir(exist_ok=True, parents=True)
@@ -160,8 +164,9 @@ def get_data_from_sids(
             except Exception as e:
                 logger.warn(e)
         if save_jacket and not Path(os.path.join(
-                env["DATASET_PATH"], "spotify_jackets",
-                sid[0], sid[1], sid[2], sid + ".jpg")).exists() and image_url is not None:
+            env["DATASET_PATH"], "spotify_jackets",
+            sid[0], sid[1], sid[2], sid + ".jpg")).exists() and \
+                image_url is not None:
             save_dir = os.path.join(
                 env["DATASET_PATH"], "spotify_jackets", sid[0], sid[1], sid[2])
             Path(save_dir).mkdir(exist_ok=True, parents=True)
