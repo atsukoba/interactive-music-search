@@ -101,10 +101,15 @@ def get_data_from_sids(
         album_title = res_track.get("album", {}).get("name", None)
         album_id = res_track.get("album", {}).get("id", None)
         date = res_track.get("album", {}).get("release_date", None)
-        album_jacket_url = res_track.get("album", {}).get(
-            "images", [{}])[0].get("url", [None])
-        artist = res_track.get("artists", [{}])[0].get("name", None)
-        artist_id = res_track.get("artists", [{}])[0].get("id", None)
+        album_jacket_url = None
+        # if condition as a fallback for the response has a empty value for each key
+        if len(images := res_track.get("album", {}).get("images", [])) > 0:
+            album_jacket_url = images[0].get("url", None)
+        artist = None
+        artist_id = None
+        if len(artist_info := res_track.get("artists", [])) > 0:
+            artist = artist_info.get("name", None)
+            artist_id = artist_info.get("id", None)
         acousticness = res_feature.get("acousticness", None)
         danceability = res_feature.get("danceability", None)
         duration_ms = res_feature.get("duration_ms", None)
