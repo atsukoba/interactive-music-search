@@ -88,15 +88,19 @@ def get_data_from_sids(
         save_mp3: bool = False,
         save_jacket: bool = False) -> Optional[List[Union[int, float]]]:
     try:
-        res_tracks = spotify.tracks(sids).get("tracks", [])
-        res_audio_features = spotify.audio_features(sids)
+        res_tracks: List[Optional[dict]] = spotify.tracks(
+            sids).get("tracks", [])
+        res_audio_features: List[Optional[dict]] = spotify.audio_features(sids)
         if len(res_tracks) != len(res_audio_features) or \
                 len(sids) != len(res_tracks):
             return None
     except Exception as e:
+        logger.warn(e)
         return None
     analysis_value_list = []
     for res_feature, res_track in zip(res_audio_features, res_tracks):
+        if res_feature is None or res_track is None:
+            continue
         track_id = res_feature.get("id", None)
         title = res_track.get("name", None)
         album_title = res_track.get("album", {}).get("name", None)
@@ -124,29 +128,31 @@ def get_data_from_sids(
         tempo = res_feature.get("tempo", None)
         time_signature = res_feature.get("time_signature", None)
         valence = res_feature.get("valence", None)
-        analysis_value_list.append(
-            [track_id,
-             title,
-             artist,
-             artist_id,
-             album_title,
-             album_id,
-             date,
-             acousticness,
-             danceability,
-             duration_ms,
-             energy,
-             instrumentalness,
-             key,
-             liveness,
-             loudness,
-             mode,
-             speechiness,
-             tempo,
-             time_signature,
-             valence,
-             album_jacket_url])
+        analysis_value_list.append([
+            track_id,
+            title,
+            artist,
+            artist_id,
+            album_title,
+            album_id,
+            date,
+            acousticness,
+            danceability,
+            duration_ms,
+            energy,
+            instrumentalness,
+            key,
+            liveness,
+            loudness,
+            mode,
+            speechiness,
+            tempo,
+            time_signature,
+            valence,
+            album_jacket_url])
     for res, sid in zip(res_tracks, sids):
+        if res is None:
+            continue
         sample_url = res.get("preview_url", None)
         if len(images := res.get("album", {}).get("images", [])) > 0:
             image_url = images[0].get("url", None)

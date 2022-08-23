@@ -135,9 +135,10 @@ if __name__ == "__main__":
                     env["DATASET_PATH"], "**", "*.jpg"), recursive=True)
                 slack_notify_info(
                     "spotify data fetcher",
-                    f"now downloaded {len(total_audio_files)} mp3 files" +
-                    f"and {len(total_image_files)} jpg files.",
-                    title="Spotify Datafetcher")
+                    f"now downloaded {len(total_audio_files)} mp3 files " +
+                    f"and {len(total_image_files)} jpg files. " +
+                    f"current meta data dataframe size is {MMD_spotify_all_df.shape}",
+                    title="Spotify Audio/Feature Datafetcher")
 
     MMD_spotify_all_df.to_csv(os.path.join(
         env["DATASET_PATH"], "MMD_spotify_all.csv"),
