@@ -73,7 +73,7 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
         sids = res.spotify_track_id.values
         titles = res.title.values
         artists = res.artist.values
-        years = res.publish_year.values
+        publish_date = res.date.values
         # normalize audio features
         if len(a) > 0:
             for feat_name in a:
@@ -115,7 +115,7 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
             "y": y,
             "z": z,
         } for sid, t, a, y, x, y, z
-            in zip(sids, titles, artists, years,
+            in zip(sids, titles, artists, publish_date,
                    data_matrix[:, 0], data_matrix[:, 1], data_matrix[:, 2])]
     else:
         logger.warn("Database returns no records!")

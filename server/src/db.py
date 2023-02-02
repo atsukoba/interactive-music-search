@@ -72,22 +72,22 @@ class QueryDataSelector:
         if cls.engine is None:
             return
 
-        if len(midi_feature_names) > 0 and len(audio_feature_names) > 0: # both
+        if len(midi_feature_names) > 0 and len(audio_feature_names) > 0:  # both
             q = text(
-                "SELECT song.spotify_track_id, song.title, song.artist, song.publish_year, " +
+                "SELECT song.spotify_track_id, song.title, song.artist, song.date, song.date, " +
                 ','.join(['M.' + m for m in midi_feature_names]) + ", " +
                 ','.join(['A.' + a for a in audio_feature_names]) + " " +
                 "FROM song INNER JOIN midi_features M on M.md5 = song.md5 " +
                 "INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;"
             )
-        elif len(midi_feature_names) > 0: # midi feature only
+        elif len(midi_feature_names) > 0:  # midi feature only
             q = text(
-                "SELECT song.spotify_track_id, song.title, song.artist, song.publish_year, " +
+                "SELECT song.spotify_track_id, song.title, song.artist, song.date, song.date, " +
                 ','.join(['M.' + m for m in midi_feature_names]) + " " +
                 "FROM song INNER JOIN midi_features M on M.md5 = song.md5")
         elif len(audio_feature_names) > 0:  # audio feature only
             q = text(
-                "SELECT song.spotify_track_id, song.title, song.artist, song.publish_year, " +
+                "SELECT song.spotify_track_id, song.title, song.artist, song.date, song.date, " +
                 ','.join(['A.' + a for a in audio_feature_names]) + " " +
                 "FROM song INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;")
         else:
