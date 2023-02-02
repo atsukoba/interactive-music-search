@@ -3,19 +3,15 @@ import multiprocessing as mp
 import os
 import warnings
 from concurrent.futures import Future, ProcessPoolExecutor
-from typing import List, Union
-
-import librosa
-import numpy as np
+from typing import List
 import pandas as pd
-from sqlalchemy import column, text
+from sqlalchemy import text
 from tqdm import tqdm
 
 from src.audio_feature import (AudioFeatures, calc_audio_features,
                                sid_to_filepath)
-from src.datasets import MMD_audio_matches, MMD_md5_metainfo
 from src.db import create_engine
-from src.utils import AudioFeatureName, create_logger, env
+from src.utils import AudioFeatureName, create_logger
 
 warnings.simplefilter('ignore')
 logger = create_logger(os.path.basename(__file__))
@@ -40,7 +36,7 @@ if __name__ == "__main__":
     logger.debug(q)
     logger.info("Loading database: songs.song")
     res_df = pd.read_sql_query(sql=q, con=engine)
-    res_df.columns = ["sid"]
+    res_df.columns = ["sid"]  # type: ignore
     logger.info(f"Got {len(res_df)} records")
     audio_files = [sid_to_filepath(sid) for sid in res_df.sid.values]
 
@@ -68,8 +64,7 @@ if __name__ == "__main__":
                           "percussive_components",
                           "spectral_centroid",
                           "spectral_rolloff",
-                          "chroma_frequencies"]
-
+                          "chroma_frequencies"]  # type: ignore
     results_df.drop_duplicates(subset=["spotify_track_id"], inplace=True)
     results_df.to_sql("audio_features", con=engine,
                       if_exists="append", index=False)

@@ -39,7 +39,7 @@ if __name__ == "__main__":
     logger.debug(q)
     logger.info("Loading database column: `songs.md5`")
     res_df = pd.read_sql_query(sql=q, con=engine)
-    res_df.columns = ["md5"]
+    res_df.columns = ["md5"]  # type: ignore
     logger.info(f"Got {len(res_df)} records")
     midi_files = [md5_to_filepath(md5) for md5 in res_df.md5.values]
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         "drum_in_duple_rate",
         "drum_in_triple_rate",
         "drum_pattern_consistency"
-    ]
+    ]  # type: ignore
     results_df.drop_duplicates(subset=["md5"], inplace=True)
     results_df.to_sql("midi_features", con=engine,
                       if_exists="append", index=False)
