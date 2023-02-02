@@ -196,10 +196,18 @@ export default function Home() {
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
   const updateData = async () => {
+    const genres = Object.keys(genreState).filter((key) => state[key]);
     const feature_names = Object.keys(state).filter((key) => state[key]);
-    console.log(feature_names);
+    const year_range = dateRangeValue;
+    // console.log(feature_names);
     setNowLoading(true);
-    const data = await getData(feature_names, nOfSongs, dimMethod);
+    const data = await getData(
+      feature_names,
+      nOfSongs,
+      dimMethod,
+      genres,
+      year_range
+    );
     setSidMapping(getTitleToSid(data));
     setData([...data]);
     setNowLoading(false);
