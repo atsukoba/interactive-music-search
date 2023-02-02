@@ -1,18 +1,25 @@
-DROP TABLE IF EXISTS midi_features;
-DROP TABLE IF EXISTS audio_features;
-DROP TABLE IF EXISTS spotify_features;
-DROP TABLE IF EXISTS song;
+CREATE SCHEMA IF NOT EXISTS public;
 
-CREATE TABLE song (
+DROP TABLE IF EXISTS spotify_features;
+
+DROP TABLE IF EXISTS song CASCADE;
+
+CREATE TABLE public.song (
     md5 TEXT NOT NULL UNIQUE,
     spotify_track_id TEXT NOT NULL UNIQUE,
+    midi_artist TEXT,
+    midi_title TEXT,
+    scraped_genre TEXT,
     title TEXT,
     artist TEXT,
-    publish_year smallint,
+    artist_id TEXT,
+    album_title TEXT,
+    album_id TEXT,
+    date DATE,
     PRIMARY KEY(md5, spotify_track_id)
 );
 
-CREATE TABLE midi_features (
+CREATE TABLE public.midi_features (
     md5 TEXT REFERENCES song(md5),
     -- Pitch metrics
     pitch_range INT,
@@ -27,9 +34,7 @@ CREATE TABLE midi_features (
     empty_beat_rate FLOAT,
     drum_in_duple_rate FLOAT,
     drum_in_triple_rate FLOAT,
-    drum_pattern_consistency FLOAT
-
-    -- Duplicated mgeval metrics
+    drum_pattern_consistency FLOAT -- Duplicated mgeval metrics
     -- total_used_pitch INT,
     -- bar_used_pitch FLOAT,
     -- total_used_note INT,
@@ -41,30 +46,32 @@ CREATE TABLE midi_features (
     -- note_length_hist FLOAT
 );
 
-CREATE TABLE audio_features (
+CREATE TABLE public.audio_features (
     spotify_track_id TEXT REFERENCES song(spotify_track_id),
     tempo FLOAT,
-    zero_crossing_rate FLOAT[],
-    harmonic_components FLOAT[],
-    percussive_components FLOAT[],
-    spectral_centroid FLOAT[],
-    spectral_rolloff FLOAT[],
-    chroma_frequencies FLOAT[]
+    zero_crossing_rate FLOAT [],
+    harmonic_components FLOAT [],
+    percussive_components FLOAT [],
+    spectral_centroid FLOAT [],
+    spectral_rolloff FLOAT [],
+    chroma_frequencies FLOAT []
 );
 
-CREATE TABLE spotify_features (
+CREATE TABLE public.spotify_features (
     spotify_track_id TEXT REFERENCES song(spotify_track_id),
+    md5 TEXT REFERENCES song(md5),
     acousticness FLOAT,
     danceability FLOAT,
     duration_ms FLOAT,
     energy FLOAT,
     instrumentalness FLOAT,
-    music_key FLOAT,
+    key FLOAT,
     liveness FLOAT,
     loudness FLOAT,
     mode FLOAT,
     speechiness FLOAT,
     tempo FLOAT,
     time_signature FLOAT,
-    valence FLOAT
+    valence FLOAT,
+    album_jacket_url TEXT
 );
