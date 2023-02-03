@@ -1,16 +1,15 @@
 # for debugging front-end
 import os
 from random import choice, choices, randint
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
+
 import numpy as np
-
 import pandas as pd
-
 from src.datasets import MMD_md5_metainfo
 from src.db import QueryDataSelector
+from src.dim_reduction import dim_reduction_pca, dim_reduction_tsne
 from src.utils import (AudioFeatureName, AudioFeatureNames, MidiFeatureName,
                        MidiFeatureNames, create_logger, env)
-from src.dim_reduction import dim_reduction_tsne, dim_reduction_pca
 
 """ expected data structure on front-end 
 
@@ -58,7 +57,9 @@ DimReductionMethod = Literal["PCA", "tSNE"]
 
 def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
                n_data: int = 1000,
-               dim_reduction_method: DimReductionMethod = "PCA"
+               dim_reduction_method: DimReductionMethod = "PCA",
+               genres: List[str] = ["rock", "pop"],
+               year_range: Tuple[int, int] = (1900, 2023)
                ) -> Optional[List[Dict[str, Union[str, int]]]]:
 
     m: List[MidiFeatureName] = [
@@ -66,7 +67,8 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
     a: List[AudioFeatureName] = [
         n for n in feature_names if n in AudioFeatureNames]
 
-    res: Optional[pd.DataFrame] = QueryDataSelector.get_features(m, a)
+    res: Optional[pd.DataFrame] = QueryDataSelector.get_features(
+        m, a, genres, year_range)
 
     if res is not None:
         res = res.head(n_data)

@@ -90,7 +90,11 @@ def get_features():
             'pitch_class_entropy', 'empty_beat_rate'
         ],
         'method': "PCA",
-        'n_songs': 100
+        'n_songs': 100,
+        'genres': [
+            'rock', 'pops'
+        ],
+        'year_range' [1990, 2005]
     }
     Returns:
         _type_: _description_
