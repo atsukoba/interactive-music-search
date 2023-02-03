@@ -254,7 +254,9 @@ export default function Home() {
     const d = await getData(
       Object.keys(state).filter((k) => state[k]),
       nOfSongs,
-      dimMethod
+      dimMethod,
+      Object.keys(genreState).filter((k) => genreState[k]),
+      dateRangeValue
     );
     setData([...d]);
   };
