@@ -5,7 +5,6 @@ interface IProps {
   track_id: string;
 }
 
-export const clientSecret = process.env.CLIENT_SECRET;
 export default function SpotifyPlayer({ track_id }: IProps) {
   return (
     <iframe
