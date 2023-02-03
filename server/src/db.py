@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from venv import create
 from sqlalchemy import (ARRAY, Column, Float,
                         ForeignKey, Integer, String, text)
@@ -51,7 +51,9 @@ class QueryDataSelector:
     @classmethod
     def get_features(cls,
                      midi_feature_names: List[MidiFeatureName],
-                     audio_feature_names: List[AudioFeatureName]) -> Optional[pd.DataFrame]:
+                     audio_feature_names: List[AudioFeatureName],
+                     genres: List[str],
+                     year_range: Tuple[int, int]) -> Optional[pd.DataFrame]:
         """ got pandas.DataFrame object which contain values of selected features
 
         Args:
@@ -72,24 +74,29 @@ class QueryDataSelector:
         if cls.engine is None:
             return
 
+        q_genre_and_year = "WHERE (" + " OR ".join([f"song.scraped_genre = '{g}'" for g in genres]) + ") " + \
+            f"AND song.date > '{year_range[0]}-01-01' AND song.date < '{year_range[1]}-01-01' "
+
         if len(midi_feature_names) > 0 and len(audio_feature_names) > 0:  # both
             q = text(
-                "SELECT song.spotify_track_id, song.title, song.artist, song.date, song.date, " +
-                ','.join(['M.' + m for m in midi_feature_names]) + ", " +
-                ','.join(['A.' + a for a in audio_feature_names]) + " " +
+                "SELECT song.spotify_track_id, song.title, song.artist, song.date, " +
+                ', '.join(['M.' + m for m in midi_feature_names]) + ", " +
+                ', '.join(['A.' + a for a in audio_feature_names]) + " " +
                 "FROM song INNER JOIN midi_features M on M.md5 = song.md5 " +
-                "INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;"
-            )
+                "INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id " +
+                q_genre_and_year)
         elif len(midi_feature_names) > 0:  # midi feature only
             q = text(
-                "SELECT song.spotify_track_id, song.title, song.artist, song.date, song.date, " +
-                ','.join(['M.' + m for m in midi_feature_names]) + " " +
-                "FROM song INNER JOIN midi_features M on M.md5 = song.md5")
+                "SELECT song.spotify_track_id, song.title, song.artist, song.date, " +
+                ', '.join(['M.' + m for m in midi_feature_names]) + " " +
+                "FROM song INNER JOIN midi_features M on M.md5 = song.md5" +
+                q_genre_and_year + ";")
         elif len(audio_feature_names) > 0:  # audio feature only
             q = text(
-                "SELECT song.spotify_track_id, song.title, song.artist, song.date, song.date, " +
-                ','.join(['A.' + a for a in audio_feature_names]) + " " +
-                "FROM song INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id;")
+                "SELECT song.spotify_track_id, song.title, song.artist, song.date, " +
+                ', '.join(['A.' + a for a in audio_feature_names]) + " " +
+                "FROM song INNER JOIN audio_features A on A.spotify_track_id = song.spotify_track_id " +
+                q_genre_and_year + ";")
         else:
             return
         logger.debug(q)
