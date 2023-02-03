@@ -16,8 +16,13 @@ class RequestType(TypedDict):
 logger = create_logger(os.path.basename(__file__))
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # insecure ?
-
+cors = CORS(
+    app, resources={
+        r"/*": {"origins": [
+            "http://cclab-dlbox2.sfc.keio.ac.jp/",
+            "http://localhost",
+            "http://127.0.0.1"]}})
+
 
 @app.route("/", methods=["GET"])
 def test():
