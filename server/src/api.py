@@ -22,7 +22,7 @@ cors = CORS(
             "http://cclab-dlbox2.sfc.keio.ac.jp/",
             "http://localhost",
             "http://127.0.0.1"]}})
-
+
 
 @app.route("/", methods=["GET"])
 def test():
