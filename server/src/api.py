@@ -19,8 +19,8 @@ app = Flask(__name__)
 cors = CORS(
     app, resources={
         r"/*": {"origins": [
-            "http://cclab-dlbox2.sfc.keio.ac.jp/",
-            "http://cclab-dlbox2.sfc.keio.ac.jp/:3000",
+            "http://cclab-dlbox2.sfc.keio.ac.jp",
+            "http://cclab-dlbox2.sfc.keio.ac.jp:3000",
             "http://localhost:3000",
             "http://127.0.0.1:3000"]}})
 
