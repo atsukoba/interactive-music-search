@@ -46,7 +46,9 @@ export const getSampleData = async (n_songs: number) => {
 export const getData = async (
   features: Array<string>,
   n_songs: number,
-  method: string
+  method: string,
+  genres: Array<string>,
+  year_range: Array<number>
 ) => {
   const params = {
     method: "POST",
@@ -54,6 +56,8 @@ export const getData = async (
       feature_names: features,
       n_songs: n_songs,
       method: method,
+      genres: genres,
+      year_range: year_range,
     }),
     headers: headers,
   };

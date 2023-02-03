@@ -39,6 +39,7 @@ import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from "@mui/material/AccordionSummary";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
 
 import {
@@ -85,12 +86,87 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 const drawerWidth = 270;
+const allGenres = [
+  "pop",
+  "classical",
+  "baroque",
+  "rock",
+  "renaissance",
+  "alternative-indie",
+  "italian french spanish",
+  "metal",
+  "country",
+  "romantic",
+  "traditional",
+  "dance-eletric",
+  "modern",
+  "jazz",
+  "blues",
+  "hits of 2011 2020",
+  "hip-hop-rap",
+  "punk",
+  "instrumental",
+  "hits of the 1970s",
+  "hits of the 2000s",
+];
+
+const allMidiFeatures = [
+  "pitch_range",
+  "n_pitches_used",
+  "n_pitch_classes_used",
+  "polyphony",
+  "polyphony_rate",
+  "scale_consistency",
+  "pitch_entropy",
+  "pitch_class_entropy",
+  "empty_beat_rate",
+  "drum_in_duple_rate",
+  "drum_in_triple_rate",
+  "drum_pattern_consistency",
+];
+
+const allAudioFeatures = [
+  "tempo",
+  "zero_crossing_rate",
+  "harmonic_components",
+  "percussive_components",
+  "spectral_centroid",
+  "spectral_rolloff",
+  "chroma_frequencies",
+];
 
 export default function Home() {
   // NOTE: handle `any` below
   let state: { [name: string]: boolean };
+  let genreState: { [name: string]: boolean };
   let setState: any;
+  let setGenreState: any;
+  [genreState, setGenreState] = useState({
+    // Genres
+    pop: false,
+    classical: false,
+    baroque: false,
+    rock: false,
+    renaissance: false,
+    alternative_indie: false,
+    italian_french_spanish: false,
+    metal: false,
+    country: false,
+    romantic: false,
+    traditional: false,
+    dance_eletric: false,
+    modern: false,
+    jazz: false,
+    blues: false,
+    hits_of_2011_2020: false,
+    hip_hop_rap: false,
+    punk: false,
+    instrumental: false,
+    hits_of_the_1970s: false,
+    hits_of_the_2000s: false,
+  });
   [state, setState] = useState({
+    // MIDI Features
     pitch_range: true,
     n_pitches_used: false,
     n_pitch_classes_used: false,
@@ -103,6 +179,7 @@ export default function Home() {
     drum_in_duple_rate: false,
     drum_in_triple_rate: false,
     drum_pattern_consistency: false,
+    // Audio Features
     tempo: true,
     zero_crossing_rate: false,
     harmonic_components: true,
@@ -114,14 +191,23 @@ export default function Home() {
 
   const [nOfSongs, setNOfSongs] = useState(500);
   const [dimMethod, setDimMethod] = useState("tSNE");
+  const [dateRangeValue, setDateRangeValue] = useState<number[]>([1939, 2021]);
   const [nowLoading, setNowLoading] = useState(false);
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
   const updateData = async () => {
+    const genres = Object.keys(genreState).filter((key) => state[key]);
     const feature_names = Object.keys(state).filter((key) => state[key]);
-    console.log(feature_names);
+    const year_range = dateRangeValue;
+    // console.log(feature_names);
     setNowLoading(true);
-    const data = await getData(feature_names, nOfSongs, dimMethod);
+    const data = await getData(
+      feature_names,
+      nOfSongs,
+      dimMethod,
+      genres,
+      year_range
+    );
     setSidMapping(getTitleToSid(data));
     setData([...data]);
     setNowLoading(false);
@@ -135,12 +221,29 @@ export default function Home() {
     setState(newState);
   };
 
+  const handleGenreChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const key = event.target.name.replace(" ", "_").replace("-", "_");
+    let newState = {
+      ...genreState,
+      [key]: event.target.checked,
+    };
+    setGenreState(newState);
+  };
+
   const handleMethodChange = (
     event: SelectChangeEvent<string>,
     child: ReactNode
   ) => {
     setDimMethod(event.target.value);
   };
+
+  const handleDateChange = (event: Event, newValue: number | number[]) => {
+    setDateRangeValue(newValue as number[]);
+  };
+
+  const valuetext = (y) => y;
 
   const handleNofSongsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNOfSongs(Number(event.target.value));
@@ -159,6 +262,33 @@ export default function Home() {
   useEffect(() => {
     fetchInitialData().catch(console.error);
   }, []);
+
+  const setGenreAll = () => {
+    setGenreState({
+      ...genreState,
+      pop: genreState.pop === false,
+      classical: genreState.classical === false,
+      baroque: genreState.baroque === false,
+      rock: genreState.rock === false,
+      renaissance: genreState.renaissance === false,
+      alternative_indie: genreState.alternative_indie === false,
+      italian_french_spanish: genreState.italian_french_spanish === false,
+      metal: genreState.metal === false,
+      country: genreState.country === false,
+      romantic: genreState.romantic === false,
+      traditional: genreState.traditional === false,
+      dance_eletric: genreState.dance_eletric === false,
+      modern: genreState.modern === false,
+      jazz: genreState.jazz === false,
+      blues: genreState.blues === false,
+      hits_of_2011_2020: genreState.hits_of_2011_2020 === false,
+      hip_hop_rap: genreState.hip_hop_rap === false,
+      punk: genreState.punk === false,
+      instrumental: genreState.instrumental === false,
+      hits_of_the_1970s: genreState.hits_of_the_1970s === false,
+      hits_of_the_2000s: genreState.hits_of_the_2000s === false,
+    });
+  };
 
   const setMidiAll = () => {
     setState({
@@ -281,6 +411,30 @@ export default function Home() {
                   <MenuItem value={"tSNE"}>tSNE</MenuItem>
                 </Select>
               </FormControl>
+              <Box
+                style={{ width: "calc(100% - 35px)", paddingLeft: "15px" }}
+                sx={{ ma: 2, mb: 4 }}
+              >
+                <Slider
+                  aria-label="Always visible"
+                  value={dateRangeValue}
+                  onChange={handleDateChange}
+                  valueLabelDisplay="auto"
+                  min={1939}
+                  max={2021}
+                  getAriaValueText={valuetext}
+                />
+                <span
+                  style={{
+                    height: "16px",
+                    fontSize: "12px",
+                    display: "block",
+                    textAlign: "center",
+                  }}
+                >
+                  Year Range: {dateRangeValue[0]} ~ {dateRangeValue[1]}
+                </span>
+              </Box>
             </AccordionDetails>
           </Accordion>
           <Divider />
@@ -294,28 +448,22 @@ export default function Home() {
             </AccordionSummary>
             <AccordionDetails>
               <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.pitch_range}
-                      name="pitch_range"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="pitch_range"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.n_pitches_used}
-                      name="n_pitches_used"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="n_pitches_used"
-                />
+                {allGenres.map((name) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={
+                          genreState[name.replace(" ", "_").replace("-", "_")]
+                        }
+                        name={name}
+                        onChange={handleGenreChange}
+                      />
+                    }
+                    label={name}
+                  />
+                ))}
                 <Box my={2}>
-                  <Button variant="contained" onClick={setMidiAll}>
+                  <Button variant="contained" onClick={setGenreAll}>
                     Toggle All
                   </Button>
                 </Box>
@@ -333,126 +481,18 @@ export default function Home() {
             </AccordionSummary>
             <AccordionDetails>
               <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.pitch_range}
-                      name="pitch_range"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="pitch_range"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.n_pitches_used}
-                      name="n_pitches_used"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="n_pitches_used"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.n_pitch_classes_used}
-                      name="n_pitch_classes_used"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="n_pitch_classes_used"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.polyphony}
-                      name="polyphony"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="polyphony"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.polyphony_rate}
-                      name="polyphony_rate"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="polyphony_rate"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.scale_consistency}
-                      name="scale_consistency"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="scale_consistency"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.pitch_entropy}
-                      name="pitch_entropy"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="pitch_entropy"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.pitch_class_entropy}
-                      name="pitch_class_entropy"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="pitch_class_entropy"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.empty_beat_rate}
-                      name="empty_beat_rate"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="empty_beat_rate"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.drum_in_duple_rate}
-                      name="drum_in_duple_rate"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="drum_in_duple_rate"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.drum_in_triple_rate}
-                      name="drum_in_triple_rate"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="drum_in_triple_rate"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.drum_pattern_consistency}
-                      name="drum_pattern_consistency"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="drum_pattern_consistency"
-                />
+                {allMidiFeatures.map((name) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={state[name]}
+                        name={name}
+                        onChange={handleChange}
+                      />
+                    }
+                    label={name}
+                  />
+                ))}
                 <Box my={2}>
                   <Button variant="contained" onClick={setMidiAll}>
                     Toggle All
@@ -472,89 +512,18 @@ export default function Home() {
             </AccordionSummary>
             <AccordionDetails>
               <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.tempo}
-                      name="tempo"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Tempo"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.zero_crossing_rate}
-                      name="zero_crossing_rate"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Zero Crossing Rate"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.harmonic_components}
-                      name="harmonic_components"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Harmonic Components"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.percussive_components}
-                      name="percussive_components"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Percussive Components"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.spectral_centroid}
-                      name="spectral_centroid"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Spectral Centroid"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.spectral_rolloff}
-                      name="spectral_rolloff"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Spectral Rolloff"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={state.chroma_frequencies}
-                      name="chroma_frequencies"
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Chroma Frequencies"
-                />
-                {/* todo: implement Spotify features backend */}
-                {/* <Divider 
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}13" />
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}14" />
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}15" />
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}/>
-                  <Typography my={2}>Spotify</Typograph16" />
-                  <Divider 
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}17" />
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}18" />
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}19" />
-                  <FormControlLabel control={<Checkbox checked={staabelte.} />} label="Feature  name="Feature" onChange={handleChange}/>
-                  <Typography my={2}>Kansei</Typograph20" /> */}
+                {allAudioFeatures.map((name) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={state[name]}
+                        name={name}
+                        onChange={handleChange}
+                      />
+                    }
+                    label={name}
+                  />
+                ))}
                 <Box my={2}>
                   <Button variant="contained" onClick={setAudioAll}>
                     Toggle All
