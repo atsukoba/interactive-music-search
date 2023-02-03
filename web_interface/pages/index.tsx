@@ -143,10 +143,10 @@ export default function Home() {
   let setGenreState: any;
   [genreState, setGenreState] = useState({
     // Genres
-    pop: false,
+    pop: true,
     classical: false,
     baroque: false,
-    rock: false,
+    rock: true,
     renaissance: false,
     alternative_indie: false,
     italian_french_spanish: false,
@@ -156,7 +156,7 @@ export default function Home() {
     traditional: false,
     dance_eletric: false,
     modern: false,
-    jazz: false,
+    jazz: true,
     blues: false,
     hits_of_2011_2020: false,
     hip_hop_rap: false,
@@ -189,9 +189,9 @@ export default function Home() {
     chroma_frequencies: true,
   });
 
-  const [nOfSongs, setNOfSongs] = useState(500);
+  const [nOfSongs, setNOfSongs] = useState(1000);
   const [dimMethod, setDimMethod] = useState("tSNE");
-  const [dateRangeValue, setDateRangeValue] = useState<number[]>([1939, 2021]);
+  const [dateRangeValue, setDateRangeValue] = useState<number[]>([1980, 2020]);
   const [nowLoading, setNowLoading] = useState(false);
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
