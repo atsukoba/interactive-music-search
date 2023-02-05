@@ -126,7 +126,7 @@ const allMidiFeatures = [
 ];
 
 const allAudioFeatures = [
-  "tempo",
+  // "tempo",
   "zero_crossing_rate",
   "harmonic_components",
   "percussive_components",
@@ -135,11 +135,43 @@ const allAudioFeatures = [
   "chroma_frequencies",
 ];
 
+const allSpotifyFeatures = [
+  "acousticness",
+  "danceability",
+  "duration_ms",
+  "energy",
+  "instrumentalness",
+  "key",
+  "liveness",
+  "loudness",
+  "mode",
+  "speechiness",
+  "tempo",
+  "time_signature",
+  "valence",
+  // "album_jacket_url",
+];
+
+const toggleAllVal = (state: { [name: string]: boolean }) => {
+  const newVal =
+    Object.values(state).filter((n) => n).length <
+    Object.values(state).length / 2;
+  const newState = Object.assign({}, state);
+  Object.keys(newState).forEach((k) => {
+    newState[k] = newVal;
+  });
+  return newState;
+};
+
 export default function Home() {
   // NOTE: handle `any` below
-  let state: { [name: string]: boolean };
+  let midiState: { [name: string]: boolean };
+  let audioState: { [name: string]: boolean };
+  let spotifyState: { [name: string]: boolean };
   let genreState: { [name: string]: boolean };
-  let setState: any;
+  let setMidiState: any;
+  let setAudioState: any;
+  let setSpotifyState: any;
   let setGenreState: any;
   [genreState, setGenreState] = useState({
     // Genres
@@ -165,7 +197,7 @@ export default function Home() {
     hits_of_the_1970s: false,
     hits_of_the_2000s: false,
   });
-  [state, setState] = useState({
+  [midiState, setMidiState] = useState({
     // MIDI Features
     pitch_range: true,
     n_pitches_used: false,
@@ -179,8 +211,10 @@ export default function Home() {
     drum_in_duple_rate: false,
     drum_in_triple_rate: false,
     drum_pattern_consistency: false,
+  });
+  [audioState, setAudioState] = useState({
     // Audio Features
-    tempo: true,
+    // tempo: true,
     zero_crossing_rate: false,
     harmonic_components: true,
     percussive_components: false,
@@ -188,16 +222,36 @@ export default function Home() {
     spectral_rolloff: false,
     chroma_frequencies: true,
   });
+  [spotifyState, setSpotifyState] = useState({
+    // Spotify Features
+    tempo: true,
+    acousticness: false,
+    danceability: false,
+    duration_ms: false,
+    energy: false,
+    instrumentalness: false,
+    key: false,
+    liveness: false,
+    loudness: false,
+    mode: false,
+    speechiness: false,
+    time_signature: false,
+    valence: false,
+  });
 
   const [nOfSongs, setNOfSongs] = useState(1000);
-  const [dimMethod, setDimMethod] = useState("tSNE");
+  const [dimMethod, setDimMethod] = useState("tSNE"); // tSNE or PCA
   const [dateRangeValue, setDateRangeValue] = useState<number[]>([1980, 2020]);
   const [nowLoading, setNowLoading] = useState(false);
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
   const updateData = async () => {
-    const genres = Object.keys(genreState).filter((key) => state[key]);
-    const feature_names = Object.keys(state).filter((key) => state[key]);
+    const genres = Object.keys(genreState).filter((key) => genreState[key]);
+    const feature_names = [
+      ...Object.keys(midiState).filter((key) => midiState[key]),
+      ...Object.keys(audioState).filter((key) => audioState[key]),
+      ...Object.keys(spotifyState).filter((key) => spotifyState[key]),
+    ];
     const year_range = dateRangeValue;
     // console.log(feature_names);
     setNowLoading(true);
@@ -213,18 +267,40 @@ export default function Home() {
     setNowLoading(false);
   };
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMidiChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     let newState = {
-      ...state,
+      ...midiState,
       [event.target.name]: event.target.checked,
     };
-    setState(newState);
+    setMidiState(newState);
+  };
+
+  const handleAudioChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let newState = {
+      ...audioState,
+      [event.target.name]: event.target.checked,
+    };
+    setAudioState(newState);
+  };
+
+  const handleSpotifyChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let newState = {
+      ...spotifyState,
+      [event.target.name]: event.target.checked,
+    };
+    setSpotifyState(newState);
   };
 
   const handleGenreChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const key = event.target.name.replace(" ", "_").replace("-", "_");
+    const key = event.target.name.replaceAll(" ", "_").replaceAll("-", "_");
     let newState = {
       ...genreState,
       [key]: event.target.checked,
@@ -252,7 +328,11 @@ export default function Home() {
   const [data, setData] = useState<ResponseDatum[]>([]);
   const fetchInitialData = async () => {
     const d = await getData(
-      Object.keys(state).filter((k) => state[k]),
+      [
+        ...Object.keys(midiState).filter((key) => midiState[key]),
+        ...Object.keys(audioState).filter((key) => audioState[key]),
+        ...Object.keys(spotifyState).filter((key) => spotifyState[key]),
+      ],
       nOfSongs,
       dimMethod,
       Object.keys(genreState).filter((k) => genreState[k]),
@@ -268,58 +348,28 @@ export default function Home() {
   const setGenreAll = () => {
     setGenreState({
       ...genreState,
-      pop: genreState.pop === false,
-      classical: genreState.classical === false,
-      baroque: genreState.baroque === false,
-      rock: genreState.rock === false,
-      renaissance: genreState.renaissance === false,
-      alternative_indie: genreState.alternative_indie === false,
-      italian_french_spanish: genreState.italian_french_spanish === false,
-      metal: genreState.metal === false,
-      country: genreState.country === false,
-      romantic: genreState.romantic === false,
-      traditional: genreState.traditional === false,
-      dance_eletric: genreState.dance_eletric === false,
-      modern: genreState.modern === false,
-      jazz: genreState.jazz === false,
-      blues: genreState.blues === false,
-      hits_of_2011_2020: genreState.hits_of_2011_2020 === false,
-      hip_hop_rap: genreState.hip_hop_rap === false,
-      punk: genreState.punk === false,
-      instrumental: genreState.instrumental === false,
-      hits_of_the_1970s: genreState.hits_of_the_1970s === false,
-      hits_of_the_2000s: genreState.hits_of_the_2000s === false,
+      ...toggleAllVal(genreState),
     });
   };
 
   const setMidiAll = () => {
-    setState({
-      ...state,
-      pitch_range: state.pitch_range === false,
-      n_pitches_used: state.n_pitches_used === false,
-      n_pitch_classes_used: state.n_pitch_classes_used === false,
-      polyphony: state.polyphony === false,
-      polyphony_rate: state.polyphony_rate === false,
-      scale_consistency: state.scale_consistency === false,
-      pitch_entropy: state.pitch_entropy === false,
-      pitch_class_entropy: state.pitch_class_entropy === false,
-      empty_beat_rate: state.empty_beat_rate === false,
-      drum_in_duple_rate: state.drum_in_duple_rate === false,
-      drum_in_triple_rate: state.drum_in_triple_rate === false,
-      drum_pattern_consistency: state.drum_pattern_consistency === false,
+    setMidiState({
+      ...midiState,
+      ...toggleAllVal(midiState),
     });
   };
 
   const setAudioAll = () => {
-    setState({
-      ...state,
-      tempo: state.tempo === false,
-      zero_crossing_rate: state.zero_crossing_rate === false,
-      harmonic_components: state.harmonic_components === false,
-      percussive_components: state.percussive_components === false,
-      spectral_centroid: state.spectral_centroid === false,
-      spectral_rolloff: state.spectral_rolloff === false,
-      chroma_frequencies: state.chroma_frequencies === false,
+    setAudioState({
+      ...audioState,
+      ...toggleAllVal(audioState),
+    });
+  };
+
+  const setSpotifyAll = () => {
+    setSpotifyState({
+      ...spotifyState,
+      ...toggleAllVal(spotifyState),
     });
   };
 
@@ -378,7 +428,7 @@ export default function Home() {
               aria-controls="panel1a-content"
               id="panel1a-header"
             >
-              <Typography my={2}>Data</Typography>
+              <Typography my={2}>Data Setting</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <TextField
@@ -437,6 +487,40 @@ export default function Home() {
                   Year Range: {dateRangeValue[0]} ~ {dateRangeValue[1]}
                 </span>
               </Box>
+              <Accordion defaultExpanded={true}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
+                >
+                  <Typography my={2}>Music Genres</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormGroup>
+                    {allGenres.map((name) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={
+                              genreState[
+                                name.replaceAll(" ", "_").replaceAll("-", "_")
+                              ]
+                            }
+                            name={name}
+                            onChange={handleGenreChange}
+                          />
+                        }
+                        label={name}
+                      />
+                    ))}
+                    <Box my={2}>
+                      <Button variant="contained" onClick={setGenreAll}>
+                        Toggle All
+                      </Button>
+                    </Box>
+                  </FormGroup>
+                </AccordionDetails>
+              </Accordion>
             </AccordionDetails>
           </Accordion>
           <Divider />
@@ -446,33 +530,30 @@ export default function Home() {
               aria-controls="panel1a-content"
               id="panel1a-header"
             >
-              <Typography my={2}>Music Genres</Typography>
+              <Typography my={2}>Spotify Features</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <FormGroup>
-                {allGenres.map((name) => (
+                {allSpotifyFeatures.map((name) => (
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={
-                          genreState[name.replace(" ", "_").replace("-", "_")]
-                        }
+                        checked={spotifyState[name]}
                         name={name}
-                        onChange={handleGenreChange}
+                        onChange={handleSpotifyChange}
                       />
                     }
                     label={name}
                   />
                 ))}
                 <Box my={2}>
-                  <Button variant="contained" onClick={setGenreAll}>
+                  <Button variant="contained" onClick={setSpotifyAll}>
                     Toggle All
                   </Button>
                 </Box>
               </FormGroup>
             </AccordionDetails>
           </Accordion>
-          <Divider />
           <Accordion defaultExpanded={true}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
@@ -487,12 +568,12 @@ export default function Home() {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={state[name]}
+                        checked={midiState[name]}
                         name={name}
-                        onChange={handleChange}
+                        onChange={handleMidiChange}
                       />
                     }
-                    label={name}
+                    label={name.replaceAll("-", " ").replaceAll("_", " ")}
                   />
                 ))}
                 <Box my={2}>
@@ -518,12 +599,12 @@ export default function Home() {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={state[name]}
+                        checked={audioState[name]}
                         name={name}
-                        onChange={handleChange}
+                        onChange={handleAudioChange}
                       />
                     }
-                    label={name}
+                    label={name.replaceAll("-", " ").replaceAll("_", " ")}
                   />
                 ))}
                 <Box my={2}>
