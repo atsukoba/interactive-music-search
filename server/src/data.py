@@ -9,7 +9,8 @@ from src.datasets import MMD_md5_metainfo
 from src.db import QueryDataSelector
 from src.dim_reduction import dim_reduction_pca, dim_reduction_tsne
 from src.utils import (AudioFeatureName, AudioFeatureNames, MidiFeatureName,
-                       MidiFeatureNames, create_logger, env)
+                       MidiFeatureNames, SpotifyFeatureName,
+                       SpotifyFeatureNames, create_logger, env)
 
 """ expected data structure on front-end 
 
@@ -66,9 +67,11 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
         n for n in feature_names if n in MidiFeatureNames]
     a: List[AudioFeatureName] = [
         n for n in feature_names if n in AudioFeatureNames]
+    s: List[SpotifyFeatureName] = [
+        n for n in feature_names if n in SpotifyFeatureNames]
 
     res: Optional[pd.DataFrame] = QueryDataSelector.get_features(
-        m, a, genres, year_range)
+        m, a, s, genres, year_range)
 
     if res is not None:
         res = res.head(n_data)
