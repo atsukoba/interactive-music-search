@@ -15,22 +15,46 @@ AudioPath = str
 SID = str
 MD5 = str
 
-"""Audio Feature Table
+# Song Table
+SongTableColumnName = Literal[
+    "md5",
+    "spotify_track_id",
+    "midi_artist",
+    "midi_title",
+    "scraped_genre",
+    "title",
+    "artist",
+    "artist_id",
+    "album_title",
+    "album_id",
+    "date"
+]
 
-        Column         |        Type        | Collation | Nullable | Default
------------------------+--------------------+-----------+----------+---------
- spotify_track_id      | text               |           |          |
- tempo                 | double precision   |           |          |
- zero_crossing_rate    | double precision[] |           |          |
- harmonic_components   | double precision[] |           |          |
- percussive_components | double precision[] |           |          |
- spectral_centroid     | double precision[] |           |          |
- spectral_rolloff      | double precision[] |           |          |
- chroma_frequencies    | double precision[] |           |          |
+"""Table `song`
 
-Foreign-key constraints:
-"audio_features_spotify_track_id_fkey" FOREIGN KEY (spotify_track_id) REFERENCES song(spotify_track_id)
+      Column      | Type | Collation | Nullable | Default 
+:-----------------|:-----|:----------|:---------|:--------
+ md5              | text |           | not null | 
+ spotify_track_id | text |           | not null | 
+ midi_artist      | text |           |          | 
+ midi_title       | text |           |          | 
+ scraped_genre    | text |           |          | 
+ title            | text |           |          | 
+ artist           | text |           |          | 
+ artist_id        | text |           |          | 
+ album_title      | text |           |          | 
+ album_id         | text |           |          | 
+ date             | date |           |          | 
+
+Indexes:
+    "song_pkey" PRIMARY KEY, btree (md5, spotify_track_id)
+    "song_md5_key" UNIQUE CONSTRAINT, btree (md5)
+    "song_spotify_track_id_key" UNIQUE CONSTRAINT, btree (spotify_track_id)
+Referenced by:
+    TABLE "spotify_features" CONSTRAINT "spotify_features_md5_fkey" FOREIGN KEY (md5) REFERENCES song(md5)
+    TABLE "spotify_features" CONSTRAINT "spotify_features_spotify_track_id_fkey" FOREIGN KEY (spotify_track_id) REFERENCES song(spotify_track_id)
 """
+
 
 # Audio Features
 AudioFeatureName = Literal[
@@ -42,25 +66,21 @@ AudioFeatureName = Literal[
     "spectral_rolloff",
     "chroma_frequencies"
 ]
+"""Audio Feature Table (audio_features)
 
-"""MIDI Feature Table
-          Column          |       Type       | Collation | Nullable | Default
---------------------------+------------------+-----------+----------+---------
- md5                      | text             |           |          |
- pitch_range              | integer          |           |          |
- n_pitches_used           | integer          |           |          |
- n_pitch_classes_used     | integer          |           |          |
- polyphony                | double precision |           |          |
- polyphony_rate           | double precision |           |          |
- scale_consistency        | double precision |           |          |
- pitch_entropy            | double precision |           |          |
- pitch_class_entropy      | double precision |           |          |
- empty_beat_rate          | double precision |           |          |
- drum_in_duple_rate       | double precision |           |          |
- drum_in_triple_rate      | double precision |           |          |
- drum_pattern_consistency | double precision |           |          |
+        Column         |        Type        | Collation | Nullable | Default
+:----------------------|:-------------------|:----------|:---------|:--------
+ spotify_track_id      | text               |           |          |
+ tempo                 | double precision   |           |          |
+ zero_crossing_rate    | double precision[] |           |          |
+ harmonic_components   | double precision[] |           |          |
+ percussive_components | double precision[] |           |          |
+ spectral_centroid     | double precision[] |           |          |
+ spectral_rolloff      | double precision[] |           |          |
+ chroma_frequencies    | double precision[] |           |          |
+
 Foreign-key constraints:
-    "midi_features_md5_fkey" FOREIGN KEY (md5) REFERENCES song(md5)
+"audio_features_spotify_track_id_fkey" FOREIGN KEY (spotify_track_id) REFERENCES song(spotify_track_id)
 """
 
 # MIDI Features
@@ -78,6 +98,71 @@ MidiFeatureName = Literal[
     "drum_in_triple_rate",
     "drum_pattern_consistency"
 ]
+
+"""MIDI Feature Table (midi_features)
+
+          Column          |       Type       | Collation | Nullable | Default
+:-------------------------|:-----------------|:----------|:---------|:--------
+ md5                      | text             |           |          |
+ pitch_range              | integer          |           |          |
+ n_pitches_used           | integer          |           |          |
+ n_pitch_classes_used     | integer          |           |          |
+ polyphony                | double precision |           |          |
+ polyphony_rate           | double precision |           |          |
+ scale_consistency        | double precision |           |          |
+ pitch_entropy            | double precision |           |          |
+ pitch_class_entropy      | double precision |           |          |
+ empty_beat_rate          | double precision |           |          |
+ drum_in_duple_rate       | double precision |           |          |
+ drum_in_triple_rate      | double precision |           |          |
+ drum_pattern_consistency | double precision |           |          |
+
+Foreign-key constraints:
+- "midi_features_md5_fkey" FOREIGN KEY (md5) REFERENCES song(md5)
+"""
+
+SpotifyFeatureName = Literal[
+    "acousticness",
+    "danceability",
+    "duration_ms",
+    "energy",
+    "instrumentalness",
+    "key",
+    "liveness",
+    "loudness",
+    "mode",
+    "speechiness",
+    "tempo",
+    "time_signature",
+    "valence"
+]
+
+"""Spotify Feature Table (spotify_features)
+
+      Column      |       Type       | Collation | Nullable | Default 
+:-----------------|:-----------------|:----------|:---------|:--------
+ spotify_track_id | text             |           |          | 
+ md5              | text             |           |          | 
+ acousticness     | double precision |           |          | 
+ danceability     | double precision |           |          | 
+ duration_ms      | double precision |           |          | 
+ energy           | double precision |           |          | 
+ instrumentalness | double precision |           |          | 
+ key              | double precision |           |          | 
+ liveness         | double precision |           |          | 
+ loudness         | double precision |           |          | 
+ mode             | double precision |           |          | 
+ speechiness      | double precision |           |          | 
+ tempo            | double precision |           |          | 
+ time_signature   | double precision |           |          | 
+ valence          | double precision |           |          | 
+ album_jacket_url | text             |           |          | 
+
+Foreign-key constraints:
+- "spotify_features_md5_fkey" FOREIGN KEY (md5) REFERENCES song(md5)
+- "spotify_features_spotify_track_id_fkey" FOREIGN KEY (spotify_track_id) REFERENCES song(spotify_track_id)
+"""
+
 
 AudioFeatureNames: List[AudioFeatureName] = [
     "tempo",
@@ -102,6 +187,22 @@ MidiFeatureNames: List[MidiFeatureName] = [
     "drum_in_duple_rate",
     "drum_in_triple_rate",
     "drum_pattern_consistency"
+]
+
+SpotifyFeatureNames: List[SpotifyFeatureName] = [
+    "acousticness",
+    "danceability",
+    "duration_ms",
+    "energy",
+    "instrumentalness",
+    "key",
+    "liveness",
+    "loudness",
+    "mode",
+    "speechiness",
+    "tempo",
+    "time_signature",
+    "valence"
 ]
 
 
@@ -221,6 +322,11 @@ def slack_notify_info(username: str, message: str, mention_to=[],
         }],
     }
     __send_notify(obj)
+
+
+class DBNotConnectedError(RuntimeError):
+    def __repr__(self) -> str:
+        return "Database not connected"
 
 
 if __name__ == "__main__":
