@@ -8,7 +8,7 @@ import {
 } from "react";
 import { AxesHelper, Color, Vector3 } from "three";
 
-import { CardContent, Typography } from "@mui/material";
+import { Button, CardContent, Typography } from "@mui/material";
 import {
   AdaptiveDpr,
   AdaptiveEvents,
@@ -69,6 +69,20 @@ export default function PointsViewer({ newData }: IProps) {
 
   return (
     <>
+      <Button
+        variant={isAutoRotating ? "contained" : "outlined"}
+        size="small"
+        style={{
+          position: "absolute",
+          top: "85px",
+          right: "16px",
+          fontSize: "12px",
+          zIndex: "1000",
+        }}
+        onClick={() => setIsAutoRotating(!isAutoRotating)}
+      >
+        Auto Rotate {isAutoRotating ? "ON" : "OFF"}
+      </Button>
       <Canvas
         resize={{ scroll: true, debounce: { scroll: 10, resize: 0 } }}
         raycaster={{ params: { Points: { threshold: 0.175 } } }}
@@ -78,12 +92,12 @@ export default function PointsViewer({ newData }: IProps) {
           height: "calc(100% - 100px)",
           backgroundColor: "#f7f7f7",
         }}
-        onPointerEnter={() => {
-          setIsAutoRotating(false);
-        }}
-        onPointerLeave={() => {
-          setIsAutoRotating(true);
-        }}
+        // onPointerEnter={() => {
+        //   setIsAutoRotating(false);
+        // }}
+        // onPointerLeave={() => {
+        //   setIsAutoRotating(true);
+        // }}
       >
         <AdaptiveDpr pixelated />
         <AdaptiveEvents />
@@ -91,8 +105,8 @@ export default function PointsViewer({ newData }: IProps) {
         {IS_DEVELOP_MODE && <Stats showPanel={0} className="stats" />}
         <OrbitControls
           enableDamping={false}
-          maxZoom={100}
-          minZoom={0.8}
+          maxZoom={200}
+          minZoom={0.5}
           zoomSpeed={1}
           autoRotate={isAutoRotating}
           autoRotateSpeed={5}
