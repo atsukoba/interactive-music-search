@@ -1,53 +1,27 @@
-import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
 import {
   ChangeEventHandler,
-  Children,
   MouseEventHandler,
   ReactNode,
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
-import {
-  Apps,
-  Book,
-  Email,
-  GitHub,
-  Home,
-  Inbox,
-  Menu,
-  Search,
-  TableChart,
-  VerifiedUser,
-} from "@mui/icons-material";
+import { Menu } from "@mui/icons-material";
 import {
   AppBar,
   Box,
-  Button,
-  Checkbox,
   CssBaseline,
-  Divider,
-  Drawer,
-  FormControlLabel,
-  FormGroup,
-  Grid,
   IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
+  Modal,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 import { postUserFile } from "../api/user_data";
+import AudioTrimmer from "./AudioTrimmer";
+import SideBar from "./SideBar";
 
-const drawerWidth = 270;
+const drawerWidth = 270 + 16; // TODO
 
 interface IProps {
   children: ReactNode;
@@ -59,40 +33,45 @@ const Input = styled("input")({
 
 export default function Layout({ children }: IProps) {
   const [drawerOpen, setDrawerOpen] = useState<boolean | undefined>(false);
-  const [selectedFile, selectFile] = useState<FormData | undefined>(undefined);
+  const [audioBlobUrl, setAudioBlobUrl] = useState<URL>(null);
 
   const toggleDrawer: MouseEventHandler<HTMLButtonElement> = () => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const body = new FormData();
-      if (file.type === "audio/mpeg" || file.type === "audio/wav") {
-        body.append("audio", file);
-        selectFile(body);
-      } else if (file.type === "audio/midi") {
-        body.append("midi", file);
-        selectFile(body);
-      } else {
-        alert("File type incorrect to upload");
-      }
-    }
-  };
-
-  const onUploadButtonPush: MouseEventHandler<HTMLSpanElement> = async (
-    event
-  ) => {
-    if (selectedFile) {
-      const res = postUserFile(selectedFile);
-      console.dir(selectedFile);
-      console.dir(res);
-    }
+  const toggleAudioEditor = (audioBlobUrl: URL) => {
+    setAudioBlobUrl(audioBlobUrl);
   };
 
   return (
     <Box sx={{ display: "flex" }}>
+      <Modal
+        open={audioBlobUrl !== null}
+        onClose={() => {
+          setAudioBlobUrl(null);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          px={4}
+          py={4}
+          style={{
+            backgroundColor: "#dedede",
+            borderRadius: "16px",
+            position: "absolute" as "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "80vw",
+          }}
+        >
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Select 30sec Region to Calculate Audio Feature
+          </Typography>
+          <AudioTrimmer audioUrl={audioBlobUrl} />
+        </Box>
+      </Modal>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -119,118 +98,11 @@ export default function Layout({ children }: IProps) {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Drawer
-        open={drawerOpen}
-        onClose={toggleDrawer}
-        variant="persistent"
-        anchor="left"
-        sx={{
-          // width: drawerOpen ? drawerWidth : 0,
-          width: 0,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            // width: drawerOpen ? drawerWidth : 0,
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
-          <List>
-            <ListItem key={"search"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Search />
-                </ListItemIcon>
-                <Link href="/">
-                  <ListItemText primary={"Search View"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"table"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <TableChart />
-                </ListItemIcon>
-                <Link href="/table">
-                  <ListItemText primary={"Table View"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem key={"about"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Apps />
-                </ListItemIcon>
-                <Link href="/about">
-                  <ListItemText primary={"About This App"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"Paper"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Book />
-                </ListItemIcon>
-                <Link href="https://atsuya.xyz">
-                  <ListItemText primary={"Paper"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"Author"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <VerifiedUser />
-                </ListItemIcon>
-                <Link href="https://atsuya.xyz">
-                  <ListItemText primary={"Author"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"GitHub"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <GitHub />
-                </ListItemIcon>
-                <Link href="https://github.com/atsukoba">
-                  <ListItemText primary={"GitHub"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem>
-              <label htmlFor="contained-button-file">
-                <Input
-                  accept="audio/wav,audio/mpeg,audio/midi,audio/x-midi"
-                  id="contained-button-file"
-                  type="file"
-                  onChange={handleChange}
-                />
-                <Button variant="contained" component="span">
-                  Select Audio / MIDI File
-                </Button>
-              </label>
-            </ListItem>
-            <ListItem>
-              <Button
-                variant="contained"
-                component="span"
-                disabled={selectedFile === undefined}
-                onClick={onUploadButtonPush}
-              >
-                Upload
-              </Button>
-            </ListItem>
-          </List>
-          <Divider />
-        </Box>
-      </Drawer>
+      <SideBar
+        isOpen={drawerOpen}
+        toggle={toggleDrawer}
+        toggleAudioEditor={toggleAudioEditor}
+      />
       <Box
         component="main"
         sx={{ flexGrow: 1, p: 0, pl: 3, fontSize: 0 }}
