@@ -1,3 +1,5 @@
+server/uploads/midi/
+server/uploads/audio/
 .vscode
 environment.json
 
