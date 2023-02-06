@@ -5,11 +5,16 @@ interface IRes {
 }
 
 export const postUserFile = async (
+  file_name: string,
   payload: Blob,
   filetype: string
 ): Promise<IRes> => {
   const data = new FormData();
-  data.append("file", payload, "file");
+  data.append(
+    "file",
+    payload,
+    file_name + (filetype === "audio" ? ".wav" : ".mid")
+  );
   const params = {
     method: "POST",
     body: data,

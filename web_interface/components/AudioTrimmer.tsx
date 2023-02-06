@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Box, Button, CardContent, Typography } from "@mui/material";
+import { Box, Button, CardContent, TextField, Typography } from "@mui/material";
 
 import { postUserFile } from "../api/user_data";
 import { audioBufferToWav } from "../utils/audioConversion";
@@ -28,6 +28,7 @@ export default function WaveEditor({ audioUrl }: IProps) {
   const wavesurfer = useRef(null);
   const waveformRef = useRef<HTMLDivElement>(null);
   const [sourceAudioUrl, setSourceAudioUrl] = useState<URL>(audioUrl);
+  const [uploadFileNameFront, setUploadFileNameFront] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,10 @@ export default function WaveEditor({ audioUrl }: IProps) {
       };
     }
   }, [sourceAudioUrl]);
+
+  const handleFileNameFront = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadFileNameFront(event.target.value);
+  };
 
   const create = async () => {
     const WaveSurfer = (await import("wavesurfer.js")).default;
@@ -122,15 +127,17 @@ export default function WaveEditor({ audioUrl }: IProps) {
       wavesurfer.current.regions.list
     )[0];
     setUploading(true);
+    setUploaded("");
     const start = currentRegion.start;
     const end = currentRegion.end;
     const buf = copy(start, end, wavesurfer.current);
     const blob = bufferToWave(buf);
     console.log("file on", URL.createObjectURL(blob));
     setUploading(false);
-    const res = await postUserFile(blob, "audio");
+    const res = await postUserFile(uploadFileNameFront, blob, "audio");
     console.dir(res);
     setUploaded(res.fileName);
+    localStorage.setItem(uploadFileNameFront, res.fileName);
   };
 
   const handlePlayPause = () => {
@@ -142,12 +149,21 @@ export default function WaveEditor({ audioUrl }: IProps) {
     <Box style={{ width: "100%" }}>
       {loading && <span>Loading Audio...</span>}
       <div ref={waveformRef}></div>
-      <Box my={2}>
+      <Box
+        my={2}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignContent: "center",
+          justifyContent: "flex-start",
+          alignItems: "flex-end",
+          gap: "16px",
+        }}
+      >
         <Button
           color="primary"
-          component="span"
+          component="div"
           variant={playing ? "contained" : "outlined"}
-          size="small"
           style={{
             fontSize: "12px",
             marginRight: "8px",
@@ -156,27 +172,39 @@ export default function WaveEditor({ audioUrl }: IProps) {
         >
           Play / Pause
         </Button>
-        {uploaded != "" ? (
+        {uploaded !== "" && (
           <Box>
-            <Typography>Uploaded: {uploaded}</Typography>
+            <Typography>Uploaded to server as '{uploaded}'</Typography>
           </Box>
-        ) : uploading ? (
+        )}
+        {uploading && (
           <Box>
             <Typography>Now Uploading...</Typography>
           </Box>
-        ) : (
-          <Button
-            color="primary"
-            component="span"
-            variant="contained"
-            size="small"
-            style={{
-              fontSize: "12px",
-            }}
-            onClick={save}
-          >
-            Upload Selected Region
-          </Button>
+        )}
+        {!uploading && uploaded === "" && (
+          <>
+            <TextField
+              required
+              id="song-file-name"
+              label="Song File Name"
+              defaultValue="users_song"
+              variant="standard"
+              value={uploadFileNameFront}
+              onChange={handleFileNameFront}
+            />
+            <Button
+              color="primary"
+              component="div"
+              variant="contained"
+              style={{
+                fontSize: "12px",
+              }}
+              onClick={save}
+            >
+              Upload Selected Region
+            </Button>
+          </>
         )}
       </Box>
     </Box>
