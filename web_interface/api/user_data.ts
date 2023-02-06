@@ -1,14 +1,22 @@
-import { apiUrl, headers } from "./common";
+import { apiUrl, blobHeaders } from "./common";
 
-export const postUserFile = async (data: FormData) => {
+interface IRes {
+  fileName: string;
+}
+
+export const postUserFile = async (
+  payload: Blob,
+  filetype: string
+): Promise<IRes> => {
+  const data = new FormData();
+  data.append("file", payload, "file");
   const params = {
     method: "POST",
-    body: JSON.stringify({
-      file: data,
-    }),
-    headers: headers,
+    body: data,
+    // headers: blobHeaders,
   };
-  const res = await fetch(`${apiUrl}/user_data`, params);
-  const resData = await res.json();
-  return resData;
+  const res: Response = await fetch(`${apiUrl}/user_data/${filetype}`, params);
+  console.log("Response: ");
+  console.dir(res);
+  return res.json();
 };
