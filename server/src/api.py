@@ -49,9 +49,10 @@ def user_data_audio():
     files = request.files
     logger.info(request)
     logger.info(request.files)
-    file_name = datetime.now().strftime("%Y%m%d-%H%M%S.mp3")
     file = files.get('file')
     if file:
+        file_name = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + \
+            (file.filename or "user_audio.wav")
         logger.info(file)
         with open(os.path.abspath(f'{os.path.abspath(__file__)}/../../uploads/audio/{file_name}'), 'wb') as f:
             file.save(f)
