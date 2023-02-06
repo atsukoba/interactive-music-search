@@ -186,38 +186,38 @@ export default function Home() {
     country: false,
     romantic: false,
     traditional: false,
-    dance_eletric: false,
-    modern: false,
+    dance_eletric: true,
+    modern: true,
     jazz: true,
-    blues: false,
+    blues: true,
     hits_of_2011_2020: false,
-    hip_hop_rap: false,
-    punk: false,
+    hip_hop_rap: true,
+    punk: true,
     instrumental: false,
     hits_of_the_1970s: false,
-    hits_of_the_2000s: false,
+    hits_of_the_2000s: true,
   });
   [midiState, setMidiState] = useState({
     // MIDI Features
-    pitch_range: true,
+    pitch_range: false,
     n_pitches_used: false,
-    n_pitch_classes_used: false,
+    n_pitch_classes_used: true,
     polyphony: false,
-    polyphony_rate: false,
+    polyphony_rate: true,
     scale_consistency: false,
     pitch_entropy: false,
     pitch_class_entropy: false,
     empty_beat_rate: false,
-    drum_in_duple_rate: false,
-    drum_in_triple_rate: false,
+    drum_in_duple_rate: true,
+    drum_in_triple_rate: true,
     drum_pattern_consistency: false,
   });
   [audioState, setAudioState] = useState({
     // Audio Features
     // tempo: true,
-    zero_crossing_rate: false,
+    zero_crossing_rate: true,
     harmonic_components: true,
-    percussive_components: false,
+    percussive_components: true,
     spectral_centroid: false,
     spectral_rolloff: false,
     chroma_frequencies: true,
@@ -225,8 +225,8 @@ export default function Home() {
   [spotifyState, setSpotifyState] = useState({
     // Spotify Features
     tempo: true,
-    acousticness: false,
-    danceability: false,
+    acousticness: true,
+    danceability: true,
     duration_ms: false,
     energy: false,
     instrumentalness: false,
@@ -397,14 +397,16 @@ export default function Home() {
       )}
       <Grid
         container
-        spacing={2}
+        spacing={1}
         style={{ height: "calc(100vh - 64px)", marginTop: 0 }}
       >
         <Grid
           item
-          md={6}
-          lg={2.5}
-          xl={"auto"}
+          xs={12}
+          sm={12}
+          md={3}
+          lg={3}
+          xl={2.5}
           style={{
             height: "100%",
             overflow: "scroll",
@@ -487,7 +489,7 @@ export default function Home() {
                   Year Range: {dateRangeValue[0]} ~ {dateRangeValue[1]}
                 </span>
               </Box>
-              <Accordion defaultExpanded={true}>
+              <Accordion defaultExpanded={false}>
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
                   aria-controls="panel1a-content"
@@ -524,7 +526,7 @@ export default function Home() {
             </AccordionDetails>
           </Accordion>
           <Divider />
-          <Accordion defaultExpanded={true}>
+          <Accordion defaultExpanded={false}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
@@ -554,7 +556,8 @@ export default function Home() {
               </FormGroup>
             </AccordionDetails>
           </Accordion>
-          <Accordion defaultExpanded={true}>
+          <Divider />
+          <Accordion defaultExpanded={false}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
@@ -585,7 +588,7 @@ export default function Home() {
             </AccordionDetails>
           </Accordion>
           <Divider />
-          <Accordion defaultExpanded={true}>
+          <Accordion defaultExpanded={false}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
@@ -624,6 +627,8 @@ export default function Home() {
         />
         <Grid
           item
+          xs={12}
+          sm={12}
           md={true}
           lg={true}
           xl={true}
