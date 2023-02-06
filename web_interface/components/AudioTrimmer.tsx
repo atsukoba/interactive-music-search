@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Box, Button, CardContent, Typography } from "@mui/material";
+import { Box, Button, CardContent, TextField, Typography } from "@mui/material";
+
+import { postUserFile } from "../api/user_data";
+import { audioBufferToWav } from "../utils/audioConversion";
 
 // import WaveSurfer from ;
 
@@ -25,6 +28,9 @@ export default function WaveEditor({ audioUrl }: IProps) {
   const wavesurfer = useRef(null);
   const waveformRef = useRef<HTMLDivElement>(null);
   const [sourceAudioUrl, setSourceAudioUrl] = useState<URL>(audioUrl);
+  const [uploadFileNameFront, setUploadFileNameFront] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploaded, setUploaded] = useState("");
   const [loading, setLoading] = useState(false);
   const [playing, setPlaying] = useState(false);
 
@@ -38,6 +44,10 @@ export default function WaveEditor({ audioUrl }: IProps) {
       };
     }
   }, [sourceAudioUrl]);
+
+  const handleFileNameFront = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadFileNameFront(event.target.value);
+  };
 
   const create = async () => {
     const WaveSurfer = (await import("wavesurfer.js")).default;
@@ -71,6 +81,15 @@ export default function WaveEditor({ audioUrl }: IProps) {
           resize: false,
         });
         console.dir(wavesurfer.current);
+      } else {
+        wavesurfer.current.addRegion({
+          start: 0,
+          end: dur,
+          loop: true,
+          color: "hsla(200, 50%, 70%, 0.4)",
+          multiple: false,
+          resize: false,
+        });
       }
       wavesurfer.current.disableDragSelection({ start: 0, end: dur });
     });
@@ -97,72 +116,28 @@ export default function WaveEditor({ audioUrl }: IProps) {
     return emptySegment;
   };
 
-  const bufferToWave = (abuffer: AudioBuffer, offset = 0, len = 30): Blob => {
-    let numOfChan = abuffer.numberOfChannels,
-      length = len * numOfChan * 2 + 44,
-      buffer = new ArrayBuffer(length),
-      view = new DataView(buffer),
-      channels = [],
-      i,
-      sample,
-      pos = 0;
-
-    // write WAVE header
-    setUint32(0x46464952); // "RIFF"
-    setUint32(length - 8); // file length - 8
-    setUint32(0x45564157); // "WAVE"
-
-    setUint32(0x20746d66); // "fmt " chunk
-    setUint32(16); // length = 16
-    setUint16(1); // PCM (uncompressed)
-    setUint16(numOfChan);
-    setUint32(abuffer.sampleRate);
-    setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
-    setUint16(numOfChan * 2); // block-align
-    setUint16(16); // 16-bit (hardcoded in this demo)
-
-    setUint32(0x61746164); // "data" - chunk
-    setUint32(length - pos - 4); // chunk length
-
-    // write interleaved data
-    for (i = 0; i < abuffer.numberOfChannels; i++)
-      channels.push(abuffer.getChannelData(i));
-
-    while (pos < length) {
-      for (i = 0; i < numOfChan; i++) {
-        // interleave channels
-        sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-        sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; // scale to 16-bit signed int
-        view.setInt16(pos, sample, true); // update data chunk
-        pos += 2;
-      }
-      offset++; // next source sample
-    }
-
-    // create Blob
-    return new Blob([buffer], { type: "audio/mpeg" });
-
-    function setUint16(data) {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    }
-
-    function setUint32(data) {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    }
+  const bufferToWave = (abuffer: AudioBuffer): Blob => {
+    const arrayBuffer = audioBufferToWav(abuffer, {});
+    const blob = new Blob([arrayBuffer], { type: "audio/wave" });
+    return blob;
   };
 
-  const save = (): Blob => {
+  const save = async () => {
     const currentRegion: any = Object.values(
       wavesurfer.current.regions.list
     )[0];
+    setUploading(true);
+    setUploaded("");
     const start = currentRegion.start;
     const end = currentRegion.end;
     const buf = copy(start, end, wavesurfer.current);
     const blob = bufferToWave(buf);
-    console.log(URL.createObjectURL(blob));
-    return blob;
+    console.log("file on", URL.createObjectURL(blob));
+    setUploading(false);
+    const res = await postUserFile(uploadFileNameFront, blob, "audio");
+    console.dir(res);
+    setUploaded(res.fileName);
+    localStorage.setItem(uploadFileNameFront, res.fileName);
   };
 
   const handlePlayPause = () => {
@@ -172,14 +147,23 @@ export default function WaveEditor({ audioUrl }: IProps) {
 
   return (
     <Box style={{ width: "100%" }}>
-      {loading && <span>Now Loading</span>}
+      {loading && <span>Loading Audio...</span>}
       <div ref={waveformRef}></div>
-      <Box my={2}>
+      <Box
+        my={2}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignContent: "center",
+          justifyContent: "flex-start",
+          alignItems: "flex-end",
+          gap: "16px",
+        }}
+      >
         <Button
           color="primary"
-          component="span"
+          component="div"
           variant={playing ? "contained" : "outlined"}
-          size="small"
           style={{
             fontSize: "12px",
             marginRight: "8px",
@@ -188,18 +172,40 @@ export default function WaveEditor({ audioUrl }: IProps) {
         >
           Play / Pause
         </Button>
-        <Button
-          color="primary"
-          component="span"
-          variant="contained"
-          size="small"
-          style={{
-            fontSize: "12px",
-          }}
-          onClick={save}
-        >
-          Upload Selected Region
-        </Button>
+        {uploaded !== "" && (
+          <Box>
+            <Typography>Uploaded to server as '{uploaded}'</Typography>
+          </Box>
+        )}
+        {uploading && (
+          <Box>
+            <Typography>Now Uploading...</Typography>
+          </Box>
+        )}
+        {!uploading && uploaded === "" && (
+          <>
+            <TextField
+              required
+              id="song-file-name"
+              label="Song File Name"
+              defaultValue="users_song"
+              variant="standard"
+              value={uploadFileNameFront}
+              onChange={handleFileNameFront}
+            />
+            <Button
+              color="primary"
+              component="div"
+              variant="contained"
+              style={{
+                fontSize: "12px",
+              }}
+              onClick={save}
+            >
+              Upload Selected Region
+            </Button>
+          </>
+        )}
       </Box>
     </Box>
   );
