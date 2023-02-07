@@ -11,13 +11,17 @@ import { Apps, Book, GitHub, Search, VerifiedUser } from "@mui/icons-material";
 import {
   Box,
   Button,
+  Checkbox,
   Divider,
   Drawer,
+  FormControlLabel,
+  FormGroup,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -38,19 +42,10 @@ const Input = styled("input")({
   display: "none",
 });
 
-export const UserSongsContextProvider = ({ children }) => {
-  const [userSongData, setUserSongData] = useState(
-    JSON.parse(window.localStorage.getItem("userSongData")) || [])
-  return (
-    <UserSongsContext.Provider value={{ userSongData, setUserSongData }}>
-      {children}
-    </UserSongsContext.Provider>
-  )
-}
-
 export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
 
-  const { userSongData, setUserSongData } = useContext(UserSongsContext);
+  const { userSongData, setUserSongData,
+    selectedUserSong, setSelectedUserSong } = useContext(UserSongsContext);
 
   const handleSelectSongFile: ChangeEventHandler<HTMLInputElement> = async (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -66,11 +61,11 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
       } else if (file.type === "audio/midi" || file.type === "audio/mid") {
         // MIDI Data
         const res = await postUserFile(file.name, file, "midi");
-        setUserSongData([...userSongData, {
+        setUserSongData(userSongData => [...userSongData, {
           title: file.name,
           serverFileName: res.fileName
         }])
-        window.localStorage.setItem("userSongData", JSON.stringify(
+        localStorage.setItem("userSongData", JSON.stringify(
           [...userSongData, {
             title: file.name,
             serverFileName: res.fileName
@@ -81,6 +76,18 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
         alert("File type incorrect to upload");
       }
     }
+  };
+
+  const handleUserSongSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newSelect = {}
+    newSelect[event.target.name] = event.target.checked
+    setSelectedUserSong({
+      ...selectedUserSong,
+      ...newSelect,
+    });
+    // console.log(selectedUserSong);
   };
 
   return (
@@ -98,16 +105,15 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
       }}
     >
       <Toolbar />
-      <UserSongsContextProvider>
-        <Box
-          sx={{ overflow: "auto" }}
-          style={{
-            height: "100%",
-            overflow: "scroll",
-            width: `${drawerWidth}px`,
-          }}
-        >
-          {/* <List>
+      <Box
+        sx={{ overflow: "auto" }}
+        style={{
+          height: "100%",
+          overflow: "scroll",
+          width: `${drawerWidth}px`,
+        }}
+      >
+        {/* <List>
             <ListItem key={"table"} disablePadding>
               <ListItemButton>
                 <ListItemIcon>
@@ -120,96 +126,100 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
             </ListItem>
           </List>
           <Divider /> */}
-          <List>
-            <ListItem key={"search"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Search />
-                </ListItemIcon>
-                <Link href="/">
-                  <ListItemText primary={"Search View"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"about"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Apps />
-                </ListItemIcon>
-                <Link href="/about">
-                  <ListItemText primary={"About This App"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"Paper"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Book />
-                </ListItemIcon>
-                <Link href="https://atsuya.xyz">
-                  <ListItemText primary={"Paper"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"Author"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <VerifiedUser />
-                </ListItemIcon>
-                <Link href="https://atsuya.xyz">
-                  <ListItemText primary={"Author"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"GitHub"} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <GitHub />
-                </ListItemIcon>
-                <Link href="https://github.com/atsukoba">
-                  <ListItemText primary={"GitHub"} />
-                </Link>
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem>
-              <Typography my={1} style={{ fontWeight: "bold" }}>
-                Upload
-              </Typography>
-            </ListItem>
-            <ListItem>
-              <label htmlFor="contained-button-file">
-                <Input
-                  accept="audio/wav,audio/mpeg,audio/midi,audio/x-midi"
-                  id="contained-button-file"
-                  type="file"
-                  onChange={handleSelectSongFile}
-                />
-                <Button variant="contained" component="span">
-                  Upload Audio / MIDI File
-                </Button>
-              </label>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem>
-              <Typography my={1} style={{ fontWeight: "bold" }}>
-                Your Songs to Show in Space
-              </Typography>
-            </ListItem>
-            <ListItem>
+        <List>
+          <ListItem key={"search"} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <Search />
+              </ListItemIcon>
+              <Link href="/">
+                <ListItemText primary={"Search View"} />
+              </Link>
+            </ListItemButton>
+          </ListItem>
+          <ListItem key={"about"} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <Apps />
+              </ListItemIcon>
+              <Link href="/about">
+                <ListItemText primary={"About This App"} />
+              </Link>
+            </ListItemButton>
+          </ListItem>
+          <ListItem key={"Paper"} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <Book />
+              </ListItemIcon>
+              <Link href="https://atsuya.xyz">
+                <ListItemText primary={"Paper"} />
+              </Link>
+            </ListItemButton>
+          </ListItem>
+          <ListItem key={"Author"} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <VerifiedUser />
+              </ListItemIcon>
+              <Link href="https://atsuya.xyz">
+                <ListItemText primary={"Author"} />
+              </Link>
+            </ListItemButton>
+          </ListItem>
+          <ListItem key={"GitHub"} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                <GitHub />
+              </ListItemIcon>
+              <Link href="https://github.com/atsukoba">
+                <ListItemText primary={"GitHub"} />
+              </Link>
+            </ListItemButton>
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem>
+            <Typography my={1} style={{ fontWeight: "bold" }}>
+              Upload
+            </Typography>
+          </ListItem>
+          <ListItem>
+            <label htmlFor="contained-button-file">
+              <Input
+                accept="audio/wav,audio/mpeg,audio/midi,audio/x-midi"
+                id="contained-button-file"
+                type="file"
+                onChange={handleSelectSongFile}
+              />
+              <Button variant="contained" component="span">
+                Upload Audio / MIDI File
+              </Button>
+            </label>
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem>
+            <Typography my={1} style={{ fontWeight: "bold" }}>
+              Your Songs to Show in Space
+            </Typography>
+          </ListItem>
+          <ListItem>
+            <FormGroup>
               {userSongData.map((d) =>
-                <p>
-                  {d.title}
-                </p>
+                <FormControlLabel control={
+                  <Checkbox
+                    checked={selectedUserSong[d.title]}
+                    name={d.title}
+                    onChange={handleUserSongSelect} />
+                } label={d.title} />
               )}
-            </ListItem>
-          </List>
-        </Box>
-      </UserSongsContextProvider>
+            </FormGroup>
+          </ListItem>
+        </List>
+      </Box>
     </Drawer>
   );
 }

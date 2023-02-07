@@ -141,13 +141,12 @@ export default function WaveEditor({ audioUrl }: IProps) {
     console.log("file on", URL.createObjectURL(blob));
     setUploading(false);
     const res = await postUserFile(uploadFileNameFront, blob, "audio");
-    console.dir(res);
     setUploaded(res.fileName);
-    setUserSongData([...userSongData, {
+    setUserSongData(userSongData => [...userSongData, {
       title: uploadFileNameFront,
       serverFileName: res.fileName
     }])
-    window.localStorage.setItem("userSongData", JSON.stringify([
+    localStorage.setItem("userSongData", JSON.stringify([
       ...userSongData,
       {
         title: uploadFileNameFront,
@@ -221,7 +220,6 @@ export default function WaveEditor({ audioUrl }: IProps) {
               <ZoomOut />
               <Slider
                 defaultValue={1}
-                aria-label="zoom"
                 valueLabelDisplay="off"
                 onChange={handleZoomSlide}
                 onChangeCommitted={handleZoom}

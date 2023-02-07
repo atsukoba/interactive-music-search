@@ -20,6 +20,7 @@ import { styled } from "@mui/material/styles";
 import { postUserFile } from "../api/user_data";
 import AudioTrimmer from "./AudioTrimmer";
 import SideBar from "./SideBar";
+import { UserSongsContextProvider } from "../utils/context"
 
 const drawerWidth = 270 + 16; // TODO
 
@@ -48,6 +49,7 @@ export default function Layout({ children }: IProps) {
       <Modal
         open={audioBlobUrl !== null}
         onClose={() => {
+
           setAudioBlobUrl(null);
         }}
         aria-labelledby="modal-modal-title"
@@ -69,7 +71,9 @@ export default function Layout({ children }: IProps) {
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Select 30sec Region to Calculate Audio Feature
           </Typography>
-          <AudioTrimmer audioUrl={audioBlobUrl} />
+          <UserSongsContextProvider>
+            <AudioTrimmer audioUrl={audioBlobUrl} />
+          </UserSongsContextProvider>
         </Box>
       </Modal>
       <CssBaseline />
@@ -81,7 +85,6 @@ export default function Layout({ children }: IProps) {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
             onClick={toggleDrawer}
             edge="start"
             sx={{ mr: 2 }}
@@ -98,11 +101,13 @@ export default function Layout({ children }: IProps) {
           </Typography>
         </Toolbar>
       </AppBar>
-      <SideBar
-        isOpen={drawerOpen}
-        toggle={toggleDrawer}
-        toggleAudioEditor={toggleAudioEditor}
-      />
+      <UserSongsContextProvider >
+        <SideBar
+          isOpen={drawerOpen}
+          toggle={toggleDrawer}
+          toggleAudioEditor={toggleAudioEditor}
+        />
+      </UserSongsContextProvider>
       <Box
         component="main"
         sx={{ flexGrow: 1, p: 0, pl: 3, fontSize: 0 }}
