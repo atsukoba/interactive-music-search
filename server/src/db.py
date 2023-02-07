@@ -65,11 +65,11 @@ class QueryDataSelector:
             Optional[pd.DataFrame]:
 
         for example
-        |  sid  |      title       | artist | year | pitch_range | harmonic |
-        |:-----:|:----------------:|:------:|:----:|:-----------:|:--------:|
-        | ##### |     song title   | TheWho | 2020 |    20.0     |  0.0024  |
-        | ##### |     song title   | TheWho | 2020 |    20.0     |  0.0024  |
-        | ##### |     song title   | TheWho | 2020 |    20.0     |  0.0024  |
+        |  sid  |      title       | artist | genre | year | pitch_range | harmonic |
+        |:-----:|:----------------:|:------:|:-----:|:----:|:-----------:|:--------:|
+        | ##### |     song title   | TheWho |  rock | 2020 |    20.0     |  0.0024  |
+        | ##### |     song title   | TheWho |  jazz | 2020 |    20.0     |  0.0024  |
+        | ##### |     song title   | TheWho |  pop  | 2020 |    20.0     |  0.0024  |
         """
 
         if cls.engine is None:
@@ -98,7 +98,7 @@ class QueryDataSelector:
         # build query
         # NOTE: use ORM in the future
         q = text(
-            "SELECT song.spotify_track_id, song.title, song.artist, song.date, " +
+            "SELECT song.spotify_track_id, song.title, song.artist, song.scraped_genre, song.date, " +
             ", ".join(q_features) + " " +
             "FROM song " + " ".join(q_inner_join) +
             q_genre_and_year)
