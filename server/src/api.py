@@ -132,7 +132,8 @@ def get_features():
         'genres': [
             'rock', 'pops'
         ],
-        'year_range' [1990, 2005]
+        'year_range': [1990, 2005],
+        'user_songs': ["SONG_PATH.mid", "SONG_PATH.mid", "SONG_PATH.wav"]
     }
     Returns:
         _type_: _description_
@@ -142,9 +143,20 @@ def get_features():
         logger.warn("request body is empty")
         return jsonify({'message': 'request error'}), 500
     logger.debug(f"request: {req_json}")
+
+    user_paths: Union[None, List[str]] = None
+    if (user_songs := req_json.get("user_songs", None)) is not None:
+        user_paths = []
+        for p in user_songs:
+            upload_path = os.path.join(
+                os.path.dirname(__file__), "..", "uploads",
+                "audio" if os.path.splitext(p)[1] == "wav" else "midi",
+                p)
+            user_paths.append(upload_path)
     res = get_n_data(req_json["feature_names"],
                      n_data=req_json["n_songs"],
-                     dim_reduction_method=req_json["method"])
+                     dim_reduction_method=req_json["method"],
+                     user_songs_path=user_paths)
     if res is None:
         return jsonify({'message': 'db error'}), 500
     return jsonify(res)
