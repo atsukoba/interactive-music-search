@@ -122,7 +122,8 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
     if res is not None:
         logger.info(res.columns)
         # sample songs from dataset
-        res = res.sample(n_data)
+        if len(res) >= n_data:
+            res = res.sample(n_data)
         if len(a) > 0:  # normalize audio features
             for feat_name in a:
                 if feat_name == "chroma_frequencies":
