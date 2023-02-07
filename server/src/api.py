@@ -65,12 +65,16 @@ def user_data_audio():
 @app.route("/user_data/midi", methods=["POST"])
 def user_data_midi():
     files = request.files
+    logger.info(request)
+    logger.info(request.files)
     file = files.get('file')
     if file:
-        logger.info(file.content)
-        with open(os.path.abspath(f'{os.path.abspath(__file__)}/../uploads/midi/{file}'), 'wb') as f:
-            f.write(file.content)
-        res = jsonify({"fileName": file})
+        file_name = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + \
+            (file.filename or "user_midi.mid")
+        logger.info(file)
+        with open(os.path.abspath(f'{os.path.abspath(__file__)}/../../uploads/midi/{file_name}'), 'wb') as f:
+            file.save(f)
+        res = jsonify({"fileName": file_name})
         res.headers.add('Access-Control-Allow-Origin', '*')
         return res
 
