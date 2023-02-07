@@ -33,10 +33,10 @@ export const getSampleData = async (n_songs: number) => {
       z: [e.z],
       hovertemplate: [
         "<b>%{text}</b><br><br>" +
-          "%{xaxis.title.text}: %{x}<br>" +
-          "%{yaxis.title.text}: %{y}<br>" +
-          "%{zaxis.title.text}: %{z}<br>" +
-          "<extra></extra>",
+        "%{xaxis.title.text}: %{x}<br>" +
+        "%{yaxis.title.text}: %{y}<br>" +
+        "%{zaxis.title.text}: %{z}<br>" +
+        "<extra></extra>",
       ],
     };
   });
@@ -48,7 +48,8 @@ export const getData = async (
   n_songs: number,
   method: string,
   genres: Array<string>,
-  year_range: Array<number>
+  year_range: Array<number>,
+  user_songs: Array<string>
 ) => {
   const params = {
     method: "POST",
@@ -58,6 +59,7 @@ export const getData = async (
       method: method,
       genres: genres,
       year_range: year_range,
+      user_songs: user_songs
     }),
     headers: headers,
   };
@@ -82,10 +84,10 @@ export const responseToPlotlyData = (
       z: [e.z],
       hovertemplate: [
         "<b>%{text}</b><br><br>" +
-          "%{xaxis.title.text}: %{x}<br>" +
-          "%{yaxis.title.text}: %{y}<br>" +
-          "%{zaxis.title.text}: %{z}<br>" +
-          "<extra></extra>",
+        "%{xaxis.title.text}: %{x}<br>" +
+        "%{yaxis.title.text}: %{y}<br>" +
+        "%{zaxis.title.text}: %{z}<br>" +
+        "<extra></extra>",
       ],
       i: undefined,
       j: undefined,

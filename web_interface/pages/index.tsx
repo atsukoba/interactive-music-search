@@ -1,13 +1,10 @@
 import {
-  ChangeEventHandler,
-  FormEventHandler,
   ReactNode,
+  useContext,
   useEffect,
-  useRef,
-  useState,
+  useState
 } from "react";
 
-import { Book, Email, GitHub, Inbox, VerifiedUser } from "@mui/icons-material";
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -16,7 +13,6 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  CssBaseline,
   Divider,
   Drawer,
   FormControl,
@@ -24,19 +20,14 @@ import {
   FormGroup,
   Grid,
   InputLabel,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import MuiAccordionSummary, {
-  AccordionSummaryProps,
+  AccordionSummaryProps
 } from "@mui/material/AccordionSummary";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Slider from "@mui/material/Slider";
@@ -45,12 +36,12 @@ import { styled } from "@mui/material/styles";
 import {
   getData,
   // getSampleData,
-  ResponseDatum,
+  ResponseDatum
 } from "../api/data";
 import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
-import { DataContext } from "../utils/context";
-import { getTitleToSid } from "../utils/processData"
+import { DataContext, UserSongsContext, UserSongsContextProvider } from "../utils/context";
+import { getTitleToSid } from "../utils/processData";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -163,7 +154,7 @@ const toggleAllVal = (state: { [name: string]: boolean }) => {
   return newState;
 };
 
-export default function Home() {
+const Home = () => {
   // NOTE: handle `any` below
   let midiState: { [name: string]: boolean };
   let audioState: { [name: string]: boolean };
@@ -245,6 +236,8 @@ export default function Home() {
   const [nowLoading, setNowLoading] = useState(false);
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
+  const { userSongData, selectedUserSong, setSelectedUserSong } = useContext(UserSongsContext);
+
   const updateData = async () => {
     const genres = Object.keys(genreState).filter((key) => genreState[key]);
     const feature_names = [
@@ -254,13 +247,20 @@ export default function Home() {
     ];
     const year_range = dateRangeValue;
     // console.log(feature_names);
+    // Users songs
+    const selectedTitles = Object.keys(selectedUserSong).filter(k => selectedUserSong[k])
+    const user_songs = userSongData.map(t => {
+      if (selectedTitles.includes(t.title)) return t.serverFileName
+    })
+    console.log("user songs to calc feature val", user_songs);
     setNowLoading(true);
     const data = await getData(
       feature_names,
       nOfSongs,
       dimMethod,
       genres,
-      year_range
+      year_range,
+      user_songs
     );
     setSidMapping(getTitleToSid(data));
     setData([...data]);
@@ -336,7 +336,8 @@ export default function Home() {
       nOfSongs,
       dimMethod,
       Object.keys(genreState).filter((k) => genreState[k]),
-      dateRangeValue
+      dateRangeValue,
+      []
     );
     setData([...d]);
   };
@@ -470,7 +471,6 @@ export default function Home() {
                 sx={{ ma: 2, mb: 4 }}
               >
                 <Slider
-                  aria-label="Always visible"
                   value={dateRangeValue}
                   onChange={handleDateChange}
                   valueLabelDisplay="auto"
@@ -647,3 +647,13 @@ export default function Home() {
     </Layout>
   );
 }
+
+const HomeWrapper = () => {
+  return (
+    <UserSongsContextProvider>
+      <Home />
+    </UserSongsContextProvider>
+  );
+};
+
+export default HomeWrapper;

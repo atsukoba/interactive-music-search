@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from src.datasets import MMD_md5_metainfo
 from src.midi_feature import MIDI_FEATURE_ORDER, calc_midi_features
 from src.audio_feature import AUDIO_FEATURE_ORDER, calc_audio_features
 from src.db import QueryDataSelector
@@ -29,8 +28,14 @@ interface ResponseDatum {
 
 logger = create_logger(os.path.basename(__file__))
 
-artist_song_list: List[List[str]] = MMD_md5_metainfo[
-    MMD_md5_metainfo.genre == "rock"][["artist", "title"]].values.tolist()  # type: ignore
+artist_song_list: List[List[str]] = [[]]
+
+
+def load_song_list_for_sample_data():
+    from src.datasets import MMD_md5_metainfo
+    global artist_song_list
+    artist_song_list = MMD_md5_metainfo[
+        MMD_md5_metainfo.genre == "rock"][["artist", "title"]].values.tolist()  # type: ignore
 
 
 def min_max(x: np.ndarray, axis=None, scale: Optional[int] = None) -> np.ndarray:
@@ -44,6 +49,8 @@ def min_max(x: np.ndarray, axis=None, scale: Optional[int] = None) -> np.ndarray
 
 def get_sample_n_data(n: int) -> List[Dict[str, Union[str, int]]]:
     global artist_song_list
+    if len(artist_song_list[0]) == 0:
+        load_song_list_for_sample_data()
     return [{
         "title": l[1],
         "artist": l[0],
@@ -69,9 +76,9 @@ def get_features_from_users_song(
     Returns:
         Optional[pd.DataFrame]: features
     """
-    if len(audio_features) > 0 and len(audio_features) > 0:
+    if len(audio_features) > 0 and len(midi_features) > 0:
         return
-    if len(audio_features) == 0 and len(audio_features) == 0:
+    if len(audio_features) == 0 and len(midi_features) == 0:
         return
     features = [
         "SID_USER",  # uploaded song has no spotify id
@@ -80,7 +87,10 @@ def get_features_from_users_song(
         "USER",  # genre
         2023  # published year
     ]
-    if len(midi_features) != 0:  # MIDI features
+    # MIDI features
+    if len(midi_features) != 0 and (
+            os.path.splitext(path)[1] == ".mid" or
+            os.path.splitext(path)[1] == ".midi"):
         midi_feature_val = calc_midi_features(path, is_users_song=True)
         if midi_feature_val is None:
             return
@@ -88,7 +98,9 @@ def get_features_from_users_song(
             features.append(midi_feature_val[
                 MIDI_FEATURE_ORDER.index(feature_name)])
         return features
-    if len(audio_features) != 0:  # Audio features
+    if len(audio_features) != 0 and (
+            os.path.splitext(path)[1] == ".wav" or
+            os.path.splitext(path)[1] == ".wave"):  # Audio features
         audio_feature_val = calc_audio_features(path)
         if audio_feature_val is None:
             return
@@ -139,8 +151,9 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
         if user_songs_path is not None and len(s) == 0:
             # check if target features has only audio or midi features
             user_feature = [f for p in user_songs_path
-                            if (f := get_features_from_users_song(p)) is not None]
-            res.append(user_feature)
+                            if (f := get_features_from_users_song(
+                                p, audio_features=a, midi_features=m)) is not None]
+            res.append(pd.DataFrame(user_feature), ignore_index=True)
         # dimentionality reduction
         logger.info(f"all response: {res[feature_names].values.shape}")
         feature_values = res[feature_names].dropna().values

@@ -149,14 +149,16 @@ def get_features():
     logger.debug(f"request: {req_json}")
 
     user_paths: Union[None, List[str]] = None
-    if (user_songs := req_json.get("user_songs", None)) is not None:
+    if (user_songs := req_json["user_songs"]) is not None:
         user_paths = []
         for p in user_songs:
+            ext = os.path.splitext(p)[1]
             upload_path = os.path.join(
                 os.path.dirname(__file__), "..", "uploads",
-                "audio" if os.path.splitext(p)[1] == "wav" else "midi",
+                "audio" if ext == ".wav" or ext == ".wave" else "midi",
                 p)
             user_paths.append(upload_path)
+        logger.info(f"User songs to be calculated feature: {user_paths}")
     res = get_n_data(req_json["feature_names"],
                      n_data=req_json["n_songs"],
                      dim_reduction_method=req_json["method"],

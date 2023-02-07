@@ -1,17 +1,20 @@
+import hashlib
 import os
 from glob import glob
 from pathlib import Path
 from random import choice
 from typing import List, Optional, Union
 from urllib.request import urlretrieve
-import hashlib
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import muspy
 import numpy as np
 from muspy import Music
 from sklearn.preprocessing import minmax_scale
-from tqdm import tqdm
-
 from src.utils import MD5, SID, create_logger, env
+from tqdm import tqdm
 
 """ MIDI Feature Extraction
 
@@ -73,7 +76,8 @@ def is_downloaded(path: MidiPath) -> bool:
 
 
 def calc_md5_from_midi_obj(midi: Music) -> str:
-    return hashlib.md5(midi).hexdigest()  # type: ignore
+    midi_b = pickle.dumps(midi)
+    return hashlib.md5(midi_b).hexdigest()  # type: ignore
 
 
 def calc_midi_features(path: str, is_users_song=False) -> Optional[MidiFeatures]:
