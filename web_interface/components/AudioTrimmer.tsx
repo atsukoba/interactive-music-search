@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
-import { Box, Button, CardContent, TextField, Typography } from "@mui/material";
-
+import { Box, Button, CardContent, Slider, Stack, TextField, Typography } from "@mui/material";
 import { postUserFile } from "../api/user_data";
 import { audioBufferToWav } from "../utils/audioConversion";
+import { ZoomIn, ZoomOut } from "@mui/icons-material";
+import { UserSongsContext } from "../utils/context";
 
 // import WaveSurfer from ;
 
@@ -27,7 +28,10 @@ interface IProps {
 export default function WaveEditor({ audioUrl }: IProps) {
   const wavesurfer = useRef(null);
   const waveformRef = useRef<HTMLDivElement>(null);
+  const { userSongData, setUserSongData } = useContext(UserSongsContext);
   const [sourceAudioUrl, setSourceAudioUrl] = useState<URL>(audioUrl);
+  const [zoomRatio, setZoomRatio] = useState(1.0);
+  const [zoomAvailable, setZoomAvailable] = useState(false);
   const [uploadFileNameFront, setUploadFileNameFront] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState("");
@@ -70,6 +74,7 @@ export default function WaveEditor({ audioUrl }: IProps) {
       const dur = Number(wavesurfer.current.backend.getDuration());
       console.log("audio duration", dur);
       if (dur > 30) {
+        setZoomAvailable(true);
         wavesurfer.current.addRegion({
           start: 0,
           end: 30,
@@ -82,6 +87,7 @@ export default function WaveEditor({ audioUrl }: IProps) {
         });
         console.dir(wavesurfer.current);
       } else {
+        setZoomAvailable(false);
         wavesurfer.current.addRegion({
           start: 0,
           end: dur,
@@ -137,13 +143,31 @@ export default function WaveEditor({ audioUrl }: IProps) {
     const res = await postUserFile(uploadFileNameFront, blob, "audio");
     console.dir(res);
     setUploaded(res.fileName);
-    localStorage.setItem(uploadFileNameFront, res.fileName);
+    setUserSongData([...userSongData, {
+      title: uploadFileNameFront,
+      serverFileName: res.fileName
+    }])
+    window.localStorage.setItem("userSongData", JSON.stringify([
+      ...userSongData,
+      {
+        title: uploadFileNameFront,
+        serverFileName: res.fileName
+      }
+    ]));
   };
 
   const handlePlayPause = () => {
     setPlaying(!playing);
     wavesurfer.current.playPause();
   };
+
+  const handleZoomSlide = (event: Event, newValue: number | number[]) => {
+    setZoomRatio(Number(newValue))
+  }
+
+  const handleZoom = (event: Event, newValue: number | number[]) => {
+    wavesurfer.current.zoom(newValue)
+  }
 
   return (
     <Box style={{ width: "100%" }}>
@@ -193,6 +217,19 @@ export default function WaveEditor({ audioUrl }: IProps) {
               value={uploadFileNameFront}
               onChange={handleFileNameFront}
             />
+            <Stack width={300} direction="row" spacing={1}>
+              <ZoomOut />
+              <Slider
+                defaultValue={1}
+                aria-label="zoom"
+                valueLabelDisplay="off"
+                onChange={handleZoomSlide}
+                onChangeCommitted={handleZoom}
+                value={zoomRatio}
+                disabled={!zoomAvailable}
+              />
+              <ZoomIn />
+            </Stack>
             <Button
               color="primary"
               component="div"
@@ -202,7 +239,7 @@ export default function WaveEditor({ audioUrl }: IProps) {
               }}
               onClick={save}
             >
-              Upload Selected Region
+              Upload
             </Button>
           </>
         )}
