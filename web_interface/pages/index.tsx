@@ -44,13 +44,13 @@ import { styled } from "@mui/material/styles";
 
 import {
   getData,
-  getSampleData,
+  // getSampleData,
   ResponseDatum,
-  responseToPlotlyData,
 } from "../api/data";
 import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
-import { DataContext, getTitleToSid } from "../utils/context";
+import { DataContext } from "../utils/context";
+import { getTitleToSid } from "../utils/processData"
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -505,7 +505,7 @@ export default function Home() {
                           <Checkbox
                             checked={
                               genreState[
-                                name.replaceAll(" ", "_").replaceAll("-", "_")
+                              name.replaceAll(" ", "_").replaceAll("-", "_")
                               ]
                             }
                             name={name}

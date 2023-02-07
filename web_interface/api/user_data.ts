@@ -13,7 +13,7 @@ export const postUserFile = async (
   data.append(
     "file",
     payload,
-    file_name + (filetype === "audio" ? ".wav" : ".mid")
+    file_name + (filetype === "audio" ? ".wav" : "")
   );
   const params = {
     method: "POST",

@@ -1,46 +1,26 @@
-import { Data } from "plotly.js";
-import { createContext } from "react";
-
+import { createContext, useState } from "react";
 import { ResponseDatum } from "../api/data";
+
 
 interface DataContextType {
   data: Array<ResponseDatum>;
   sidMapping: Map<string, string>;
 }
-
 export const DataContext = createContext<DataContextType>({
   data: [],
   sidMapping: new Map<string, string>(),
 });
 
-export const getTitleToSid = (d: ResponseDatum[]): Map<string, string> => {
-  const m = new Map<string, string>();
-  d.forEach((e) => {
-    m.set(e.title, e.sid);
-  });
-  return m;
-};
+interface UploadedSongContextDataType {
+  title: string;
+  serverFileName: string;
+}
 
-export const calcMappingCoordinates = (
-  data: ResponseDatum[]
-): ResponseDatum[] => {
-  let meanX: number = 0;
-  let meanY: number = 0;
-  let meanZ: number = 0;
-  const dataLen = data.length;
-  console.log(dataLen);
-  data.forEach((d) => {
-    meanX += d.x / dataLen;
-    meanY += d.y / dataLen;
-    meanZ += d.z / dataLen;
-  });
-  console.log([meanX, meanY, meanZ]);
-  return data.map((d) => {
-    return {
-      ...d,
-      x: d.x - meanX,
-      y: d.y - meanY,
-      z: d.z - meanZ,
-    };
-  });
-};
+interface UploadedSongContextType {
+  userSongData: Array<UploadedSongContextDataType>;
+  setUserSongData: (d: Array<UploadedSongContextDataType>) => void;
+}
+export const UserSongsContext = createContext<UploadedSongContextType>({
+  userSongData: [],
+  setUserSongData: () => { }
+});

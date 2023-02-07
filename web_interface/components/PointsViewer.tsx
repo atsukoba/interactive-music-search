@@ -29,7 +29,7 @@ import {
 import { Canvas, useThree } from "@react-three/fiber";
 
 import { ResponseDatum } from "../api/data";
-import { calcMappingCoordinates } from "../utils/context";
+import { calcMappingCoordinates } from "../utils/processData";
 import SpotifyPlayer from "./SpotifyPlayer";
 
 const IS_DEVELOP_MODE = false;
@@ -92,12 +92,12 @@ export default function PointsViewer({ newData }: IProps) {
           height: "calc(100% - 100px)",
           backgroundColor: "#f7f7f7",
         }}
-        // onPointerEnter={() => {
-        //   setIsAutoRotating(false);
-        // }}
-        // onPointerLeave={() => {
-        //   setIsAutoRotating(true);
-        // }}
+      // onPointerEnter={() => {
+      //   setIsAutoRotating(false);
+      // }}
+      // onPointerLeave={() => {
+      //   setIsAutoRotating(true);
+      // }}
       >
         <AdaptiveDpr pixelated />
         <AdaptiveEvents />
