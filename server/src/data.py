@@ -1,11 +1,13 @@
 # for debugging front-end
 import os
 from random import choice, choices, randint
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from src.datasets import MMD_md5_metainfo
+from src.midi_feature import MIDI_FEATURE_ORDER, calc_midi_features
+from src.audio_feature import AUDIO_FEATURE_ORDER, calc_audio_features
 from src.db import QueryDataSelector
 from src.dim_reduction import dim_reduction_pca, dim_reduction_tsne
 from src.utils import (AudioFeatureName, AudioFeatureNames, MidiFeatureName,
@@ -53,6 +55,49 @@ def get_sample_n_data(n: int) -> List[Dict[str, Union[str, int]]]:
     } for l in choices(artist_song_list, k=n)[:n]]
 
 
+def get_features_from_users_song(
+        path: str,
+        audio_features: List[AudioFeatureName] = [],
+        midi_features: List[MidiFeatureName] = []) -> Optional[List[Any]]:
+    """Calc symbolic/audio feature from uploaded song file.
+
+    Args:
+        path (str): _description_
+        audio_features (List[AudioFeatureName], optional): Defaults to [].
+        midi_features (List[MidiFeatureName], optional): Defaults to [].
+
+    Returns:
+        Optional[pd.DataFrame]: features
+    """
+    if len(audio_features) > 0 and len(audio_features) > 0:
+        return
+    if len(audio_features) == 0 and len(audio_features) == 0:
+        return
+    features = [
+        "SID_USER",  # uploaded song has no spotify id
+        os.path.basename(path),  # user's title (file name)
+        "USER",  # artist
+        "USER",  # genre
+        2023  # published year
+    ]
+    if len(midi_features) != 0:  # MIDI features
+        midi_feature_val = calc_midi_features(path, is_users_song=True)
+        if midi_feature_val is None:
+            return
+        for feature_name in midi_features:
+            features.append(midi_feature_val[
+                MIDI_FEATURE_ORDER.index(feature_name)])
+        return features
+    if len(audio_features) != 0:  # Audio features
+        audio_feature_val = calc_audio_features(path)
+        if audio_feature_val is None:
+            return
+        for feature_name in audio_features:
+            features.append(audio_feature_val[
+                AUDIO_FEATURE_ORDER.index(feature_name)])
+        return features
+
+
 DimReductionMethod = Literal["PCA", "tSNE"]
 
 
@@ -60,7 +105,8 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
                n_data: int = 1000,
                dim_reduction_method: DimReductionMethod = "PCA",
                genres: List[str] = ["rock", "pop"],
-               year_range: Tuple[int, int] = (1900, 2023)
+               year_range: Tuple[int, int] = (1900, 2023),
+               user_songs_path: Optional[List[str]] = None
                ) -> Optional[List[Dict[str, Union[str, int]]]]:
 
     m: List[MidiFeatureName] = [
@@ -74,17 +120,12 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
         m, a, s, genres, year_range)
 
     if res is not None:
-        res = res.head(n_data)
-        sids = res.spotify_track_id.values
-        titles = res.title.values
-        artists = res.artist.values
-        publish_date = res.date.values
-        # normalize audio features
-        if len(a) > 0:
+        logger.info(res.columns)
+        # sample songs from dataset
+        res = res.sample(n_data)
+        if len(a) > 0:  # normalize audio features
             for feat_name in a:
-                if feat_name == "tempo":
-                    pass
-                elif feat_name == "chroma_frequencies":
+                if feat_name == "chroma_frequencies":
                     chroma_value = np.array(
                         res[feat_name].values.tolist())  # type: ignore
                     chroma_value = np.argmax(chroma_value, axis=1)
@@ -93,6 +134,12 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
                     value_array = np.array(
                         res[feat_name].values.tolist()).mean(axis=1)  # type: ignore
                     res[feat_name] = value_array
+        # append user's songs
+        if user_songs_path is not None and len(s) == 0:
+            # check if target features has only audio or midi features
+            user_feature = [f for p in user_songs_path
+                            if (f := get_features_from_users_song(p)) is not None]
+            res.append(user_feature)
         # dimentionality reduction
         logger.info(f"all response: {res[feature_names].values.shape}")
         feature_values = res[feature_names].dropna().values
@@ -114,14 +161,21 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
             "sid": sid,
             "title": t,
             "artist": a,
-            "year": y,
-            "genre": choice(["Rock", "Pops", "Jazz", "Classic"]),
+            "year": d,
+            "genre": g,
             "x": x,
             "y": y,
             "z": z,
-        } for sid, t, a, y, x, y, z
-            in zip(sids, titles, artists, publish_date,
-                   data_matrix[:, 0], data_matrix[:, 1], data_matrix[:, 2])]
+        } for sid, t, a, d, g, x, y, z in zip(
+            res.spotify_track_id.values,
+            res.title.values,
+            res.artist.values,
+            res.date.values,
+            res.scraped_genre.values,
+            data_matrix[:, 0],
+            data_matrix[:, 1],
+            data_matrix[:, 2]
+        )]
     else:
         logger.warn("Database returns no records!")
         logger.debug(res)

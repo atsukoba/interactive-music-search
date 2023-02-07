@@ -30,6 +30,18 @@ AudioFeatures = List[Union[str, List[float], float]]
 
 logger = create_logger(os.path.basename(__file__))
 
+AUDIO_FEATURE_ORDER = [
+    "spotify_track_id",
+    "tempo",
+    "zero_crossing_rate",
+    "harmonic_components",
+    "percussive_components",
+    "spectral_centroid",
+    "spectral_rolloff",
+    "chroma_frequencies",
+]
+
+
 n_blocks = 5
 # NOTE: the var `all_audio_files` not used for build dataset because it's
 # not compatible with the FK constraint set to the relation between
