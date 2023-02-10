@@ -105,8 +105,14 @@ def get_features_from_users_song(
         if audio_feature_val is None:
             return
         for feature_name in audio_features:
-            features.append(audio_feature_val[
-                AUDIO_FEATURE_ORDER.index(feature_name)])
+            val = audio_feature_val[
+                AUDIO_FEATURE_ORDER.index(feature_name)]
+            if feature_name == "chroma_frequencies":
+                chroma_value = np.argmax(np.array(val))
+                val = chroma_value
+            else:
+                val = np.array(val).mean()  # type: ignore
+            features.append(val)
         return features
 
 
