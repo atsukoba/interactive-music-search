@@ -4,14 +4,14 @@ import {
   MouseEventHandler,
   SetStateAction,
   useContext,
-  useState,
+  useState
 } from "react";
 
 import { Apps, Book, GitHub, Search, VerifiedUser } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Checkbox,
+  Chip,
   Divider,
   Drawer,
   FormControlLabel,
@@ -22,8 +22,9 @@ import {
   ListItemIcon,
   ListItemText,
   Stack,
+  Switch,
   Toolbar,
-  Typography,
+  Typography
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -182,7 +183,7 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
         <List>
           <ListItem>
             <Typography my={1} style={{ fontWeight: "bold" }}>
-              Upload
+              Upload New Song
             </Typography>
           </ListItem>
           <ListItem>
@@ -203,21 +204,54 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
         <List>
           <ListItem>
             <Typography my={1} style={{ fontWeight: "bold" }}>
-              Your Songs to Show in Space
+              Your Songs
             </Typography>
           </ListItem>
           <ListItem>
+            <Chip
+              label={"midi"}
+              color={"secondary"}
+            />
+          </ListItem>
+          <ListItem>
             <FormGroup>
-              {userSongData.map((d) =>
-                <FormControlLabel control={
-                  <Checkbox
-                    checked={selectedUserSong[d.title]}
-                    name={d.title}
-                    onChange={handleUserSongSelect} />
-                } label={d.title} />
-              )}
+              {userSongData.filter(d => d.serverFileName.substr(-3) == "mid" ||
+                d.serverFileName.substr(-4) == "midi").map((d) =>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedUserSong[d.title]}
+                        name={d.title}
+                        onChange={handleUserSongSelect} />
+                    }
+                    label={d.title}
+                  />
+                )}
             </FormGroup>
           </ListItem>
+          <ListItem>
+            <Chip
+              label={"audio"}
+              color={"primary"}
+            />
+          </ListItem>
+          <ListItem>
+            <FormGroup>
+              {userSongData.filter(d => d.serverFileName.substr(-3) == "wav" ||
+                d.serverFileName.substr(-4) == "wave").map((d) =>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={selectedUserSong[d.title]}
+                        name={d.title}
+                        onChange={handleUserSongSelect} />
+                    }
+                    label={d.title}
+                  />
+                )}
+            </FormGroup>
+          </ListItem>
+          <Divider />
         </List>
       </Box>
     </Drawer>
