@@ -153,10 +153,14 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
             user_feature = [f for p in user_songs_path
                             if (f := get_features_from_users_song(
                                 p, audio_features=a, midi_features=m)) is not None]
-            res.append(pd.DataFrame(user_feature), ignore_index=True)
-        # dimentionality reduction
-        logger.info(f"all response: {res[feature_names].values.shape}")
-        feature_values = res[feature_names].dropna().values
+            res = res.append(pd.DataFrame(user_feature), ignore_index=True)
+        if res is None:
+            logger.error("Database result not contains any data")
+            return
+        # dimentionality reduction        logger.info(f"all response: {res[feature_names].values.shape}")
+        # feature_values = res[feature_names].dropna().values
+        feature_values = res[feature_names].interpolate(
+            axis=0, limit_direction="both").values
         logger.info(f"not NaN response: {feature_values.shape}")
         if len(feature_names) > 3:
             if dim_reduction_method == "PCA":
