@@ -22,6 +22,8 @@ import {
   InputLabel,
   MenuItem,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography
 } from "@mui/material";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
@@ -154,6 +156,14 @@ const toggleAllVal = (state: { [name: string]: boolean }) => {
   return newState;
 };
 
+const setAll = (state: { [name: string]: boolean }, val: boolean) => {
+  const newState = Object.assign({}, state);
+  Object.keys(newState).forEach((k) => {
+    newState[k] = val;
+  });
+  return newState;
+};
+
 const Home = () => {
   // NOTE: handle `any` below
   let midiState: { [name: string]: boolean };
@@ -237,6 +247,7 @@ const Home = () => {
   const [sidMapping, setSidMapping] = useState<Map<string, string>>(new Map());
 
   const { userSongData, selectedUserSong, setSelectedUserSong } = useContext(UserSongsContext);
+  const [switchAllChange, setSwitchAllChange] = useState(null);
 
   const updateData = async () => {
     const genres = Object.keys(genreState).filter((key) => genreState[key]);
@@ -274,6 +285,7 @@ const Home = () => {
       ...midiState,
       [event.target.name]: event.target.checked,
     };
+    setSwitchAllChange(null);
     setMidiState(newState);
   };
 
@@ -284,6 +296,7 @@ const Home = () => {
       ...audioState,
       [event.target.name]: event.target.checked,
     };
+    setSwitchAllChange(null);
     setAudioState(newState);
   };
 
@@ -294,6 +307,7 @@ const Home = () => {
       ...spotifyState,
       [event.target.name]: event.target.checked,
     };
+    setSwitchAllChange(null);
     setSpotifyState(newState);
   };
 
@@ -308,7 +322,7 @@ const Home = () => {
     setGenreState(newState);
   };
 
-  const handleMethodChange = (
+  const handleDimMethodChange = (
     event: SelectChangeEvent<string>,
     child: ReactNode
   ) => {
@@ -374,6 +388,25 @@ const Home = () => {
     });
   };
 
+  const handleSwitchAllChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newVal: string,
+  ) => {
+    setSwitchAllChange(newVal);
+    setMidiState({
+      ...midiState,
+      ...setAll(midiState, newVal === "midi"),
+    });
+    setAudioState({
+      ...audioState,
+      ...setAll(audioState, newVal === "audio"),
+    });
+    setSpotifyState({
+      ...spotifyState,
+      ...setAll(spotifyState, newVal === "spotify"),
+    });
+  };
+
   return (
     <Layout>
       {nowLoading && (
@@ -425,114 +458,120 @@ const Home = () => {
               Update Data
             </Button>
           </Box>
-          <Accordion defaultExpanded={true}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
+
+          <Typography my={2} variant="h6" gutterBottom>Data Settings</Typography>
+          <TextField
+            id="outlined-number"
+            label="Maximum Number of Songs"
+            type="number"
+            size="small"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={handleNofSongsChange}
+            value={nOfSongs}
+            sx={{ my: 2 }}
+            style={{ width: "calc(100% - 20px)" }}
+          />
+          <FormControl
+            sx={{ ma: 2, mb: 4 }}
+            style={{ width: "calc(100% - 20px)" }}
+            size="small"
+          >
+            <InputLabel id="demo-select-small">
+              Dimentionality Reduction
+            </InputLabel>
+            <Select
+              labelId="demo-select-small"
+              id="demo-select-small"
+              value={dimMethod}
+              label="Method"
+              onChange={handleDimMethodChange}
             >
-              <Typography my={2}>Data Setting</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <TextField
-                id="outlined-number"
-                label="Maximum Number of Songs"
-                type="number"
-                size="small"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                onChange={handleNofSongsChange}
-                value={nOfSongs}
-                sx={{ my: 2 }}
-                style={{ width: "calc(100% - 20px)" }}
-              />
-              <FormControl
-                sx={{ ma: 2, mb: 4 }}
-                style={{ width: "calc(100% - 20px)" }}
-                size="small"
-              >
-                <InputLabel id="demo-select-small">
-                  Dimentionality Reduction
-                </InputLabel>
-                <Select
-                  labelId="demo-select-small"
-                  id="demo-select-small"
-                  value={dimMethod}
-                  label="Method"
-                  onChange={handleMethodChange}
-                >
-                  <MenuItem value={"PCA"}>PCA</MenuItem>
-                  <MenuItem value={"tSNE"}>tSNE</MenuItem>
-                </Select>
-              </FormControl>
-              <Box
-                style={{ width: "calc(100% - 35px)", paddingLeft: "15px" }}
-                sx={{ ma: 2, mb: 4 }}
-              >
-                <Slider
-                  value={dateRangeValue}
-                  onChange={handleDateChange}
-                  valueLabelDisplay="auto"
-                  min={1939}
-                  max={2021}
-                  getAriaValueText={valuetext}
-                />
-                <span
-                  style={{
-                    height: "16px",
-                    fontSize: "12px",
-                    display: "block",
-                    textAlign: "center",
-                  }}
-                >
-                  Year Range: {dateRangeValue[0]} ~ {dateRangeValue[1]}
-                </span>
-              </Box>
-              <Accordion defaultExpanded={false}>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1a-content"
-                  id="panel1a-header"
-                >
-                  <Typography my={2}>Music Genres</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <FormGroup>
-                    {allGenres.map((name) => (
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={
-                              genreState[
-                              name.replaceAll(" ", "_").replaceAll("-", "_")
-                              ]
-                            }
-                            name={name}
-                            onChange={handleGenreChange}
-                          />
-                        }
-                        label={name}
-                      />
-                    ))}
-                    <Box my={2}>
-                      <Button variant="contained" onClick={setGenreAll}>
-                        Toggle All
-                      </Button>
-                    </Box>
-                  </FormGroup>
-                </AccordionDetails>
-              </Accordion>
-            </AccordionDetails>
-          </Accordion>
-          <Divider />
+              <MenuItem value={"PCA"}>PCA</MenuItem>
+              <MenuItem value={"tSNE"}>tSNE</MenuItem>
+            </Select>
+          </FormControl>
+          <Box
+            style={{ width: "calc(100% - 35px)", paddingLeft: "15px" }}
+            sx={{ ma: 2, mb: 4 }}
+          >
+            <Slider
+              value={dateRangeValue}
+              onChange={handleDateChange}
+              valueLabelDisplay="auto"
+              min={1939}
+              max={2021}
+              getAriaValueText={valuetext}
+            />
+            <span
+              style={{
+                height: "16px",
+                fontSize: "12px",
+                display: "block",
+                textAlign: "center",
+              }}
+            >
+              Year Range: {dateRangeValue[0]} ~ {dateRangeValue[1]}
+            </span>
+          </Box>
           <Accordion defaultExpanded={false}>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
               id="panel1a-header"
             >
-              <Typography my={2}>Spotify Features</Typography>
+              <Typography my={2}>Music Genres</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormGroup>
+                {allGenres.map((name) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={
+                          genreState[
+                          name.replaceAll(" ", "_").replaceAll("-", "_")
+                          ]
+                        }
+                        name={name}
+                        onChange={handleGenreChange}
+                      />
+                    }
+                    label={name}
+                  />
+                ))}
+                <Box my={2}>
+                  <Button size="small" variant="outlined" onClick={setGenreAll}>
+                    Toggle All
+                  </Button>
+                </Box>
+              </FormGroup>
+            </AccordionDetails>
+          </Accordion>
+          <Divider />
+          <Typography my={2} variant="h6" gutterBottom>Select Features</Typography>
+          <Typography my={2} >use only..</Typography>
+          <ToggleButtonGroup
+            color="primary"
+            size="small"
+            value={switchAllChange}
+            exclusive
+            onChange={handleSwitchAllChange}
+            aria-label="Platform"
+          >
+            <ToggleButton value="midi">MIDI</ToggleButton>
+            <ToggleButton value="audio">Audio</ToggleButton>
+            <ToggleButton value="spotify">Spotify</ToggleButton>
+          </ToggleButtonGroup>
+          <Typography my={2} >Select Manually</Typography>
+          <Accordion defaultExpanded={false}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Typography my={2}>Spotify</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <FormGroup>
@@ -549,7 +588,7 @@ const Home = () => {
                   />
                 ))}
                 <Box my={2}>
-                  <Button variant="contained" onClick={setSpotifyAll}>
+                  <Button size="small" variant="outlined" onClick={setSpotifyAll}>
                     Toggle All
                   </Button>
                 </Box>
@@ -563,7 +602,7 @@ const Home = () => {
               aria-controls="panel1a-content"
               id="panel1a-header"
             >
-              <Typography my={2}>MIDI Features</Typography>
+              <Typography my={2}>MIDI (symbolic)</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <FormGroup>
@@ -580,7 +619,7 @@ const Home = () => {
                   />
                 ))}
                 <Box my={2}>
-                  <Button variant="contained" onClick={setMidiAll}>
+                  <Button size="small" variant="outlined" onClick={setMidiAll}>
                     Toggle All
                   </Button>
                 </Box>
@@ -594,7 +633,7 @@ const Home = () => {
               aria-controls="panel1a-content"
               id="panel1a-header"
             >
-              <Typography my={2}>Audio Features</Typography>
+              <Typography my={2}>Audio (acoustic)</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <FormGroup>
@@ -611,7 +650,7 @@ const Home = () => {
                   />
                 ))}
                 <Box my={2}>
-                  <Button variant="contained" onClick={setAudioAll}>
+                  <Button size="small" variant="outlined" onClick={setAudioAll}>
                     Toggle All
                   </Button>
                 </Box>
