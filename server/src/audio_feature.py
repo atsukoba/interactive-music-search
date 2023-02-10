@@ -101,8 +101,9 @@ def get_data_from_sids(
         save_jacket: bool = False) -> Optional[List[Union[int, float]]]:
     try:
         res_tracks: List[Optional[dict]] = spotify.tracks(
-            sids).get("tracks", [])
-        res_audio_features: List[Optional[dict]] = spotify.audio_features(sids)
+            sids).get("tracks", [])  # type: ignore
+        res_audio_features: List[Optional[dict]] = \
+            spotify.audio_features(sids)  # type: ignore
         if len(res_tracks) != len(res_audio_features) or \
                 len(sids) != len(res_tracks):
             return None

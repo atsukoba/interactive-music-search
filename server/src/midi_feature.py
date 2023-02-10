@@ -6,7 +6,7 @@ from random import choice
 from typing import List, Optional, Union
 from urllib.request import urlretrieve
 try:
-    import cPickle as pickle
+    import cPickle as pickle  # type: ignore
 except:
     import pickle
 import muspy
