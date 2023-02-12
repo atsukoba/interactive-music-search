@@ -124,7 +124,7 @@ export default function PointsViewer({ newData }: IProps) {
         {positions.map((d, i) => {
           // console.log(d);
           return (
-            <CliclableBox
+            <ClickableBox
               key={i}
               id={i}
               x={d.x}
@@ -140,7 +140,7 @@ export default function PointsViewer({ newData }: IProps) {
           {positions.map((d, i) => {
             // console.log(d);
             return (
-              <CliclableBoxForInstance
+              <ClickableBoxForInstance
                 key={i}
                 id={i}
                 x={d.x}
@@ -174,7 +174,7 @@ export default function PointsViewer({ newData }: IProps) {
           }}
         >
           <Typography sx={{ fontSize: 14 }}>
-            {currentTrackInfo ? currentTrackInfo.title : "Not Hovered"},
+            {currentTrackInfo ? currentTrackInfo.artist : "Not Hovered"},
             {currentTrackInfo ? currentTrackInfo.genre : "Not Hovered"}
           </Typography>
           <Typography
@@ -182,7 +182,7 @@ export default function PointsViewer({ newData }: IProps) {
             component="div"
             style={{ lineHeight: "auto" }}
           >
-            {currentTrackInfo ? currentTrackInfo.artist : "Not Hovered"}
+            {currentTrackInfo ? currentTrackInfo.title : "Not Hovered"}
           </Typography>
           <Typography sx={{ fontSize: 12 }}>
             x=
@@ -215,7 +215,7 @@ interface IPropsClickableBox {
   setSidFunc: Dispatch<SetStateAction<string>>;
 }
 
-const CliclableBox = ({
+const ClickableBox = ({
   x,
   y,
   z,
@@ -267,7 +267,7 @@ const CliclableBox = ({
         >
           <Sphere args={[0.5]}>
             <meshBasicMaterial
-              color={isHovered ? "red" : "lightblue"}
+              color={isHovered ? "red" : data.artist == "USER" ? "green" : "lightblue"}
               fog={false}
               wireframe={true}
               wireframeLinewidth={2}
@@ -290,7 +290,7 @@ const CliclableBox = ({
   );
 };
 
-const CliclableBoxForInstance = ({
+const ClickableBoxForInstance = ({
   id,
   x,
   y,
