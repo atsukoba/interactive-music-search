@@ -65,7 +65,7 @@ def get_sample_n_data(n: int) -> List[Dict[str, Union[str, int]]]:
 def get_features_from_users_song(
         path: str,
         audio_features: List[AudioFeatureName] = [],
-        midi_features: List[MidiFeatureName] = []) -> Optional[List[Any]]:
+        midi_features: List[MidiFeatureName] = []) -> Optional[pd.DataFrame]:
     """Calc symbolic/audio feature from uploaded song file.
 
     Args:
@@ -80,13 +80,15 @@ def get_features_from_users_song(
         return
     if len(audio_features) == 0 and len(midi_features) == 0:
         return
-    features = [
-        "SID_USER",  # uploaded song has no spotify id
-        os.path.basename(path),  # user's title (file name)
-        "USER",  # artist
-        "USER",  # genre
-        2023  # published year
-    ]
+    features: Dict[
+        Union[MidiFeatureName, AudioFeatureName, str],
+        List[Union[str, float, int]]] = {
+        "spotify_track_id": ["SID_USER"],  # uploaded song has no spotify id
+        "title": [os.path.basename(path)],  # user's title (file name)
+        "artist": ["USER"],  # artist
+        "scraped_genre": ["USER"],  # genre
+        "date": ["2023-01-01"]  # published year
+    }
     # MIDI features
     if len(midi_features) != 0 and (
             os.path.splitext(path)[1] == ".mid" or
@@ -95,10 +97,9 @@ def get_features_from_users_song(
         if midi_feature_val is None:
             return
         for feature_name in midi_features:
-            features.append(midi_feature_val[
-                MIDI_FEATURE_ORDER.index(feature_name)])
-        return features
-    if len(audio_features) != 0 and (
+            features[feature_name] = [midi_feature_val[
+                MIDI_FEATURE_ORDER.index(feature_name)]]
+    elif len(audio_features) != 0 and (
             os.path.splitext(path)[1] == ".wav" or
             os.path.splitext(path)[1] == ".wave"):  # Audio features
         audio_feature_val = calc_audio_features(path)
@@ -108,12 +109,14 @@ def get_features_from_users_song(
             val = audio_feature_val[
                 AUDIO_FEATURE_ORDER.index(feature_name)]
             if feature_name == "chroma_frequencies":
-                chroma_value = np.argmax(np.array(val))
+                chroma_value = np.argmax(np.array(val)).tolist()
                 val = chroma_value
             else:
                 val = np.array(val).mean()  # type: ignore
-            features.append(val)
-        return features
+            features[feature_name] = [val]
+    else:
+        return
+    return pd.DataFrame.from_dict(features)
 
 
 DimReductionMethod = Literal["PCA", "tSNE"]
@@ -126,6 +129,19 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
                year_range: Tuple[int, int] = (1900, 2023),
                user_songs_path: Optional[List[str]] = None
                ) -> Optional[List[Dict[str, Union[str, int]]]]:
+    """Main function of getting songs feature data from database.
+
+    Args:
+        feature_names (List[Union[MidiFeatureName, AudioFeatureName]]): _description_
+        n_data (int, optional): _description_. Defaults to 1000.
+        dim_reduction_method (DimReductionMethod, optional): _description_. Defaults to "PCA".
+        genres (List[str], optional): _description_. Defaults to ["rock", "pop"].
+        year_range (Tuple[int, int], optional): _description_. Defaults to (1900, 2023).
+        user_songs_path (Optional[List[str]], optional): _description_. Defaults to None.
+
+    Returns:
+        Optional[List[Dict[str, Union[str, int]]]]: _description_
+    """
 
     m: List[MidiFeatureName] = [
         n for n in feature_names if n in MidiFeatureNames]
@@ -159,7 +175,8 @@ def get_n_data(feature_names: List[Union[MidiFeatureName, AudioFeatureName]],
             user_feature = [f for p in user_songs_path
                             if (f := get_features_from_users_song(
                                 p, audio_features=a, midi_features=m)) is not None]
-            res = res.append(pd.DataFrame(user_feature), ignore_index=True)
+            res = res.append(user_feature)
+            logger.debug("\n" + res.tail(5).to_csv())
         if res is None:
             logger.error("Database result not contains any data")
             return
