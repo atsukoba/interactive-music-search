@@ -11,12 +11,12 @@ export const DataContext = createContext<DataContextType>({
   sidMapping: new Map<string, string>(),
 });
 
-interface UploadedSongContextDataType {
+export interface UploadedSongContextDataType {
   title: string;
   serverFileName: string;
 }
 
-interface UploadedSongContextType {
+export interface UploadedSongContextType {
   userSongData: Array<UploadedSongContextDataType>;
   setUserSongData: (any) => void;
   selectedUserSong: {},
@@ -37,19 +37,19 @@ export const UserSongsContextProvider = ({ children }) => {
   useEffect(() => {
     const stored: Array<UploadedSongContextDataType> = JSON.parse(
       localStorage.getItem("userSongData"))
-    if (stored.length > 0) {
+    if (stored && stored.length > 0) {
       console.log("restoring global state from localStorage.userSongData");
       console.dir(stored);
       setUserSongData(userSongData => [...userSongData, ...stored])
+      const selected = {}
+      stored.forEach(d => {
+        selected[d.title] = true
+      })
+      setSelectedUserSong({
+        ...selectedUserSong,
+        ...selected
+      })
     }
-    const selected = {}
-    stored.forEach(d => {
-      selected[d.title] = true
-    })
-    setSelectedUserSong({
-      ...selectedUserSong,
-      ...selected
-    })
   }, [setUserSongData])
 
   return (

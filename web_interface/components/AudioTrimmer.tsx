@@ -4,7 +4,7 @@ import { Box, Button, CardContent, Slider, Stack, TextField, Typography } from "
 import { postUserFile } from "../api/user_data";
 import { audioBufferToWav } from "../utils/audioConversion";
 import { ZoomIn, ZoomOut } from "@mui/icons-material";
-import { UserSongsContext } from "../utils/context";
+import { UserSongsContext, UploadedSongContextDataType } from "../utils/context";
 
 // import WaveSurfer from ;
 
@@ -142,16 +142,13 @@ export default function WaveEditor({ audioUrl }: IProps) {
     setUploading(false);
     const res = await postUserFile(uploadFileNameFront, blob, "audio");
     setUploaded(res.fileName);
-    setUserSongData(userSongData => [...userSongData, {
-      title: uploadFileNameFront,
-      serverFileName: res.fileName
-    }])
+    setUserSongData((userSongData: UploadedSongContextDataType[]) => [
+      ...userSongData,
+      { title: uploadFileNameFront, serverFileName: res.fileName }
+    ])
     localStorage.setItem("userSongData", JSON.stringify([
       ...userSongData,
-      {
-        title: uploadFileNameFront,
-        serverFileName: res.fileName
-      }
+      { title: uploadFileNameFront, serverFileName: res.fileName }
     ]));
   };
 

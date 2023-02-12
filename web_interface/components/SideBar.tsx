@@ -29,7 +29,7 @@ import {
 import { styled } from "@mui/material/styles";
 
 import { postUserFile } from "../api/user_data";
-import { UserSongsContext } from "../utils/context";
+import { UserSongsContext, UploadedSongContextDataType } from "../utils/context";
 
 const drawerWidth = 270 + 16; // TODO
 
@@ -62,7 +62,7 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
       } else if (file.type === "audio/midi" || file.type === "audio/mid") {
         // MIDI Data
         const res = await postUserFile(file.name, file, "midi");
-        setUserSongData(userSongData => [...userSongData, {
+        setUserSongData((userSongData: UploadedSongContextDataType[]) => [...userSongData, {
           title: file.name,
           serverFileName: res.fileName
         }])
