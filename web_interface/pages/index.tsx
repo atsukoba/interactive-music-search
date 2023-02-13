@@ -337,7 +337,8 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchInitialData().catch(console.error);
+    setNowLoading(true);
+    fetchInitialData().then(() => setNowLoading(false)).catch(console.error);
   }, []);
 
   const setGenreAll = () => {
@@ -395,15 +396,16 @@ const Home = () => {
             display: "flex",
             position: "absolute",
             width: "100%",
-            height: "100%",
+            height: "calc(100vh - 64px)",
             alignItems: "center",
             alignContent: "flex-start",
             justifyContent: "center",
             flexDirection: "column",
             zIndex: "1000",
+            color: "white"
           }}
         >
-          <CircularProgress size={120} thickness={4.0} color={"primary"} />
+          <CircularProgress size={140} thickness={5.0} color={"secondary"} />
           <Typography my={2} variant="h6">
             Loading Song Data...
           </Typography>
