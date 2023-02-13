@@ -660,7 +660,7 @@ const Home = () => {
           xl={true}
           style={{
             height: "100%",
-            overflow: "scroll",
+            overflow: "hidden",
             padding: 0,
             flexGrow: 1,
           }}
@@ -675,6 +675,7 @@ const Home = () => {
 }
 
 const HomeWrapper = () => {
+  // to provide context, wrap the main component
   return (
     <UserSongsContextProvider>
       <Home />

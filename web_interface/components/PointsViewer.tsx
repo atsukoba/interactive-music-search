@@ -8,7 +8,7 @@ import {
 } from "react";
 import { AxesHelper, Color, Vector3 } from "three";
 
-import { Button, CardContent, Typography } from "@mui/material";
+import { Button, CardContent, Stack, Typography } from "@mui/material";
 import {
   AdaptiveDpr,
   AdaptiveEvents,
@@ -27,10 +27,11 @@ import {
 } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 
+import CircleIcon from '@mui/icons-material/Circle';
 import { ResponseDatum } from "../api/data";
 import { calcMappingCoordinates } from "../utils/processData";
-import SpotifyPlayer from "./SpotifyPlayer";
 import { genreColorMap } from "../utils/songGenre";
+import SpotifyPlayer from "./SpotifyPlayer";
 
 const IS_DEVELOP_MODE = false;
 
@@ -50,9 +51,16 @@ interface IProps {
 const redColor = new Color(0xff0000);
 const blueColor = new Color(0x0000ff);
 
+const cutTitle = (title: string, max_length = 15): string => {
+  if (title.length > max_length) {
+    title = title.substr(0, max_length) + '...'
+  }
+  return title
+}
+
 export default function PointsViewer({ newData, colorBy }: IProps) {
   const positions = calcMappingCoordinates(newData);
-  console.log(positions);
+  // console.log(positions);
   // states
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [currentTrackInfo, setcurrentTrackInfo] =
@@ -158,7 +166,7 @@ export default function PointsViewer({ newData, colorBy }: IProps) {
       <div
         style={{
           width: "100%",
-          height: "100px",
+          height: "80px",
           fontSize: 0,
           display: "flex",
           flexDirection: "row",
@@ -169,22 +177,38 @@ export default function PointsViewer({ newData, colorBy }: IProps) {
           style={{
             width: "50%",
             height: "100%",
+            padding: "8px 16px",
             color: "white",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
           }}
         >
-          <Typography sx={{ fontSize: 14 }}>
-            {currentTrackInfo ? currentTrackInfo.artist : "Not Hovered"},
-            {currentTrackInfo ? currentTrackInfo.genre : "Not Hovered"}
-          </Typography>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+            spacing={1.5}
+          >
+            <Typography sx={{ fontSize: 12 }}>
+              by {currentTrackInfo && currentTrackInfo.artist}
+            </Typography>
+            <Typography sx={{ fontSize: 12 }}>
+              genre={currentTrackInfo && currentTrackInfo.genre}
+            </Typography>
+            {currentTrackInfo && <CircleIcon
+              style={{
+                width: "12px",
+                color: genreColorMap.get(currentTrackInfo.genre)
+              }} />}
+          </Stack>
           <Typography
             variant="h5"
             component="div"
-            style={{ lineHeight: "auto" }}
+            noWrap  // truncate title with ellipsis
+            style={{ lineHeight: "24px" }}
           >
-            {currentTrackInfo ? currentTrackInfo.title : "Not Hovered"}
+            {currentTrackInfo && currentTrackInfo.title}
           </Typography>
           <Typography sx={{ fontSize: 12 }}>
             x=
@@ -250,7 +274,7 @@ const ClickableBox = ({
           position={new Vector3(x, y, z)}
           onClick={(e) => {
             e.stopPropagation();
-            console.log(data);
+            // console.log(data);
             setSidFunc(data.sid);
           }}
         />
@@ -268,7 +292,7 @@ const ClickableBox = ({
           position={new Vector3(x, y, z)}
           onClick={(e) => {
             e.stopPropagation();
-            console.log(data);
+            // console.log(data);
             setSidFunc(data.sid);
           }}
         >
@@ -324,7 +348,7 @@ const ClickableBoxForInstance = ({
         scale={2}
         onPointerOver={(e) => {
           e.stopPropagation();
-          console.log(data);
+          // console.log(data);
           setIsHovered(true);
         }}
         onPointerOut={(e) => {
@@ -334,7 +358,7 @@ const ClickableBoxForInstance = ({
         position={new Vector3(x, y, z)}
         onClick={(e) => {
           e.stopPropagation();
-          console.log(data);
+          // console.log(data);
           setSidFunc(data.sid);
         }}
       />
