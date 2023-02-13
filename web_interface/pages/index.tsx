@@ -6,6 +6,8 @@ import {
 } from "react";
 
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
+import CircleIcon from '@mui/icons-material/Circle';
+import CircleTwoToneIcon from '@mui/icons-material/CircleTwoTone';
 import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
@@ -20,8 +22,7 @@ import {
   FormGroup,
   Grid,
   InputLabel,
-  MenuItem,
-  TextField,
+  MenuItem, Switch, TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography
@@ -44,7 +45,7 @@ import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
 import { DataContext, UserSongsContext, UserSongsContextProvider } from "../utils/context";
 import { getTitleToSid } from "../utils/processData";
-import { allGenres } from "../utils/songGenre";
+import { allGenres, genreColorMap } from "../utils/songGenre";
 
 // mui con
 const Accordion = styled((props: AccordionProps) => (
@@ -513,8 +514,13 @@ const Home = () => {
                           name.replaceAll(" ", "_").replaceAll("-", "_")
                           ]
                         }
+                        // color={genreColorMap.get(name)}
                         name={name}
                         onChange={handleGenreChange}
+                        icon={<CircleTwoToneIcon />}
+                        checkedIcon={<CircleIcon style={{
+                          color: genreColorMap.get(name)
+                        }} />}
                       />
                     }
                     label={name}

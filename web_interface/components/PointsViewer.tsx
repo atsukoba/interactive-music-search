@@ -91,7 +91,7 @@ export default function PointsViewer({ newData, colorBy }: IProps) {
         style={{
           width: "100%",
           height: "calc(100% - 100px)",
-          backgroundColor: "#f7f7f7",
+          backgroundColor: "#1e1e1e",
         }}
       // onPointerEnter={() => {
       //   setIsAutoRotating(false);
@@ -110,7 +110,7 @@ export default function PointsViewer({ newData, colorBy }: IProps) {
           minZoom={0.5}
           zoomSpeed={1}
           autoRotate={isAutoRotating}
-          autoRotateSpeed={5}
+          autoRotateSpeed={3}
         />
         <primitive object={new AxesHelper(100)} />
         <GizmoHelper
