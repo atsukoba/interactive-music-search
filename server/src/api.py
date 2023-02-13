@@ -161,6 +161,7 @@ def get_features():
         logger.info(f"User songs to be calculated feature: {user_paths}")
     res = get_n_data(req_json["feature_names"],
                      n_data=req_json["n_songs"],
+                     genres=req_json["genres"],
                      dim_reduction_method=req_json["method"],
                      user_songs_path=user_paths)
     if res is None:
