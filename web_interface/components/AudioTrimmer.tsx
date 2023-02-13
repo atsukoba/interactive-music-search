@@ -22,17 +22,18 @@ const formWaveSurferOptions = (ref) => ({
 });
 
 interface IProps {
-  audioUrl: URL;
+  audioUrl: string;
+  fileName: string;
 }
 
-export default function WaveEditor({ audioUrl }: IProps) {
+export default function WaveEditor({ fileName, audioUrl }: IProps) {
   const wavesurfer = useRef(null);
   const waveformRef = useRef<HTMLDivElement>(null);
   const { userSongData, setUserSongData } = useContext(UserSongsContext);
-  const [sourceAudioUrl, setSourceAudioUrl] = useState<URL>(audioUrl);
+  const [sourceAudioUrl, setSourceAudioUrl] = useState<string>(audioUrl);
   const [zoomRatio, setZoomRatio] = useState(1.0);
   const [zoomAvailable, setZoomAvailable] = useState(false);
-  const [uploadFileNameFront, setUploadFileNameFront] = useState("");
+  const [uploadFileNameFront, setUploadFileNameFront] = useState(fileName);
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState("");
   const [loading, setLoading] = useState(false);

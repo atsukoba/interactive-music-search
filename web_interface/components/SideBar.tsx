@@ -36,7 +36,7 @@ const drawerWidth = 270 + 16; // TODO
 interface IProps {
   isOpen: boolean;
   toggle: MouseEventHandler<HTMLButtonElement>;
-  toggleAudioEditor: (string) => void;
+  toggleAudioEditor: (filename: string, blolUrl: string) => void;
 }
 
 const Input = styled("input")({
@@ -58,7 +58,7 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
       ) {
         // AUDIO data
         const blobUrl = URL.createObjectURL(file);
-        toggleAudioEditor(blobUrl);
+        toggleAudioEditor(file.name, blobUrl);
       } else if (file.type === "audio/midi" || file.type === "audio/mid") {
         // MIDI Data
         const res = await postUserFile(file.name, file, "midi");

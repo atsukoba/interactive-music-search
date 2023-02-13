@@ -34,13 +34,15 @@ const Input = styled("input")({
 
 export default function Layout({ children }: IProps) {
   const [drawerOpen, setDrawerOpen] = useState<boolean | undefined>(false);
-  const [audioBlobUrl, setAudioBlobUrl] = useState<URL>(null);
+  const [audioFileName, setAudioFileName] = useState<string>("null");
+  const [audioBlobUrl, setAudioBlobUrl] = useState<string>(null);  // URL
 
   const toggleDrawer: MouseEventHandler<HTMLButtonElement> = () => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const toggleAudioEditor = (audioBlobUrl: URL) => {
+  const toggleAudioEditor = (fileName: string, audioBlobUrl: string) => {
+    setAudioFileName(fileName);
     setAudioBlobUrl(audioBlobUrl);
   };
 
@@ -49,7 +51,6 @@ export default function Layout({ children }: IProps) {
       <Modal
         open={audioBlobUrl !== null}
         onClose={() => {
-
           setAudioBlobUrl(null);
         }}
         aria-labelledby="modal-modal-title"
@@ -72,7 +73,7 @@ export default function Layout({ children }: IProps) {
             Select 30sec Region to Calculate Audio Feature
           </Typography>
           <UserSongsContextProvider>
-            <AudioTrimmer audioUrl={audioBlobUrl} />
+            <AudioTrimmer audioUrl={audioBlobUrl} fileName={audioFileName} />
           </UserSongsContextProvider>
         </Box>
       </Modal>
