@@ -3,29 +3,28 @@ import {
   MutableRefObject,
   SetStateAction,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState
 } from "react";
-import { AxesHelper, Color, Vector3 } from "three";
+import { AxesHelper, Color, PerspectiveCamera, Vector3 } from "three";
 
 import { Button, CardContent, Stack, Typography } from "@mui/material";
+import * as Drei from "@react-three/drei";
 import {
   AdaptiveDpr,
   AdaptiveEvents,
   ArcballControls,
   Box,
   Circle,
-  GizmoHelper,
-  GizmoViewport,
+  GizmoHelper, GizmoViewport,
   Instance,
   Instances,
-  OrbitControls,
-  RoundedBox,
-  Sphere,
+  OrbitControls, RoundedBox, Sphere,
   Stats, Tetrahedron, Text,
   useBVH
 } from "@react-three/drei";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Camera, Canvas, useThree } from "@react-three/fiber";
 
 import CircleIcon from '@mui/icons-material/Circle';
 import { ResponseDatum } from "../api/data";
@@ -48,17 +47,8 @@ interface IProps {
   colorBy: string; // genre | date | none 
 }
 
-const redColor = new Color(0xff0000);
-const blueColor = new Color(0x0000ff);
-
-const cutTitle = (title: string, max_length = 15): string => {
-  if (title.length > max_length) {
-    title = title.substr(0, max_length) + '...'
-  }
-  return title
-}
-
 export default function PointsViewer({ newData, colorBy }: IProps) {
+
   const positions = calcMappingCoordinates(newData);
   // console.log(positions);
   // states
@@ -67,14 +57,11 @@ export default function PointsViewer({ newData, colorBy }: IProps) {
     useState<ResponseDatum>(undefined);
   const [currentTrackId, setCurrentTrackId] = useState("");
 
-  const updateHoverTrackInfo = (d: ResponseDatum) => {
-    setcurrentTrackInfo({
-      ...currentTrackInfo,
-      title: d.title,
-      artist: d.artist,
-      genre: d.genre,
-    });
-  };
+  // useEffect(() => {
+  //   if (cameraRef && cameraRef.current) {
+  //     cameraRef.current.fov = cameraState.fov;
+  //   }
+  // }, [cameraState]);
 
   return (
     <>
@@ -127,7 +114,7 @@ export default function PointsViewer({ newData, colorBy }: IProps) {
         >
           <GizmoViewport
             axisColors={["red", "green", "blue"]}
-            labelColor="black"
+            labelColor="white"
           />
         </GizmoHelper>
         {positions.map((d, i) => {
@@ -299,7 +286,7 @@ const ClickableBox = ({
           {data.artist == "USER" ?
             <Tetrahedron args={[0.5]}>
               <meshBasicMaterial
-                color={"red"}
+                color={"white"}
                 fog={true}
                 wireframe={false}
               // wireframeLinewidth={2}

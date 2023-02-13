@@ -138,7 +138,7 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
               </Link>
             </ListItemButton>
           </ListItem>
-          <ListItem key={"about"} disablePadding>
+          {/* <ListItem key={"about"} disablePadding>
             <ListItemButton>
               <ListItemIcon>
                 <Apps />
@@ -147,7 +147,7 @@ export default function SideBar({ isOpen, toggle, toggleAudioEditor }: IProps) {
                 <ListItemText primary={"About This App"} />
               </Link>
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
           <ListItem key={"Paper"} disablePadding>
             <ListItemButton>
               <ListItemIcon>
