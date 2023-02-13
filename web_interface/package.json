@@ -25,6 +25,7 @@
     "react-dom": "18.1.0",
     "react-plotly.js": "^2.5.1",
     "three": "^0.143.0",
+    "tinygradient": "^1.1.5",
     "wavesurfer.js": "^6.2.0"
   },
   "devDependencies": {
