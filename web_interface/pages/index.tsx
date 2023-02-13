@@ -44,7 +44,9 @@ import Layout from "../components/Layout";
 import PlotWrapper from "../components/PlotWrapper";
 import { DataContext, UserSongsContext, UserSongsContextProvider } from "../utils/context";
 import { getTitleToSid } from "../utils/processData";
+import { allGenres } from "../utils/songGenre";
 
+// mui con
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
@@ -79,29 +81,6 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 const drawerWidth = 270;
-const allGenres = [
-  "pop",
-  "classical",
-  "baroque",
-  "rock",
-  "renaissance",
-  "alternative-indie",
-  "italian french spanish",
-  "metal",
-  "country",
-  "romantic",
-  "traditional",
-  "dance-eletric",
-  "modern",
-  "jazz",
-  "blues",
-  "hits of 2011 2020",
-  "hip-hop-rap",
-  "punk",
-  "instrumental",
-  "hits of the 1970s",
-  "hits of the 2000s",
-];
 
 const allMidiFeatures = [
   "pitch_range",

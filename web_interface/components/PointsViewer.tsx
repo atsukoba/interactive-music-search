@@ -4,7 +4,7 @@ import {
   SetStateAction,
   useEffect,
   useRef,
-  useState,
+  useState
 } from "react";
 import { AxesHelper, Color, Vector3 } from "three";
 
@@ -22,15 +22,15 @@ import {
   OrbitControls,
   RoundedBox,
   Sphere,
-  Stats,
-  Text,
-  useBVH,
+  Stats, Tetrahedron, Text,
+  useBVH
 } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 
 import { ResponseDatum } from "../api/data";
 import { calcMappingCoordinates } from "../utils/processData";
 import SpotifyPlayer from "./SpotifyPlayer";
+import { genreColorMap } from "../utils/songGenre";
 
 const IS_DEVELOP_MODE = false;
 
@@ -44,12 +44,13 @@ declare global {
 
 interface IProps {
   newData: ResponseDatum[];
+  colorBy: string; // genre | date | none 
 }
 
 const redColor = new Color(0xff0000);
 const blueColor = new Color(0x0000ff);
 
-export default function PointsViewer({ newData }: IProps) {
+export default function PointsViewer({ newData, colorBy }: IProps) {
   const positions = calcMappingCoordinates(newData);
   console.log(positions);
   // states
@@ -131,6 +132,7 @@ export default function PointsViewer({ newData }: IProps) {
               y={d.y}
               z={d.z}
               data={d}
+              colorBy={colorBy}
               setTrackFunc={setcurrentTrackInfo}
               setSidFunc={setCurrentTrackId}
             />
@@ -211,15 +213,20 @@ interface IPropsClickableBox {
   y: number;
   z: number;
   data: ResponseDatum;
+  colorBy: string;
   setTrackFunc: Dispatch<SetStateAction<ResponseDatum>>;
   setSidFunc: Dispatch<SetStateAction<string>>;
 }
 
+/**
+ * react-three-fiber component of each point (Sphere)
+ */
 const ClickableBox = ({
   x,
   y,
   z,
   data,
+  colorBy,
   setTrackFunc,
   setSidFunc,
 }: IPropsClickableBox) => {
@@ -265,14 +272,25 @@ const ClickableBox = ({
             setSidFunc(data.sid);
           }}
         >
-          <Sphere args={[0.5]}>
-            <meshBasicMaterial
-              color={isHovered ? "red" : data.artist == "USER" ? "green" : "lightblue"}
-              fog={false}
-              wireframe={true}
-              wireframeLinewidth={2}
-            />
-          </Sphere>
+          {data.artist == "USER" ?
+            <Tetrahedron args={[0.5]}>
+              <meshBasicMaterial
+                color={"red"}
+                fog={true}
+                wireframe={false}
+              // wireframeLinewidth={2}
+              />
+            </Tetrahedron>
+            :
+            <Sphere args={[0.5]}>
+              <meshBasicMaterial
+                color={isHovered ? "pink" : genreColorMap.get(data.genre)}
+                fog={false}
+                wireframe={true}
+                wireframeLinewidth={2}
+              />
+            </Sphere>
+          }
           {/* <RoundedBox args={[0.5, 0.5, 0.5]} radius={0.05}></RoundedBox> */}
         </mesh>
       )}

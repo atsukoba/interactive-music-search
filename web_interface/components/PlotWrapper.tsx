@@ -21,7 +21,7 @@ export default function PlotWrapper() {
   return (
     <Box ref={targetRef} style={{ height: "100%" }}>
       <DataContext.Consumer>
-        {(d) => <PointsViewer newData={d.data} />}
+        {(d) => <PointsViewer newData={d.data} colorBy={"genre"} />}
       </DataContext.Consumer>
     </Box>
   );
