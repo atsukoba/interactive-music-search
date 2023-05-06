@@ -85,7 +85,7 @@ export default function PointsViewer({ newData, colorBy }: IProps) {
         camera={{ position: [0, 0, 80] }}
         style={{
           width: "100%",
-          height: "calc(100% - 100px)",
+          height: "calc(100% - 80px)",
           backgroundColor: "#1e1e1e",
         }}
       // onPointerEnter={() => {
